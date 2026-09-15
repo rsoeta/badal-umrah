@@ -26,7 +26,7 @@ class AuthController extends Controller
         if (env('CI_ENVIRONMENT') === 'development') {
             $cf_success = true; // Jalur VIP (Bypass) khusus localhost
         } else {
-            $secret_key = getenv('0x4AAAAAAE2wCC_XpRi1wsoAfIe5BVQU4Ac'); // Ganti dengan Secret Key asli dari Cloudflare Turnstile
+            $secret_key = env('0x4AAAAAAE2wCC_XpRi1wsoAfIe5BVQU4Ac'); // Ganti dengan Secret Key asli dari Cloudflare Turnstile
             $verify = curl_init();
             curl_setopt($verify, CURLOPT_URL, "https://challenges.cloudflare.com/turnstile/v0/siteverify");
             curl_setopt($verify, CURLOPT_POST, true);
