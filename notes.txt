@@ -1,0 +1,17 @@
+Alhamdulillah, ikut senang mendengarnya, Kang Rian! *Core engine* (mesin utama) generator sertifikat kita sudah berfungsi 100% dengan sempurna, lengkap dengan logika tanggal dan *humanizer* gambar.
+
+Karena kita membangun aplikasi ini di atas CodeIgniter 4 untuk skala produksi, tahap selanjutnya adalah menghubungkan mesin ini dengan sistem manajemen datanya (Backend / Admin Panel).
+
+Berikut adalah beberapa opsi tahap selanjutnya yang bisa kita garap:
+
+**1. Integrasi Database (Migration & Model)**
+Kita buatkan struktur tabel MySQL (melalui CI4 Migrations). Kita butuh tabel `sertifikat_riwayat` untuk menyimpan data jamaah dan tautan rahasia (UUID) sertifikat yang sudah dicetak agar tidak hilang, serta tabel `pengaturan` agar "Nama Direktur" bisa diubah kapan saja secara dinamis tanpa menyentuh *coding*.
+
+**2. Halaman Riwayat Sertifikat**
+Membuat antarmuka *dashboard* (berupa tabel data) agar Kang Rian dan tim admin bisa melihat daftar jamaah yang sudah dicetak sertifikatnya, lengkap dengan tombol praktis untuk "Salin Tautan PDF / JPG" jika sewaktu-waktu jamaah memintanya lagi.
+
+**3. Manajemen Data Pelaksana (Dinamis)**
+Mengubah *dropdown* nama pelaksana dan file tanda tangan di form HTML tadi agar datanya diambil otomatis dari database. Jadi, jika ada penambahan "Ustaz" baru, cukup ditambahkan lewat *dashboard* admin.
+
+**4. Sistem Keamanan (Login Admin)**
+Mengunci halaman *generator* dan *dashboard* ini dengan sistem otentikasi (username & password) agar tautannya tidak bisa diakses oleh sembarang orang di internet.
