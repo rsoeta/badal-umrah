@@ -17,7 +17,7 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Favicon yang Benar -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/brand-logo.png'); ?>" />
+    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
 
     <style>
         /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */

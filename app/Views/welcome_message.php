@@ -5,7 +5,7 @@
     <title>Welcome to CodeIgniter 4!</title>
     <meta name="description" content="The small framework with powerful features">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" type="image/png" href="/img/brand-logo.png">
+    <link rel="shortcut icon" type="image/jpeg" href="/img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg">
 
     <!-- STYLES -->
 

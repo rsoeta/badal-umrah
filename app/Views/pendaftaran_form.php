@@ -9,14 +9,14 @@
     <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/brand-logo.png'); ?>" />
+    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
 
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= base_url(); ?>">
     <meta property="og:title" content="Form Pendaftaran Badal Umrah - Abdul Aziz">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
-    <meta property="og:image" content="<?= base_url('img/brand-logo.png'); ?>">
+    <meta property="og:image" content="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -84,7 +84,7 @@
     <div class="bg-green py-3 shadow-sm">
         <div class="container d-flex align-items-center justify-content-between">
             <a href="<?= base_url('/'); ?>" class="text-white text-decoration-none d-flex align-items-center">
-                <img src="<?= base_url('img/brand-logo.png'); ?>" alt="Logo" style="height: 40px; object-fit: contain;" class="me-2 bg-white rounded p-1">
+                <img src="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" alt="Logo" style="height: 40px; object-fit: contain;" class="me-2 bg-white rounded p-1">
                 <span class="fw-bold font-serif d-none d-md-block">Abdul Aziz</span>
             </a>
             <a href="<?= base_url('/'); ?>" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> Kembali</a>

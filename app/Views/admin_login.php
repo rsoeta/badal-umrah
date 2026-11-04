@@ -7,7 +7,7 @@
     <title>Login Admin - Abdul Aziz</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/brand-logo.png'); ?>" />
+    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -64,7 +64,7 @@
     <div class="container px-3 d-flex justify-content-center">
         <div class="login-card">
             <div class="text-center mb-4">
-                <img src="<?= base_url('img/brand-logo.png'); ?>" alt="Logo" style="height: 60px; object-fit: contain;" class="mb-3">
+                <img src="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" alt="Logo" style="height: 60px; object-fit: contain;" class="mb-3">
                 <h4 class="fw-bold text-dark mb-0">Admin Panel</h4>
                 <p class="text-muted small">Silakan login untuk kelola sertifikat</p>
             </div>
