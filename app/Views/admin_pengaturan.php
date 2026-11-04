@@ -105,13 +105,6 @@
                     <div class="card-body p-4">
                         <form id="formPengaturan">
 
-                            <!-- Setting: Nama Direktur -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-user-tie me-2 text-primary"></i> Nama Direktur Utama</label>
-                                <p class="text-muted mb-2" style="font-size: 0.75rem;">Nama ini akan tercetak secara otomatis di bagian tanda tangan kiri bawah pada setiap sertifikat.</p>
-                                <input type="text" name="nama_direktur" class="form-control rounded-3" value="<?= esc($nama_direktur); ?>" required>
-                            </div>
-
                             <!-- Setting: List Mutawwif -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-dark"><i class="fa-solid fa-users me-2 text-success"></i> Daftar Mutawwif & File TTD</label>

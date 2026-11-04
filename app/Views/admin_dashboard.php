@@ -8,6 +8,8 @@
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Quicksand -->
@@ -73,67 +75,10 @@
             border-radius: 6px !important;
         }
 
-        /* TEKNIK TABLE-TO-CARD UNTUK MOBILE */
         .table-custom th {
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-size: 0.9rem;
-        }
-
-        @media (max-width: 767.98px) {
-
-            body {
-                font-size: 0.85rem;
-            }
-
-            .table-mobile-cards thead {
-                display: none;
-            }
-
-            .table-mobile-cards tbody,
-            .table-mobile-cards tr,
-            .table-mobile-cards td {
-                display: block;
-                width: 100%;
-            }
-
-            .table-mobile-cards tr {
-                margin-bottom: 15px;
-                background: #fff;
-                border-radius: 10px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                border: 1px solid #eee;
-                padding: 10px;
-            }
-
-            .table-mobile-cards td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: right;
-                border-bottom: 1px solid #f1f1f1;
-                padding: 10px 5px;
-            }
-
-            .table-mobile-cards td:last-child {
-                border-bottom: 0;
-                justify-content: center;
-                padding-top: 15px;
-            }
-
-            .table-mobile-cards td::before {
-                content: attr(data-label);
-                font-weight: 700;
-                text-transform: uppercase;
-                font-size: 0.8rem;
-                color: #6c757d;
-                text-align: left;
-                margin-right: 15px;
-            }
-
-            .table-mobile-cards td>div {
-                text-align: right;
-            }
         }
     </style>
 </head>
@@ -154,6 +99,13 @@
 
                 <a href="<?= base_url('admin/pengaturan'); ?>" class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-success fw-bold">
                     <i class="fa-solid fa-sliders me-1"></i> <span class="d-none d-sm-inline">Pengaturan</span>
+                </a>
+
+                <a href="<?= base_url('admin/sampah'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm">
+                    <i class="fa-solid fa-trash me-1"></i> Sampah
+                    <?php if ($jumlah_sampah > 0): ?>
+                        <span class="badge bg-warning text-dark ms-1"><?= $jumlah_sampah; ?></span>
+                    <?php endif; ?>
                 </a>
 
                 <a href="#" id="btn-logout" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
@@ -177,7 +129,7 @@
 
         <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
             <div class="card-body p-0">
-                <table class="table table-hover mb-0 align-middle table-custom table-mobile-cards">
+                <table id="pendaftarTable" class="table table-hover mb-0 align-middle table-custom w-100">
                     <thead class="table-light text-muted">
                         <tr>
                             <th>No</th>
@@ -192,8 +144,8 @@
                         <?php $i = 1;
                         foreach ($pendaftar as $row): ?>
                             <tr>
-                                <td data-label="No"><?= $i++; ?></td>
-                                <td data-label="Pemesan">
+                                <td><?= $i++; ?></td>
+                                <td>
                                     <div>
                                         <strong class="text-dark d-block mb-1"><?= $row['uuid']; ?></strong>
 
@@ -211,34 +163,37 @@
                                         </a>
                                     </div>
                                 </td>
-                                <td data-label="Di-umrahkan" class="fw-bold text-success fs-6"><?= $row['nama_diumrahkan']; ?></td>
-                                <td data-label="Paket"><span class="badge bg-light text-dark border p-2"><?= $row['paket_pilihan']; ?></span></td>
-                                <td data-label="Status">
+                                <td class="fw-bold text-success fs-6"><?= $row['nama_diumrahkan']; ?></td>
+                                <td><span class="badge bg-light text-dark border p-2"><?= $row['paket_pilihan']; ?></span></td>
+                                <td>
                                     <?php if ($row['status'] == 'pending'): ?>
                                         <span class="badge bg-warning text-dark rounded-pill p-2"><i class="fa-regular fa-clock me-1"></i> Pending</span>
                                     <?php else: ?>
                                         <span class="badge bg-success rounded-pill p-2"><i class="fa-solid fa-check-double me-1"></i> Selesai</span>
                                     <?php endif; ?>
                                 </td>
-                                <td data-label="Aksi" class="text-center">
-                                    <?php if ($row['status'] == 'pending'): ?>
-                                        <button class="btn btn-primary rounded-pill px-3 btn-proses shadow-sm"
+                                <td class="text-center text-nowrap">
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                        <?php if ($row['status'] == 'pending'): ?>
+                                            <button class="btn btn-primary rounded-pill px-3 btn-proses shadow-sm"
+                                                data-id="<?= $row['id']; ?>"
+                                                data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>">
+                                                <i class="fa-solid fa-gear me-1"></i> Proses
+                                            </button>
+                                        <?php else: ?>
+                                            <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                                        <?php endif; ?>
+                                        <button type="button" class="btn btn-outline-secondary rounded-pill btn-hapus-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
-                                            data-nama="<?= $row['nama_diumrahkan']; ?>">
-                                            <i class="fa-solid fa-gear me-1"></i> Proses
+                                            data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                            aria-label="Pindahkan pendaftaran ke sampah">
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
-                                    <?php else: ?>
-                                        <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-                                    <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
 
-                        <?php if (empty($pendaftar)): ?>
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted fs-5">Belum ada data pendaftaran masuk.</td>
-                            </tr>
-                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -317,10 +272,6 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">Tempat Miqat</label>
-                            <input type="text" name="tempat_miqat" class="form-control rounded-3" placeholder="Contoh: Bir Ali" required>
-                        </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label text-muted fw-bold">Tgl Miqat</label>
@@ -345,10 +296,36 @@
         </div>
     </div>
 
+    <!-- jQuery (required by the DataTables CDN build) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
+        new DataTable('#pendaftarTable', {
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [],
+            language: {
+                search: 'Cari:',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                infoEmpty: 'Tidak ada data untuk ditampilkan',
+                infoFiltered: '(difilter dari _MAX_ total data)',
+                zeroRecords: 'Data yang cocok tidak ditemukan',
+                emptyTable: 'Belum ada data pendaftaran masuk.',
+                paginate: {
+                    first: 'Pertama',
+                    last: 'Terakhir',
+                    next: 'Berikutnya',
+                    previous: 'Sebelumnya'
+                }
+            }
+        });
+
         // Konfirmasi Logout dengan SweetAlert2
         document.getElementById('btn-logout').addEventListener('click', function(e) {
             e.preventDefault();
@@ -381,6 +358,34 @@
                 document.getElementById('lbl_nama_diumrahkan').innerText = this.getAttribute('data-nama');
 
                 new bootstrap.Modal(document.getElementById('modalProses')).show();
+            });
+        });
+
+        document.querySelectorAll('.btn-hapus-pendaftaran').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const nama = this.dataset.nama;
+
+                Swal.fire({
+                    title: 'Pindahkan ke Sampah?',
+                    text: `Pendaftaran atas nama ${nama} dapat dipulihkan dari menu Sampah.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, pindahkan',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#6c757d'
+                }).then(result => {
+                    if (!result.isConfirmed) return;
+
+                    fetch(`<?= base_url('admin/pendaftaran'); ?>/${id}/hapus`, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status !== 'success') throw new Error(data.message);
+                            return Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                        })
+                        .then(() => location.reload())
+                        .catch(error => Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Terjadi kesalahan sistem.' }));
+                });
             });
         });
 

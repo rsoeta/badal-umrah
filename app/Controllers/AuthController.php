@@ -12,7 +12,7 @@ class AuthController extends Controller
         if (session()->get('is_admin')) {
             return redirect()->to(base_url('admin'));
         }
-        return view('admin_login');
+        return view('admin_login', ['isLocalhost' => $this->isLocalhost()]);
     }
 
     public function proses()
@@ -21,8 +21,8 @@ class AuthController extends Controller
         $password = $this->request->getPost('password');
         $cf_response = $this->request->getPost('cf-turnstile-response');
 
-        // 1. Validasi Frontend: Pastikan widget dicentang dan mengeluarkan token
-        if (empty($cf_response)) {
+        // Wajibkan token Turnstile di luar localhost development.
+        if (! $this->isLocalhost() && empty($cf_response)) {
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Verifikasi keamanan gagal! Harap tunggu/centang kotak Cloudflare.'
@@ -54,6 +54,21 @@ class AuthController extends Controller
                 'message' => 'Username atau Password salah!'
             ]);
         }
+    }
+
+    private function isLocalhost(): bool
+    {
+        if (ENVIRONMENT !== 'development') {
+            return false;
+        }
+
+        $host = trim(strtolower((string) parse_url(
+            'http://' . $this->request->getServer('HTTP_HOST'),
+            PHP_URL_HOST
+        )), '[]');
+
+        return in_array($host, ['localhost', '127.0.0.1', '::1'], true)
+            && in_array($this->request->getIPAddress(), ['127.0.0.1', '::1'], true);
     }
 
     public function logout()

@@ -10,7 +10,8 @@ class PendaftaranModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
+    protected $deletedField     = 'deleted_at';
     protected $protectFields    = true;
 
     // Kolom-kolom yang diizinkan untuk diisi (Mass Assignment)
@@ -25,7 +26,8 @@ class PendaftaranModel extends Model
         'tempat_miqat',
         'tanggal_miqat',
         'tanggal_cetak',
-        'status'
+        'status',
+        'deleted_at'
     ];
 
     // Aktifkan timestamp otomatis

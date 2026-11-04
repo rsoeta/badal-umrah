@@ -15,8 +15,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Cloudflare Turnstile -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <?php if (! $isLocalhost): ?>
+        <!-- Cloudflare Turnstile -->
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <?php endif; ?>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -84,9 +86,12 @@
                     </div>
                 </div>
 
-                <!-- Widget Cloudflare Turnstile -->
-                <!-- Ini adalah Sitekey Testing resmi dari Cloudflare (Selalu Pass di localhost) -->
-                <div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="0x4AAAAAAE2wCBIBbm825VPi"></div>
+                <?php if (! $isLocalhost): ?>
+                    <!-- Widget Cloudflare Turnstile -->
+                    <div class="cf-turnstile mb-3 d-flex justify-content-center" data-sitekey="0x4AAAAAAE2wCBIBbm825VPi"></div>
+                <?php else: ?>
+                    <p class="text-muted small text-center">Verifikasi Cloudflare dilewati di localhost.</p>
+                <?php endif; ?>
 
                 <button type="submit" class="btn w-100 fw-bold shadow-sm" style="background-color: #b8924b; color: white;">
                     <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk Sistem

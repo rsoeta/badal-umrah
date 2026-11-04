@@ -1,69 +1,96 @@
-# CodeIgniter 4 Application Starter
+# Badal Umrah
 
-## What is CodeIgniter?
+Aplikasi web untuk mengelola pendaftaran layanan badal umrah dan menerbitkan sertifikat pelaksanaan. Aplikasi dibuat dengan CodeIgniter 4.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Fitur
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- Formulir pendaftaran badal umrah dan pembuatan nomor registrasi.
+- Pemeriksaan status pendaftaran dan tautan unduh sertifikat PDF/JPG.
+- Panel admin untuk melihat pendaftaran, mengisi data pelaksanaan, dan membuat sertifikat.
+- Pengaturan data master, termasuk nama direktur, daftar mutawwif, serta kredensial admin.
+- Sertifikat menggunakan template gambar dan dapat menyertakan tanda tangan pelaksana.
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## Teknologi
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+- PHP 8.2 atau lebih baru
+- CodeIgniter 4
+- MySQL/MariaDB
+- Intervention Image dan FPDF
 
-## Installation & updates
+Ekstensi PHP yang diperlukan: `intl`, `mbstring`, `mysqli`, dan `gd`. Ekstensi `json` juga harus tersedia.
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## Persiapan
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+1. Siapkan PHP dan MySQL/MariaDB, lalu buat database kosong untuk aplikasi.
+2. Pasang dependensi PHP:
 
-## Setup
+   ```sh
+   composer install
+   ```
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+3. Salin berkas konfigurasi contoh dan sesuaikan pengaturan aplikasi:
 
-## Important Change with index.php
+   ```powershell
+   Copy-Item env .env
+   ```
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+   Atur `app.baseURL` serta `database.default.hostname`, `database.default.database`, `database.default.username`, dan `database.default.password` di `.env`.
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+4. Jalankan migrasi untuk membuat tabel:
 
-**Please** read the user guide for a better explanation of how CI4 works!
+   ```sh
+   php spark migrate
+   ```
 
-## Repository Management
+   Migrasi terbaru menambahkan soft delete untuk data pendaftaran. Pastikan migrasi ini dijalankan pada database lama sebelum menggunakan menu Sampah.
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+5. Jalankan server pengembangan:
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+   ```sh
+   php spark serve
+   ```
 
-## Server Requirements
+   Buka URL yang ditampilkan oleh perintah tersebut. Untuk deployment, arahkan document root web server ke direktori `public`, bukan ke root proyek.
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+## Penggunaan
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+- Pengunjung membuka `/pendaftaran` untuk mendaftar. Setelah berhasil, aplikasi menampilkan nomor registrasi yang digunakan untuk memeriksa sertifikat.
+- Pengunjung menggunakan formulir cek sertifikat di halaman utama untuk melihat status dan mengunduh sertifikat yang sudah selesai.
+- Admin masuk melalui `/login`. Pada instalasi baru tanpa kata sandi admin tersimpan, kredensial awal adalah **admin / rahasia123**. Segera ganti kata sandi melalui menu pengaturan setelah login.
+- Admin mengelola data melalui `/admin`, lalu mengatur informasi master melalui menu pengaturan. Berkas template sertifikat berada di `public/templates/template_sertifikat.png`; tanda tangan pelaksana diletakkan di `public/signatures/`.
+- Berkas sertifikat yang dihasilkan disimpan di `public/storage/certificates/`.
+- Pendaftaran yang dihapus masuk ke menu **Sampah** pada panel admin. Data dapat dipulihkan atau dihapus permanen; penghapusan permanen juga menghapus berkas sertifikat PDF/JPG terkait.
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+Pastikan direktori penyimpanan yang digunakan aplikasi dapat ditulis oleh proses PHP. Jangan menyimpan kredensial produksi di repositori.
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+## Deploy otomatis melalui GitHub
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+Workflow `.github/workflows/deploy.yml` menjalankan deploy setiap ada push ke branch `main`, atau saat workflow dijalankan manual dari tab **Actions** di GitHub. Server diperbarui melalui SSH dengan `git pull --ff-only origin main`, lalu dependensi produksi dipasang menggunakan Composer. Migrasi database **tidak** dijalankan otomatis; jalankan `php spark migrate` secara manual setelah meninjau perubahan migrasi.
+
+Persyaratan di hosting:
+
+- SSH dan Git tersedia.
+- Aplikasi sudah di-clone ke server, branch yang digunakan bernama `main`, dan remote `origin` menunjuk ke repositori ini.
+- Server dapat mengakses repositori GitHub untuk menjalankan `git pull` (misalnya dengan deploy key GitHub yang hanya memiliki akses baca).
+- PHP serta Composer tersedia di shell SSH server.
+
+Tambahkan secrets berikut di **GitHub repository → Settings → Secrets and variables → Actions**:
+
+| Secret | Nilai |
+| --- | --- |
+| `SSH_HOST` | Hostname server SSH |
+| `SSH_PORT` | Port SSH; boleh tidak diisi jika menggunakan port `22` |
+| `SSH_USER` | Username SSH |
+| `SSH_PRIVATE_KEY` | Private key SSH yang diizinkan login ke hosting; simpan public key pasangannya di hosting |
+| `SSH_KNOWN_HOSTS` | Host key server SSH yang telah diverifikasi |
+| `DEPLOY_PATH` | Path absolut direktori aplikasi di server, yaitu direktori yang berisi `spark` dan `.git` |
+
+Gunakan kunci SSH khusus deployment, jangan gunakan password akun hosting atau private key pribadi. Verifikasi fingerprint host key melalui penyedia hosting sebelum menyimpannya sebagai `SSH_KNOWN_HOSTS`. Setelah secrets terpasang, lakukan push ke `main` untuk memicu deploy. Periksa hasilnya di tab **Actions**; workflow akan gagal secara eksplisit jika koneksi SSH, `git pull`, atau Composer gagal.
+
+## Pengujian
+
+Jalankan pengujian dengan PHPUnit:
+
+```sh
+composer test
+```

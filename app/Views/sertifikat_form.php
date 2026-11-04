@@ -96,10 +96,6 @@
                 <input type="text" name="nama_diumrahkan" required placeholder="Contoh: Hj. Siti Aminah binti Fulan">
             </div>
             <div class="form-group">
-                <label>Tempat Miqat</label>
-                <input type="text" name="tempat_miqat" required placeholder="Contoh: Bir Ali / Dzul Hulaifah">
-            </div>
-            <div class="form-group">
                 <label>Tanggal Miqat (Masehi)</label>
                 <!-- Menggunakan input date -->
                 <input type="date" name="tanggal_miqat" required>
