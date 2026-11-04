@@ -11,14 +11,14 @@
     <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png'); ?>" />
 
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= base_url(); ?>">
     <meta property="og:title" content="🕋 Badal Umrah - Abdul Aziz">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
-    <meta property="og:image" content="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -348,9 +348,9 @@
                 <div class="col-lg-7 col-md-12">
                     <!-- Menggunakan Logo Perusahaan Asli -->
                     <div class="d-flex align-items-center mb-4">
-                        <img src="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" alt="Logo Abdul Aziz" style="max-height: 100px; object-fit: contain;" class="me-3">
+                        <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Abdul Aziz" style="max-height: 100px; object-fit: contain;" class="me-3">
                         <div>
-                            <h2 class="mb-0 fw-bold text-green font-serif" style="line-height: 1;">Raehan<br>Cipta Pesona</h2>
+                            <h2 class="mb-0 fw-bold text-green font-serif" style="line-height: 1;">Abdul Aziz</h2>
                             <small class="text-muted" style="font-size: 0.9rem;">Amanah dalam Ibadah, Indah dalam Layanan</small>
                         </div>
                     </div>
