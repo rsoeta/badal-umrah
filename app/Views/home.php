@@ -6,21 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Primary Meta Tags -->
-    <title>Raehan Cipta Pesona - Layanan Badal Umrah Amanah</title>
-    <meta name="title" content="Raehan Cipta Pesona - Layanan Badal Umrah Amanah">
+    <title>Abdul Aziz - Layanan Badal Umrah Amanah</title>
+    <meta name="title" content="Abdul Aziz - Layanan Badal Umrah Amanah">
     <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="<?= base_url('img/logo.png'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/brand-logo.png'); ?>" />
 
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= base_url(); ?>">
-    <meta property="og:title" content="🕋 Badal Umrah - Raehan Cipta Pesona">
+    <meta property="og:title" content="🕋 Badal Umrah - Abdul Aziz">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
-    <meta property="og:image" content="<?= base_url('img/logo.png'); ?>">
-    <meta property="og:image:width" content="800">
-    <meta property="og:image:height" content="800">
+    <meta property="og:image" content="<?= base_url('img/brand-logo.png'); ?>">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -350,7 +348,7 @@
                 <div class="col-lg-7 col-md-12">
                     <!-- Menggunakan Logo Perusahaan Asli -->
                     <div class="d-flex align-items-center mb-4">
-                        <img src="<?= base_url('img/logo.png'); ?>" alt="Logo Raehan Cipta Pesona" style="max-height: 100px; object-fit: contain;" class="me-3">
+                        <img src="<?= base_url('img/brand-logo.png'); ?>" alt="Logo Abdul Aziz" style="max-height: 100px; object-fit: contain;" class="me-3">
                         <div>
                             <h2 class="mb-0 fw-bold text-green font-serif" style="line-height: 1;">Raehan<br>Cipta Pesona</h2>
                             <small class="text-muted" style="font-size: 0.9rem;">Amanah dalam Ibadah, Indah dalam Layanan</small>
@@ -568,7 +566,7 @@
                     <div class="d-flex">
                         <img src="https://ui-avatars.com/api/?name=Siti+Rahayu&background=b8924b&color=fff" class="testi-avatar">
                         <div>
-                            <p class="small text-muted fst-italic mb-2">"Alhamdulillah, prosesnya sangat mudah dan terpercaya. Sertifikat dan videonya lengkap. Terima kasih Raehan Cipta Pesona."</p>
+                            <p class="small text-muted fst-italic mb-2">"Alhamdulillah, prosesnya sangat mudah dan terpercaya. Sertifikat dan videonya lengkap. Terima kasih Abdul Aziz."</p>
                             <div class="text-warning mb-1" style="font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                             <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Ibu Siti Rahayu</h6>
                             <p class="text-muted mb-0" style="font-size: 0.7rem;">(Anak dari Almarhum Bapak H. Mulyadi)</p>
@@ -644,7 +642,7 @@
             <div class="d-flex align-items-center mb-3 mb-md-0">
                 <i class="fa-solid fa-kaaba fa-2x text-gold me-3"></i>
                 <div>
-                    <h6 class="mb-0 fw-bold font-serif text-white">Raehan Cipta Pesona</h6>
+                    <h6 class="mb-0 fw-bold font-serif text-white">Abdul Aziz</h6>
                     <small class="text-gold" style="font-size: 0.7rem;">Amanah dalam Ibadah, Indah dalam Layanan</small>
                 </div>
             </div>
