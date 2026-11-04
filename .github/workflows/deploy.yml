@@ -45,6 +45,6 @@ jobs:
           ssh -i "$HOME/.ssh/deploy_key" \
             -p "$SSH_PORT" \
             -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
+            -o StrictHostKeyChecking=no \
             "$SSH_USER@$SSH_HOST" \
             "$REMOTE_COMMAND"
