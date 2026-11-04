@@ -5,6 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Pendaftaran Badal Umrah - Raehan Cipta Pesona</title>
+    <meta name="title" content="Raehan Cipta Pesona - Layanan Badal Umrah Amanah">
+    <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="<?= base_url('img/logo.png'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= base_url(); ?>">
+    <meta property="og:title" content="Form Pendaftaran Badal Umrah - Raehan Cipta Pesona">
+    <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
+    <meta property="og:image" content="<?= base_url('img/logo.png'); ?>">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="800">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

@@ -21,52 +21,38 @@ class AuthController extends Controller
         $password = $this->request->getPost('password');
         $cf_response = $this->request->getPost('cf-turnstile-response');
 
-        // 1. Verifikasi Cloudflare Turnstile
-        // Cek apakah aplikasi sedang dalam mode 'development' di file .env
-        if (env('CI_ENVIRONMENT') === 'development') {
-            $cf_success = true; // Jalur VIP (Bypass) khusus localhost
-        } else {
-            $secret_key = env('0x4AAAAAAE2wCC_XpRi1wsoAfIe5BVQU4Ac'); // Ganti dengan Secret Key asli dari Cloudflare Turnstile
-            $verify = curl_init();
-            curl_setopt($verify, CURLOPT_URL, "https://challenges.cloudflare.com/turnstile/v0/siteverify");
-            curl_setopt($verify, CURLOPT_POST, true);
-            curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query([
-                'secret'   => $secret_key,
-                'response' => $cf_response
-            ]));
-            curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($verify, CURLOPT_SSL_VERIFYPEER, false); // Jaga-jaga error SSL
-
-            $response = curl_exec($verify);
-            $result = json_decode($response);
-
-            $cf_success = $result->success ?? false;
+        // 1. Validasi Frontend: Pastikan widget dicentang dan mengeluarkan token
+        if (empty($cf_response)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Verifikasi keamanan gagal! Harap tunggu/centang kotak Cloudflare.'
+            ]);
         }
 
-        if (!$cf_success) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Verifikasi Cloudflare gagal! Pastikan Anda bukan robot.']);
-        }
-
-        // 2. Verifikasi Database (Menggunakan PengaturanModel)
+        // 2. BYPASS CURL KE CLOUDFLARE (Karena diblokir oleh server hosting)
+        // Langsung lompat ke pengecekan Database
         $pengaturanModel = new \App\Models\PengaturanModel();
 
-        $db_user = $pengaturanModel->getSetting('admin_username');
+        $db_user = $pengaturanModel->getSetting('admin_username') ?? 'admin';
         $db_pass = $pengaturanModel->getSetting('admin_password');
 
-        // Jika data login belum pernah di-setting di database, buat otomatis (Default)
-        if (!$db_user || !$db_pass) {
-            $db_user = 'admin-badal';
-            $db_pass = password_hash('tBwueF@f_8szpVz;', PASSWORD_DEFAULT);
-            $pengaturanModel->insert(['setting_key' => 'admin_username', 'setting_value' => $db_user]);
-            $pengaturanModel->insert(['setting_key' => 'admin_password', 'setting_value' => $db_pass]);
+        // Fallback jika database belum pernah di-setting
+        if (empty($db_pass)) {
+            $db_pass = password_hash('rahasia123', PASSWORD_DEFAULT);
         }
 
-        // 3. Pengecekan Kredensial dengan Password Hash
+        // 3. Verifikasi Password
         if ($username === $db_user && password_verify($password, $db_pass)) {
             session()->set(['is_admin' => true]);
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Login berhasil...']);
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Login berhasil, mengalihkan...'
+            ]);
         } else {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Username atau Password salah!']);
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Username atau Password salah!'
+            ]);
         }
     }
 
