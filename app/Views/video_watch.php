@@ -192,11 +192,36 @@
                     </div>
 
                     <!-- Pemutar Video Realtime -->
-                    <div class="video-wrapper mb-4">
+                    <div class="video-wrapper mb-3 position-relative">
                         <video id="playerVideo" controls autoplay playsinline preload="auto">
+                            <source src="<?= esc($streamUrl); ?>" type="video/mp4">
+                            <?php if ($video['mime_type'] !== 'video/mp4'): ?>
                             <source src="<?= esc($streamUrl); ?>" type="<?= esc($video['mime_type']); ?>">
+                            <?php endif; ?>
+                            <source src="<?= esc($streamUrl); ?>">
                             Browser Anda tidak mendukung pemutar video HTML5. Silakan unduh berkas video menggunakan tombol di bawah.
                         </video>
+                    </div>
+
+                    <!-- Pemberitahuan jika codec/format video tidak kompatibel di browser tertentu -->
+                    <div id="videoCodecNotice" class="alert alert-warning d-none text-start p-3 mb-4 rounded-3 border-warning shadow-sm">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-warning fs-5 mt-1 flex-shrink-0"></i>
+                            <div>
+                                <div class="fw-semibold text-dark">Video Tidak Dapat Diputar Langsung di Browser Ini?</div>
+                                <div class="small text-muted mb-2">
+                                    Berkas ini berformat <strong><?= esc($namaVideo); ?></strong> (rekaman iPhone Apple MOV / HEVC). Beberapa browser desktop (seperti Chrome di Windows tanpa codec HEVC) tidak dapat mendekode video format ini di halaman web.
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="<?= esc($downloadUrl); ?>" class="btn btn-sm btn-success rounded-pill px-3">
+                                        <i class="fa-solid fa-download me-1"></i> Unduh Video (<?= esc($fileSizeFormatted); ?>)
+                                    </a>
+                                    <a href="https://wa.me/?text=<?= rawurlencode("Video Dokumentasi Badal Umrah - " . $namaDiumrahkan . "\n\n" . $shareUrl); ?>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                        <i class="fa-brands fa-whatsapp me-1"></i> Buka di Ponsel / iPhone
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tombol Aksi Cepat -->
@@ -326,6 +351,25 @@
                         customClass: { popup: 'swal-mobile-custom' }
                     });
                 });
+            }
+
+            const playerVideo = document.getElementById('playerVideo');
+            const videoCodecNotice = document.getElementById('videoCodecNotice');
+            if (playerVideo && videoCodecNotice) {
+                const showCodecNotice = () => {
+                    videoCodecNotice.classList.remove('d-none');
+                };
+
+                playerVideo.addEventListener('error', showCodecNotice, true);
+                playerVideo.querySelectorAll('source').forEach(source => {
+                    source.addEventListener('error', showCodecNotice);
+                });
+
+                setTimeout(() => {
+                    if (playerVideo.networkState === HTMLMediaElement.NETWORK_NO_SOURCE || (playerVideo.error && playerVideo.error.code !== 0)) {
+                        showCodecNotice();
+                    }
+                }, 3000);
             }
         });
     </script>

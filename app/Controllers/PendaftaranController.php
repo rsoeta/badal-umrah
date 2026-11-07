@@ -280,7 +280,11 @@ class PendaftaranController extends Controller
             strtoupper($this->request->getMethod()) === 'HEAD'
         );
         $response->setStatusCode($statusCode);
-        $response->setContentType($video['mime_type'], '');
+        $streamMime = $video['mime_type'];
+        if (! $download && $streamMime === 'video/quicktime') {
+            $streamMime = 'video/mp4';
+        }
+        $response->setContentType($streamMime, '');
         $response->setHeader('Accept-Ranges', 'bytes');
         $response->setHeader('Content-Length', (string) $length);
 

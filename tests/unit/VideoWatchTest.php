@@ -113,6 +113,21 @@ final class VideoWatchTest extends CIUnitTestCase
         $this->assertSame('bytes', $streamResponse->getHeaderLine('Accept-Ranges'));
     }
 
+    public function testStreamVideoMapsQuickTimeToMp4(): void
+    {
+        (new VideoDokumentasiModel())->update($this->videoId, ['mime_type' => 'video/quicktime']);
+
+        $controller = new PendaftaranController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $streamResponse = $controller->streamVideo($this->token);
+        $this->assertSame(200, $streamResponse->getStatusCode());
+        $this->assertSame('inline', $streamResponse->getHeaderLine('Content-Disposition'));
+        $this->assertSame('video/mp4', $streamResponse->getHeaderLine('Content-Type'));
+    }
+
     public function testDownloadSharedVideoReturnsAttachment(): void
     {
         $controller = new PendaftaranController();
