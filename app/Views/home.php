@@ -179,6 +179,21 @@
             margin-top: 15px;
         }
 
+        .cek-hasil-card {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .cek-hasil-video {
+            width: 100%;
+            max-height: 280px;
+            border-radius: 0.6rem;
+            background: #000;
+        }
+
         .features-bottom {
             display: flex;
             justify-content: space-between;
@@ -384,15 +399,16 @@
                     <div class="d-flex align-items-center mb-3">
                         <i class="fa-solid fa-certificate fa-2x text-gold me-3"></i>
                         <div>
-                            <h5 class="mb-0 fw-bold text-gold">Cek & Unduh Sertifikat</h5>
-                            <small>Masukkan Nomor Registrasi / UUID untuk mengunduh sertifikat Badal Umrah Anda</small>
+                            <h5 class="mb-0 fw-bold text-gold">Cek & Unduh Sertifikat / Video</h5>
+                            <small>Masukkan Nomor Registrasi / UUID untuk melihat sertifikat dan video dokumentasi yang tersedia.</small>
                         </div>
                     </div>
                     <div class="input-group">
                         <input type="text" id="inputSertifikat" class="form-control" placeholder="Contoh: RCP-2026-XXXX atau UUID">
                         <button class="btn btn-search" type="button"><i class="fa-solid fa-search"></i></button>
                     </div>
-                    <button class="btn btn-gold w-100 mt-3" id="btnCekSertifikat">Cek Sertifikat</button>
+                    <button class="btn btn-gold w-100 mt-3" id="btnCekSertifikat">Cek Sertifikat & Video</button>
+                    <div id="hasilCekSertifikat" class="d-none" aria-live="polite"></div>
 
                     <div class="features-bottom">
                         <span><i class="fa-regular fa-clock text-gold"></i> Instan</span>
@@ -659,6 +675,69 @@
 
     <!-- Script Interaksi Cek Sertifikat Asli -->
     <script>
+        const hasilCekSertifikat = document.getElementById('hasilCekSertifikat');
+        const tampilkanHasilCek = data => {
+            hasilCekSertifikat.replaceChildren();
+            hasilCekSertifikat.classList.remove('d-none');
+
+            const resultCard = document.createElement('div');
+            resultCard.className = 'cek-hasil-card';
+            const heading = document.createElement('div');
+            heading.className = 'fw-bold text-gold mb-2';
+            heading.textContent = data.certificate_ready
+                ? `Sertifikat atas nama ${data.nama} siap diunduh.`
+                : data.message;
+            resultCard.append(heading);
+
+            if (data.certificate_ready) {
+                const certificateActions = document.createElement('div');
+                certificateActions.className = 'd-flex flex-wrap gap-2 mb-3';
+                const pdfLink = document.createElement('a');
+                pdfLink.href = data.url_pdf;
+                pdfLink.target = '_blank';
+                pdfLink.rel = 'noopener';
+                pdfLink.className = 'btn btn-sm btn-danger';
+                pdfLink.innerHTML = '<i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF';
+                const jpgLink = document.createElement('a');
+                jpgLink.href = data.url_jpg;
+                jpgLink.target = '_blank';
+                jpgLink.rel = 'noopener';
+                jpgLink.className = 'btn btn-sm btn-info text-white';
+                jpgLink.innerHTML = '<i class="fa-solid fa-image me-1"></i> Lihat JPG';
+                certificateActions.append(pdfLink, jpgLink);
+                resultCard.append(certificateActions);
+            }
+
+            if (data.videos && data.videos.length > 0) {
+                const videoHeading = document.createElement('div');
+                videoHeading.className = 'fw-bold text-gold mb-2';
+                videoHeading.textContent = 'Video dokumentasi';
+                resultCard.append(videoHeading);
+
+                data.videos.forEach(video => {
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'mb-3';
+                    const name = document.createElement('div');
+                    name.className = 'small mb-2 text-break';
+                    name.textContent = video.name;
+                    const player = document.createElement('video');
+                    player.className = 'cek-hasil-video';
+                    player.controls = true;
+                    player.preload = 'metadata';
+                    player.playsInline = true;
+                    player.src = video.stream_url;
+                    const download = document.createElement('a');
+                    download.className = 'btn btn-sm btn-outline-light mt-2';
+                    download.href = video.download_url;
+                    download.innerHTML = '<i class="fa-solid fa-download me-1"></i> Unduh Video';
+                    videoCard.append(name, player, download);
+                    resultCard.append(videoCard);
+                });
+            }
+
+            hasilCekSertifikat.append(resultCard);
+        };
+
         document.getElementById('btnCekSertifikat').addEventListener('click', function() {
             let inputVal = document.getElementById('inputSertifikat').value;
 
@@ -690,36 +769,23 @@
             // Siapkan data untuk dikirim
             let formData = new FormData();
             formData.append('uuid', inputVal.trim());
+            hasilCekSertifikat.replaceChildren();
+            hasilCekSertifikat.classList.add('d-none');
 
             // Tembak ke Backend CI4
             fetch('<?= base_url('cek-sertifikat') ?>', {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Pencarian gagal.');
+                    return data;
+                })
                 .then(data => {
                     if (data.status === 'success') {
-                        // Sertifikat Selesai
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Sertifikat Ditemukan!',
-                            html: 'Sertifikat atas nama <b>' + data.nama + '</b> siap diunduh.',
-                            showDenyButton: true,
-                            confirmButtonText: '<i class="fa-solid fa-file-pdf"></i> Unduh PDF',
-                            denyButtonText: '<i class="fa-solid fa-image"></i> Unduh JPG',
-                            customClass: {
-                                popup: 'swal-mobile-custom',
-                                title: 'swal-title-custom',
-                                confirmButton: 'swal-btn-custom btn-danger shadow-sm',
-                                denyButton: 'swal-btn-custom btn-info text-white shadow-sm'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.open(data.url_pdf, '_blank'); // Buka PDF
-                            } else if (result.isDenied) {
-                                window.open(data.url_jpg, '_blank'); // Buka JPG
-                            }
-                        });
+                        Swal.close();
+                        tampilkanHasilCek(data);
                     } else if (data.status === 'pending') {
                         // Masih Proses
                         Swal.fire({
@@ -745,10 +811,11 @@
                     }
                 })
                 .catch(error => {
+                    Swal.close();
                     Swal.fire({
                         icon: 'error',
                         title: 'Error Server',
-                        text: 'Terjadi kendala saat menghubungi server.',
+                        text: error.message || 'Terjadi kendala saat menghubungi server.',
                         customClass: {
                             popup: 'swal-mobile-custom',
                             title: 'swal-title-custom'

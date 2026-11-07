@@ -4,6 +4,8 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
+$routes->get('video/(:segment)', 'PendaftaranController::streamVideo/$1');
+$routes->get('video/(:segment)/download', 'PendaftaranController::downloadSharedVideo/$1');
 
 // Rute Login
 $routes->get('login', 'AuthController::index');
@@ -21,6 +23,8 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pendaftaran/(:num)/hapus-permanen', 'AdminController::hapusPermanen/$1');
     $routes->get('pendaftaran/(:num)/videos', 'AdminController::daftarVideo/$1');
     $routes->post('pendaftaran/(:num)/videos', 'AdminController::unggahVideo/$1');
+    $routes->post('pendaftaran/(:num)/videos/(:num)/share', 'AdminController::bagikanVideo/$1/$2');
+    $routes->post('pendaftaran/(:num)/videos/(:num)/unshare', 'AdminController::cabutBagikanVideo/$1/$2');
     $routes->get('pendaftaran/(:num)/videos/(:num)/download', 'AdminController::unduhVideo/$1/$2');
     $routes->post('pendaftaran/(:num)/videos/(:num)/hapus', 'AdminController::hapusVideo/$1/$2');
 

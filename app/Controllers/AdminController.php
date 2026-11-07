@@ -303,10 +303,81 @@ class AdminController extends Controller
                 'file_size'     => (int) $video['file_size'],
                 'created_at'    => $video['created_at'],
                 'download_url'  => base_url('admin/pendaftaran/' . $id . '/videos/' . $video['id'] . '/download'),
+                'share_url'     => $video['share_token'] !== null
+                    ? base_url('video/' . $video['share_token'])
+                    : null,
             ];
         }, $videos);
 
         return $this->response->setJSON(['status' => 'success', 'videos' => $items]);
+    }
+
+    public function bagikanVideo(int $id, int $videoId)
+    {
+        if (! (new PendaftaranModel())->find($id)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data pendaftaran tidak ditemukan.',
+            ]);
+        }
+
+        $videoModel = new VideoDokumentasiModel();
+        $video = $videoModel->where('pendaftaran_id', $id)->find($videoId);
+        if (! $video) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Video tidak ditemukan.',
+            ]);
+        }
+
+        $token = $video['share_token'] ?? bin2hex(random_bytes(32));
+        if ($video['share_token'] === null && ! $videoModel->update($videoId, ['share_token' => $token])) {
+            log_message('error', 'Failed to enable public sharing for video {videoId}.', ['videoId' => $videoId]);
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Tautan berbagi gagal dibuat.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'    => 'success',
+            'message'   => 'Tautan video siap dibagikan.',
+            'share_url' => base_url('video/' . $token),
+        ]);
+    }
+
+    public function cabutBagikanVideo(int $id, int $videoId)
+    {
+        if (! (new PendaftaranModel())->find($id)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data pendaftaran tidak ditemukan.',
+            ]);
+        }
+
+        $videoModel = new VideoDokumentasiModel();
+        $video = $videoModel->where('pendaftaran_id', $id)->find($videoId);
+        if (! $video) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Video tidak ditemukan.',
+            ]);
+        }
+
+        if ($video['share_token'] !== null && ! $videoModel->update($videoId, ['share_token' => null])) {
+            log_message('error', 'Failed to revoke public sharing for video {videoId}.', ['videoId' => $videoId]);
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Tautan berbagi gagal dicabut.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Tautan berbagi video telah dicabut.',
+        ]);
     }
 
     public function unggahVideo(int $id)
@@ -315,6 +386,16 @@ class AdminController extends Controller
             return $this->response->setStatusCode(404)->setJSON([
                 'status'  => 'error',
                 'message' => 'Data pendaftaran tidak ditemukan.',
+            ]);
+        }
+
+        $contentLength = (int) ($this->request->getServer('CONTENT_LENGTH') ?? 0);
+        if ($contentLength > 0 && empty($_FILES) && empty($_POST)) {
+            $postMaxSize = ini_get('post_max_size') ?: 'unknown';
+
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => "Ukuran video melebihi batas 'post_max_size' pada konfigurasi PHP server ({$postMaxSize}). Mohon tingkatkan nilai post_max_size dan upload_max_filesize di php.ini atau cPanel.",
             ]);
         }
 
@@ -328,9 +409,11 @@ class AdminController extends Controller
         }
 
         $allowedTypes = [
-            'video/mp4'       => 'mp4',
-            'video/webm'      => 'webm',
-            'video/quicktime' => 'mov',
+            'video/mp4'        => ['ext' => 'mp4',  'mime' => 'video/mp4'],
+            'video/webm'       => ['ext' => 'webm', 'mime' => 'video/webm'],
+            'video/quicktime'  => ['ext' => 'mov',  'mime' => 'video/quicktime'],
+            'video/x-m4v'      => ['ext' => 'mp4',  'mime' => 'video/mp4'],
+            'video/x-mp4'      => ['ext' => 'mp4',  'mime' => 'video/mp4'],
         ];
         $maxFileSize = 500 * 1024 * 1024;
         $validatedFiles = [];
@@ -348,9 +431,21 @@ class AdminController extends Controller
             if (! $file->isValid()) {
                 finfo_close($finfo);
 
+                $errorCode = $file->getError();
+                $clientName = htmlspecialchars($file->getClientName(), ENT_QUOTES, 'UTF-8');
+                $message = match ($errorCode) {
+                    UPLOAD_ERR_INI_SIZE   => "Ukuran berkas '{$clientName}' melebihi batas 'upload_max_filesize' pada PHP server (" . ini_get('upload_max_filesize') . '). Tingkatkan konfigurasi ini di php.ini atau cPanel.',
+                    UPLOAD_ERR_FORM_SIZE  => "Ukuran berkas '{$clientName}' melebihi batas maksimal yang ditentukan formulir.",
+                    UPLOAD_ERR_PARTIAL    => "Berkas '{$clientName}' hanya terunggah sebagian. Periksa koneksi internet atau batas waktu upload server.",
+                    UPLOAD_ERR_NO_TMP_DIR => 'Folder penyimpanan sementara (upload_tmp_dir) hilang pada server.',
+                    UPLOAD_ERR_CANT_WRITE => 'Gagal menulis berkas sementara ke disk server. Periksa kapasitas disk atau izin folder temporary server.',
+                    UPLOAD_ERR_EXTENSION  => 'Proses unggah dihentikan oleh modul ekstensi PHP server.',
+                    default               => $file->getErrorString(),
+                };
+
                 return $this->response->setStatusCode(422)->setJSON([
                     'status'  => 'error',
-                    'message' => $file->getErrorString(),
+                    'message' => $message,
                 ]);
             }
 
@@ -363,8 +458,29 @@ class AdminController extends Controller
                 ]);
             }
 
-            $mimeType = finfo_file($finfo, $file->getTempName());
-            if (! isset($allowedTypes[$mimeType])) {
+            $detectedMime = finfo_file($finfo, $file->getTempName());
+            $normalizedType = null;
+
+            if (is_string($detectedMime) && isset($allowedTypes[$detectedMime])) {
+                $normalizedType = $allowedTypes[$detectedMime];
+            } else {
+                $clientExtension = strtolower(pathinfo($file->getClientName(), PATHINFO_EXTENSION));
+                $handle = @fopen($file->getTempName(), 'rb');
+                $header = $handle ? @fread($handle, 16) : '';
+                if ($handle) {
+                    @fclose($handle);
+                }
+
+                if (strlen($header) >= 8 && substr($header, 4, 4) === 'ftyp') {
+                    $normalizedType = $clientExtension === 'mov'
+                        ? ['ext' => 'mov', 'mime' => 'video/quicktime']
+                        : ['ext' => 'mp4', 'mime' => 'video/mp4'];
+                } elseif (strlen($header) >= 4 && substr($header, 0, 4) === "\x1A\x45\xDF\xA3") {
+                    $normalizedType = ['ext' => 'webm', 'mime' => 'video/webm'];
+                }
+            }
+
+            if ($normalizedType === null) {
                 finfo_close($finfo);
 
                 return $this->response->setStatusCode(422)->setJSON([
@@ -374,11 +490,11 @@ class AdminController extends Controller
             }
 
             $originalName = basename(str_replace('\\', '/', $file->getClientName()));
-            $originalName = preg_replace('/[\x00-\x1F\x7F]/', '', $originalName) ?: 'video.' . $allowedTypes[$mimeType];
+            $originalName = preg_replace('/[\x00-\x1F\x7F]/', '', $originalName) ?: 'video.' . $normalizedType['ext'];
             $validatedFiles[] = [
                 'file'          => $file,
-                'mime_type'     => $mimeType,
-                'extension'     => $allowedTypes[$mimeType],
+                'mime_type'     => $normalizedType['mime'],
+                'extension'     => $normalizedType['ext'],
                 'original_name' => mb_substr($originalName, 0, 255),
                 'file_size'     => $file->getSize(),
             ];

@@ -17,6 +17,7 @@ class VideoDokumentasiModel extends Model
         'original_name',
         'mime_type',
         'file_size',
+        'share_token',
         'created_at',
     ];
     protected $useTimestamps    = false;

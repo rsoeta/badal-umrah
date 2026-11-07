@@ -543,6 +543,15 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js"></script>
 
     <script>
+        // Blur active element before SweetAlert2 shows to avoid WAI-ARIA aria-hidden console warning on modal descendants
+        const originalSwalFire = Swal.fire.bind(Swal);
+        Swal.fire = function(...args) {
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
+            return originalSwalFire(...args);
+        };
+
         new DataTable('#pendaftarTable', {
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
@@ -717,9 +726,30 @@
             return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
         };
 
+        const copyShareUrl = async shareUrl => {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    return;
+                } catch (error) {
+                    console.warn('Clipboard access unavailable; showing the share URL for manual copying.', error);
+                }
+            }
+
+            window.prompt('Salin tautan video ini:', shareUrl);
+        };
+
         const requestVideoJson = async (url, options = {}) => {
             const response = await fetch(url, options);
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (err) {
+                if (response.status === 413) {
+                    throw new Error('Ukuran berkas video terlalu besar untuk server (413 Request Entity Too Large). Periksa konfigurasi web server (misal: client_max_body_size pada Nginx).');
+                }
+                throw new Error(`Permintaan ke server gagal (Status ${response.status}: ${response.statusText || 'Error'}).`);
+            }
             if (!response.ok || data.status !== 'success') {
                 throw new Error(data.message || 'Permintaan arsip video gagal.');
             }
@@ -765,13 +795,34 @@
                 downloadLink.rel = 'noopener';
                 downloadLink.setAttribute('aria-label', `Unduh video ${video.original_name}`);
                 downloadLink.innerHTML = '<i class="fa-solid fa-download"></i>';
+                const shareButton = document.createElement('button');
+                shareButton.type = 'button';
+                shareButton.className = `btn btn-sm rounded-pill ${video.share_url ? 'btn-success' : 'btn-outline-primary'} btn-bagikan-video`;
+                shareButton.dataset.id = video.id;
+                shareButton.dataset.shareUrl = video.share_url || '';
+                shareButton.setAttribute('aria-label', video.share_url ? `Salin tautan video ${video.original_name}` : `Buat tautan video ${video.original_name}`);
+                shareButton.title = video.share_url ? 'Salin tautan berbagi' : 'Buat tautan berbagi';
+                shareButton.innerHTML = video.share_url
+                    ? '<i class="fa-solid fa-link"></i>'
+                    : '<i class="fa-solid fa-share-nodes"></i>';
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
                 deleteButton.className = 'btn btn-sm btn-outline-danger rounded-pill btn-hapus-video';
                 deleteButton.dataset.id = video.id;
                 deleteButton.setAttribute('aria-label', `Hapus video ${video.original_name}`);
                 deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                actions.append(downloadLink, deleteButton);
+                actions.append(downloadLink, shareButton);
+                if (video.share_url) {
+                    const revokeButton = document.createElement('button');
+                    revokeButton.type = 'button';
+                    revokeButton.className = 'btn btn-sm btn-outline-warning rounded-pill btn-cabut-bagikan-video';
+                    revokeButton.dataset.id = video.id;
+                    revokeButton.setAttribute('aria-label', `Cabut tautan video ${video.original_name}`);
+                    revokeButton.title = 'Cabut tautan berbagi';
+                    revokeButton.innerHTML = '<i class="fa-solid fa-link-slash"></i>';
+                    actions.append(revokeButton);
+                }
+                actions.append(deleteButton);
                 item.append(details, actions);
                 daftarVideoArsip.append(item);
             });
@@ -791,6 +842,21 @@
 
         formUnggahVideo.addEventListener('submit', async function(event) {
             event.preventDefault();
+
+            const input = document.getElementById('inputVideoDokumentasi');
+            const files = input ? input.files : [];
+            const maxClientBytes = 500 * 1024 * 1024;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > maxClientBytes) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ukuran Terlalu Besar',
+                        text: `Berkas "${files[i].name}" (${(files[i].size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimal 500 MB.`
+                    });
+                    return;
+                }
+            }
+
             btnUnggahVideo.disabled = true;
             btnUnggahVideo.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Mengunggah...';
 
@@ -813,6 +879,51 @@
         });
 
         daftarVideoArsip.addEventListener('click', async event => {
+            const shareButton = event.target.closest('.btn-bagikan-video');
+            if (shareButton) {
+                try {
+                    let shareUrl = shareButton.dataset.shareUrl;
+                    if (!shareUrl) {
+                        const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos/${shareButton.dataset.id}/share`, {
+                            method: 'POST'
+                        });
+                        shareUrl = data.share_url;
+                        await loadVideoArchive();
+                    }
+
+                    await copyShareUrl(shareUrl);
+                    Swal.fire({ icon: 'success', title: 'Tautan siap dibagikan', text: 'Salin tautan untuk membagikan video secara daring.' });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Tautan video gagal disiapkan atau disalin.' });
+                }
+                return;
+            }
+
+            const revokeButton = event.target.closest('.btn-cabut-bagikan-video');
+            if (revokeButton) {
+                const confirmation = await Swal.fire({
+                    title: 'Cabut tautan berbagi?',
+                    text: 'Tautan yang sudah dibagikan tidak akan dapat diputar lagi.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, cabut tautan',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#dc3545'
+                });
+                if (!confirmation.isConfirmed) return;
+
+                try {
+                    const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos/${revokeButton.dataset.id}/unshare`, {
+                        method: 'POST'
+                    });
+                    await loadVideoArchive();
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Tautan gagal dicabut.' });
+                }
+                return;
+            }
+
             const button = event.target.closest('.btn-hapus-video');
             if (!button) return;
 
