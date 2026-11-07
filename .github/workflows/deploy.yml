@@ -41,79 +41,11 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
 
+          REMOTE_COMMAND="export PATH=\"\$HOME/bin:\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/cpanel/composer/bin:\$PATH\" && cd $(printf '%q' "$DEPLOY_PATH") && git pull --ff-only origin main && if command -v composer >/dev/null 2>&1; then composer install --no-dev --prefer-dist --optimize-autoloader; elif [ -x /usr/local/bin/composer ]; then /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader; elif [ -x /opt/cpanel/composer/bin/composer ]; then /opt/cpanel/composer/bin/composer install --no-dev --prefer-dist --optimize-autoloader; else echo 'Composer tidak ditemukan di PATH, melanjutkan dengan dependensi yang sudah ada.'; fi && if command -v php >/dev/null 2>&1 && [ -f spark ]; then php spark migrate --no-header || true; php spark cache:clear || true; fi"
+
           ssh -i "$HOME/.ssh/deploy_key" \
             -p "$SSH_PORT" \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=no \
-            "$SSH_USER@$SSH_HOST" "bash -s" -- "$DEPLOY_PATH" << 'EOF'
-            set -eu
-
-            DEPLOY_DIR="$1"
-            echo "==> Berpindah ke direktori: $DEPLOY_DIR"
-            cd "$DEPLOY_DIR"
-
-            # Muat profile pengguna hosting jika tersedia
-            [ -f "$HOME/.profile" ] && . "$HOME/.profile" || true
-            [ -f "$HOME/.bash_profile" ] && . "$HOME/.bash_profile" || true
-            [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" || true
-
-            # Tambahkan path umum binary di hosting Linux/cPanel ke PATH
-            export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/cpanel/composer/bin:$PATH"
-
-            echo "==> Menarik commit terbaru via git pull..."
-            git pull --ff-only origin main
-
-            echo "==> Memeriksa lingkungan PHP & Composer..."
-            PHP_BIN=""
-            if command -v php >/dev/null 2>&1; then
-              PHP_BIN="$(command -v php)"
-            fi
-
-            COMPOSER_BIN=""
-            if command -v composer >/dev/null 2>&1; then
-              COMPOSER_BIN="$(command -v composer)"
-            elif [ -x "/usr/local/bin/composer" ]; then
-              COMPOSER_BIN="/usr/local/bin/composer"
-            elif [ -x "/opt/cpanel/composer/bin/composer" ]; then
-              COMPOSER_BIN="/opt/cpanel/composer/bin/composer"
-            elif [ -x "$HOME/bin/composer" ]; then
-              COMPOSER_BIN="$HOME/bin/composer"
-            elif [ -x "$HOME/.local/bin/composer" ]; then
-              COMPOSER_BIN="$HOME/.local/bin/composer"
-            elif [ -f "$DEPLOY_DIR/composer.phar" ] && [ -n "$PHP_BIN" ]; then
-              COMPOSER_BIN="$PHP_BIN $DEPLOY_DIR/composer.phar"
-            elif [ -f "$HOME/composer.phar" ] && [ -n "$PHP_BIN" ]; then
-              COMPOSER_BIN="$PHP_BIN $HOME/composer.phar"
-            fi
-
-            if [ -n "$COMPOSER_BIN" ]; then
-              echo "==> Menjalankan composer install menggunakan $COMPOSER_BIN..."
-              $COMPOSER_BIN install --no-dev --prefer-dist --optimize-autoloader
-            else
-              if [ -d "vendor" ]; then
-                echo "⚠️ Perhatian: Perintah 'composer' tidak ditemukan di hosting, namun direktori 'vendor' sudah ada. Melewati composer install."
-              elif [ -n "$PHP_BIN" ]; then
-                echo "==> Mencoba mengunduh composer.phar lokal..."
-                $PHP_BIN -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" || true
-                if [ -f composer-setup.php ]; then
-                  $PHP_BIN composer-setup.php --quiet || true
-                  rm -f composer-setup.php
-                fi
-                if [ -f composer.phar ]; then
-                  $PHP_BIN composer.phar install --no-dev --prefer-dist --optimize-autoloader
-                else
-                  echo "⚠️ Gagal mengunduh composer.phar, melewati composer install."
-                fi
-              else
-                echo "⚠️ Composer tidak ditemukan di hosting."
-              fi
-            fi
-
-            if [ -n "$PHP_BIN" ] && [ -f "spark" ]; then
-              echo "==> Menjalankan migrasi database otomatis..."
-              $PHP_BIN spark migrate --no-header || true
-              $PHP_BIN spark cache:clear || true
-            fi
-
-            echo "==> Deployment ke hosting berhasil diselesaikan!"
-EOF
+            "$SSH_USER@$SSH_HOST" \
+            "$REMOTE_COMMAND"
