@@ -71,6 +71,23 @@ class AdminController extends Controller
             ]);
         }
 
+        $fotoJamaah = $this->request->getFile('foto_jamaah');
+        if ($fotoJamaah && $fotoJamaah->isValid()) {
+            if (! $this->validate([
+                'foto_jamaah' => 'is_image[foto_jamaah]|mime_in[foto_jamaah,image/jpeg,image/png,image/webp]|max_size[foto_jamaah,5120]',
+            ])) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'status'  => 'error',
+                    'message' => implode(' ', $this->validator->getErrors()),
+                ]);
+            }
+        } elseif ($fotoJamaah && ! $fotoJamaah->hasMoved() && $fotoJamaah->getError() !== UPLOAD_ERR_NO_FILE) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Berkas foto tidak valid atau melebihi batas ukuran unggah server.',
+            ]);
+        }
+
         $updatedData = [
             'nama_pemesan'    => trim($this->request->getPost('nama_pemesan')),
             'no_wa_pemesan'   => trim($this->request->getPost('no_wa_pemesan')),
@@ -78,10 +95,30 @@ class AdminController extends Controller
             'paket_pilihan'   => $paketPilihan,
         ];
 
+        $uploadedFotoName = null;
+        if ($fotoJamaah && $fotoJamaah->isValid() && ! $fotoJamaah->hasMoved()) {
+            $uploadedFotoName = $fotoJamaah->getRandomName();
+            $uploadDir = WRITEPATH . 'uploads/pendaftaran-images';
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $fotoJamaah->move($uploadDir, $uploadedFotoName);
+            $updatedData['foto_jamaah'] = $uploadedFotoName;
+        } elseif ($this->request->getPost('hapus_foto_jamaah') === '1') {
+            $updatedData['foto_jamaah'] = null;
+        }
+
         $certificateFiles = [];
         $backupFiles = [];
         if ($pendaftaran['status'] === 'selesai') {
             if (empty($pendaftaran['tanggal_miqat']) || empty($pendaftaran['tanggal_cetak']) || empty($pendaftaran['nama_pelaksana'])) {
+                if ($uploadedFotoName !== null) {
+                    $uploadedPath = WRITEPATH . 'uploads/pendaftaran-images/' . $uploadedFotoName;
+                    if (is_file($uploadedPath)) {
+                        @unlink($uploadedPath);
+                    }
+                }
+
                 return $this->response->setStatusCode(409)->setJSON([
                     'status'  => 'error',
                     'message' => 'Data tanggal atau pelaksana sertifikat tidak lengkap, sehingga sertifikat tidak dapat diperbarui.',
@@ -97,6 +134,10 @@ class AdminController extends Controller
                 ? (int) $pendaftaran['koreksi_hijriah']
                 : (int) ((new PengaturanModel())->getSetting('koreksi_hijriah') ?? 0);
 
+            $effectiveFoto = array_key_exists('foto_jamaah', $updatedData)
+                ? $updatedData['foto_jamaah']
+                : $pendaftaran['foto_jamaah'];
+
             (new SertifikatGenerator())->generate(
                 $pendaftaran['nama_pelaksana'],
                 $updatedData['nama_diumrahkan'],
@@ -106,8 +147,8 @@ class AdminController extends Controller
                 $pendaftaran['file_ttd_pelaksana'] ?? '',
                 $temporaryJpg,
                 $temporaryPdf,
-                ! empty($pendaftaran['foto_jamaah'])
-                    ? WRITEPATH . 'uploads/pendaftaran-images/' . basename($pendaftaran['foto_jamaah'])
+                ! empty($effectiveFoto)
+                    ? WRITEPATH . 'uploads/pendaftaran-images/' . basename($effectiveFoto)
                     : null
             );
 
@@ -123,6 +164,12 @@ class AdminController extends Controller
                             array_keys($certificateFiles),
                             $backupFiles
                         ));
+                        if ($uploadedFotoName !== null) {
+                            $uploadedPath = WRITEPATH . 'uploads/pendaftaran-images/' . $uploadedFotoName;
+                            if (is_file($uploadedPath)) {
+                                @unlink($uploadedPath);
+                            }
+                        }
 
                         return $this->response->setStatusCode(500)->setJSON([
                             'status'  => 'error',
@@ -141,6 +188,12 @@ class AdminController extends Controller
         if (! $updated) {
             log_message('error', 'Failed to update registration details for registration {registrationId}.', ['registrationId' => $id]);
             $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
+            if ($uploadedFotoName !== null) {
+                $uploadedPath = WRITEPATH . 'uploads/pendaftaran-images/' . $uploadedFotoName;
+                if (is_file($uploadedPath)) {
+                    @unlink($uploadedPath);
+                }
+            }
 
             return $this->response->setStatusCode(500)->setJSON([
                 'status'  => 'error',
@@ -154,12 +207,16 @@ class AdminController extends Controller
             }
 
             log_message('error', 'Failed to replace generated certificate file during registration edit: {file}', ['file' => $certificateFile]);
-            $databaseRestored = $pendaftaranModel->update($id, [
+            $restoreData = [
                 'nama_pemesan'    => $pendaftaran['nama_pemesan'],
                 'no_wa_pemesan'   => $pendaftaran['no_wa_pemesan'],
                 'nama_diumrahkan' => $pendaftaran['nama_diumrahkan'],
                 'paket_pilihan'   => $pendaftaran['paket_pilihan'],
-            ]);
+            ];
+            if (array_key_exists('foto_jamaah', $updatedData)) {
+                $restoreData['foto_jamaah'] = $pendaftaran['foto_jamaah'];
+            }
+            $databaseRestored = $pendaftaranModel->update($id, $restoreData);
             if (! $databaseRestored) {
                 log_message('error', 'Failed to restore registration details after certificate replacement failed: {registrationId}', ['registrationId' => $id]);
             }
@@ -174,11 +231,25 @@ class AdminController extends Controller
                 }
             }
             $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
+            if ($uploadedFotoName !== null) {
+                $uploadedPath = WRITEPATH . 'uploads/pendaftaran-images/' . $uploadedFotoName;
+                if (is_file($uploadedPath)) {
+                    @unlink($uploadedPath);
+                }
+            }
 
             return $this->response->setStatusCode(500)->setJSON([
                 'status'  => 'error',
                 'message' => 'Sertifikat gagal diperbarui; data pendaftaran dikembalikan ke nilai sebelumnya.',
             ]);
+        }
+
+        // Hapus file foto lama jika foto diganti atau dihapus
+        if (array_key_exists('foto_jamaah', $updatedData) && ! empty($pendaftaran['foto_jamaah']) && $pendaftaran['foto_jamaah'] !== $updatedData['foto_jamaah']) {
+            $oldFotoPath = WRITEPATH . 'uploads/pendaftaran-images/' . basename($pendaftaran['foto_jamaah']);
+            if (is_file($oldFotoPath)) {
+                @unlink($oldFotoPath);
+            }
         }
 
         $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
@@ -189,6 +260,25 @@ class AdminController extends Controller
                 ? 'Data pendaftaran dan sertifikat berhasil diperbarui.'
                 : 'Data pendaftaran berhasil diperbarui.',
         ]);
+    }
+
+    public function lihatFoto(int $id)
+    {
+        $pendaftaran = (new PendaftaranModel())->withDeleted()->find($id);
+        if (! $pendaftaran || empty($pendaftaran['foto_jamaah'])) {
+            return $this->response->setStatusCode(404)->setBody('Foto tidak ditemukan.');
+        }
+
+        $photoPath = WRITEPATH . 'uploads/pendaftaran-images/' . basename($pendaftaran['foto_jamaah']);
+        if (! is_file($photoPath)) {
+            return $this->response->setStatusCode(404)->setBody('Berkas foto tidak ditemukan di server.');
+        }
+
+        $mime = mime_content_type($photoPath) ?: 'image/jpeg';
+
+        return $this->response
+            ->setContentType($mime)
+            ->setBody(file_get_contents($photoPath));
     }
 
     /**

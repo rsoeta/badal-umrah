@@ -310,6 +310,8 @@
                                             data-no-wa="<?= esc($row['no_wa_pemesan'], 'attr'); ?>"
                                             data-nama-diumrahkan="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                             data-paket="<?= esc($row['paket_pilihan'], 'attr'); ?>"
+                                            data-foto="<?= esc($row['foto_jamaah'] ?? '', 'attr'); ?>"
+                                            data-foto-url="<?= ! empty($row['foto_jamaah']) ? base_url('admin/pendaftaran/' . $row['id'] . '/foto') : ''; ?>"
                                             aria-label="Edit data pendaftar <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                             title="Edit Data">
                                             <i class="fa-solid fa-pen-to-square"></i>
@@ -346,7 +348,7 @@
                     <h5 class="modal-title fw-bold" id="modalEditPendaftaranLabel"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Data Pendaftar</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <form id="formEditPendaftaran">
+                <form id="formEditPendaftaran" enctype="multipart/form-data">
                     <div class="modal-body p-4 bg-light">
                         <input type="hidden" name="id_pendaftaran" id="editIdPendaftaran">
                         <div class="mb-3">
@@ -360,6 +362,23 @@
                         <div class="mb-3">
                             <label for="editNamaDiumrahkan" class="form-label text-muted fw-bold small">Nama yang Di-umrahkan</label>
                             <input type="text" name="nama_diumrahkan" id="editNamaDiumrahkan" class="form-control rounded-3" maxlength="150" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editFotoJamaah" class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
+                            <div id="editFotoCurrentWrapper" class="d-none mb-2 p-2 bg-white border rounded-3 d-flex align-items-center gap-3">
+                                <img id="editFotoPreview" src="" alt="Foto Jamaah" class="rounded border" style="width: 50px; height: 65px; object-fit: cover;">
+                                <div class="small">
+                                    <div class="fw-semibold text-dark"><i class="fa-solid fa-image text-primary me-1"></i> Foto Saat Ini Tersedia</div>
+                                    <div class="form-check mt-1">
+                                        <input class="form-check-input" type="checkbox" name="hapus_foto_jamaah" value="1" id="editHapusFoto">
+                                        <label class="form-check-label text-danger small fw-medium" for="editHapusFoto">
+                                            Hapus foto ini (sertifikat tanpa foto)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" name="foto_jamaah" id="editFotoJamaah" class="form-control rounded-3" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4. Kosongkan jika tidak ingin mengubah foto.</div>
                         </div>
                         <div>
                             <label for="editPaketPilihan" class="form-label text-muted fw-bold small">Pilihan Paket</label>
@@ -673,7 +692,24 @@
         const modalEditPendaftaran = document.getElementById('modalEditPendaftaran');
         const formEditPendaftaran = document.getElementById('formEditPendaftaran');
         const btnSimpanEditPendaftaran = document.getElementById('btnSimpanEditPendaftaran');
+        const editFotoCurrentWrapper = document.getElementById('editFotoCurrentWrapper');
+        const editFotoPreview = document.getElementById('editFotoPreview');
+        const editHapusFoto = document.getElementById('editHapusFoto');
+        const editFotoJamaah = document.getElementById('editFotoJamaah');
         const pendaftaranBaseUrl = '<?= base_url('admin/pendaftaran'); ?>';
+
+        if (editFotoJamaah && editHapusFoto) {
+            editFotoJamaah.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    editHapusFoto.checked = false;
+                }
+            });
+            editHapusFoto.addEventListener('change', function() {
+                if (this.checked) {
+                    editFotoJamaah.value = '';
+                }
+            });
+        }
 
         document.querySelectorAll('.btn-edit-pendaftaran').forEach(button => {
             button.addEventListener('click', function() {
@@ -682,6 +718,22 @@
                 document.getElementById('editNoWaPemesan').value = this.dataset.noWa;
                 document.getElementById('editNamaDiumrahkan').value = this.dataset.namaDiumrahkan;
                 document.getElementById('editPaketPilihan').value = this.dataset.paket;
+
+                if (editFotoJamaah) {
+                    editFotoJamaah.value = '';
+                }
+                if (editHapusFoto) {
+                    editHapusFoto.checked = false;
+                }
+
+                if (this.dataset.foto && this.dataset.fotoUrl) {
+                    if (editFotoPreview) editFotoPreview.src = this.dataset.fotoUrl;
+                    if (editFotoCurrentWrapper) editFotoCurrentWrapper.classList.remove('d-none');
+                } else {
+                    if (editFotoPreview) editFotoPreview.src = '';
+                    if (editFotoCurrentWrapper) editFotoCurrentWrapper.classList.add('d-none');
+                }
+
                 bootstrap.Modal.getOrCreateInstance(modalEditPendaftaran).show();
             });
         });
