@@ -15,6 +15,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'AdminController::index');
     $routes->post('proses-sertifikat', 'AdminController::prosesSertifikat');
     $routes->get('sampah', 'AdminController::sampah');
+    $routes->post('pendaftaran/(:num)/edit', 'AdminController::editPendaftaran/$1');
     $routes->post('pendaftaran/(:num)/hapus', 'AdminController::hapusPendaftaran/$1');
     $routes->post('pendaftaran/(:num)/restore', 'AdminController::restorePendaftaran/$1');
     $routes->post('pendaftaran/(:num)/hapus-permanen', 'AdminController::hapusPermanen/$1');

@@ -37,6 +37,172 @@ class AdminController extends Controller
         return view('admin_trash', $data);
     }
 
+    public function editPendaftaran(int $id)
+    {
+        $pendaftaranModel = new PendaftaranModel();
+        $pendaftaran = $pendaftaranModel->find($id);
+        if (! $pendaftaran) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data pendaftaran tidak ditemukan.',
+            ]);
+        }
+
+        if (! $this->validate([
+            'nama_pemesan'    => 'required|max_length[100]',
+            'no_wa_pemesan'   => 'required|max_length[20]',
+            'nama_diumrahkan' => 'required|max_length[150]',
+            'paket_pilihan'   => 'required|max_length[50]',
+        ])) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => implode(' ', $this->validator->getErrors()),
+            ]);
+        }
+
+        $paketPilihan = $this->request->getPost('paket_pilihan');
+        if (! in_array($paketPilihan, [
+            'Paket Standar (Rp 1.5 Jt)',
+            'Paket Paripurna (Rp 2 Jt)',
+        ], true)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Pilihan paket tidak valid.',
+            ]);
+        }
+
+        $updatedData = [
+            'nama_pemesan'    => trim($this->request->getPost('nama_pemesan')),
+            'no_wa_pemesan'   => trim($this->request->getPost('no_wa_pemesan')),
+            'nama_diumrahkan' => trim($this->request->getPost('nama_diumrahkan')),
+            'paket_pilihan'   => $paketPilihan,
+        ];
+
+        $certificateFiles = [];
+        $backupFiles = [];
+        if ($pendaftaran['status'] === 'selesai') {
+            if (empty($pendaftaran['tanggal_miqat']) || empty($pendaftaran['tanggal_cetak']) || empty($pendaftaran['nama_pelaksana'])) {
+                return $this->response->setStatusCode(409)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Data tanggal atau pelaksana sertifikat tidak lengkap, sehingga sertifikat tidak dapat diperbarui.',
+                ]);
+            }
+
+            $token = bin2hex(random_bytes(8));
+            $temporaryJpg = WRITEPATH . 'cache/certificate-edit-' . $token . '.jpg';
+            $temporaryPdf = WRITEPATH . 'cache/certificate-edit-' . $token . '.pdf';
+            $certificateJpg = FCPATH . 'storage/certificates/' . basename($pendaftaran['uuid']) . '.jpg';
+            $certificatePdf = FCPATH . 'storage/certificates/' . basename($pendaftaran['uuid']) . '.pdf';
+            $correction = $pendaftaran['koreksi_hijriah'] !== null
+                ? (int) $pendaftaran['koreksi_hijriah']
+                : (int) ((new PengaturanModel())->getSetting('koreksi_hijriah') ?? 0);
+
+            (new SertifikatGenerator())->generate(
+                $pendaftaran['nama_pelaksana'],
+                $updatedData['nama_diumrahkan'],
+                $this->formatMasehi($pendaftaran['tanggal_miqat']) . ' M / ' . $this->gregorianToHijri($pendaftaran['tanggal_miqat'], $correction) . ' H',
+                $this->formatMasehi($pendaftaran['tanggal_cetak']),
+                $this->gregorianToHijri($pendaftaran['tanggal_cetak'], $correction),
+                $pendaftaran['file_ttd_pelaksana'] ?? '',
+                $temporaryJpg,
+                $temporaryPdf,
+                ! empty($pendaftaran['foto_jamaah'])
+                    ? WRITEPATH . 'uploads/pendaftaran-images/' . basename($pendaftaran['foto_jamaah'])
+                    : null
+            );
+
+            $certificateFiles = [
+                $temporaryJpg => $certificateJpg,
+                $temporaryPdf => $certificatePdf,
+            ];
+            foreach ($certificateFiles as $temporaryFile => $certificateFile) {
+                if (is_file($certificateFile)) {
+                    $backupFile = WRITEPATH . 'cache/certificate-edit-' . $token . '-backup-' . basename($certificateFile);
+                    if (! copy($certificateFile, $backupFile)) {
+                        $this->cleanupCertificateEditFiles(array_merge(
+                            array_keys($certificateFiles),
+                            $backupFiles
+                        ));
+
+                        return $this->response->setStatusCode(500)->setJSON([
+                            'status'  => 'error',
+                            'message' => 'Sertifikat lama gagal disiapkan untuk diperbarui.',
+                        ]);
+                    }
+                    $backupFiles[$certificateFile] = $backupFile;
+                } else {
+                    $backupFiles[$certificateFile] = null;
+                }
+            }
+        }
+
+        $updated = $pendaftaranModel->update($id, $updatedData);
+
+        if (! $updated) {
+            log_message('error', 'Failed to update registration details for registration {registrationId}.', ['registrationId' => $id]);
+            $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data pendaftaran gagal diperbarui.',
+            ]);
+        }
+
+        foreach ($certificateFiles as $temporaryFile => $certificateFile) {
+            if (copy($temporaryFile, $certificateFile)) {
+                continue;
+            }
+
+            log_message('error', 'Failed to replace generated certificate file during registration edit: {file}', ['file' => $certificateFile]);
+            $databaseRestored = $pendaftaranModel->update($id, [
+                'nama_pemesan'    => $pendaftaran['nama_pemesan'],
+                'no_wa_pemesan'   => $pendaftaran['no_wa_pemesan'],
+                'nama_diumrahkan' => $pendaftaran['nama_diumrahkan'],
+                'paket_pilihan'   => $pendaftaran['paket_pilihan'],
+            ]);
+            if (! $databaseRestored) {
+                log_message('error', 'Failed to restore registration details after certificate replacement failed: {registrationId}', ['registrationId' => $id]);
+            }
+
+            foreach ($backupFiles as $targetFile => $backupFile) {
+                if ($backupFile !== null) {
+                    if (! copy($backupFile, $targetFile)) {
+                        log_message('error', 'Failed to restore previous certificate file after edit failure: {file}', ['file' => $targetFile]);
+                    }
+                } elseif (is_file($targetFile) && ! unlink($targetFile)) {
+                    log_message('error', 'Failed to remove incomplete certificate file after edit failure: {file}', ['file' => $targetFile]);
+                }
+            }
+            $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Sertifikat gagal diperbarui; data pendaftaran dikembalikan ke nilai sebelumnya.',
+            ]);
+        }
+
+        $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => $pendaftaran['status'] === 'selesai'
+                ? 'Data pendaftaran dan sertifikat berhasil diperbarui.'
+                : 'Data pendaftaran berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * @param list<string> $files
+     */
+    private function cleanupCertificateEditFiles(array $files): void
+    {
+        foreach ($files as $file) {
+            if (is_file($file) && ! unlink($file)) {
+                log_message('error', 'Failed to clean up temporary certificate edit file: {file}', ['file' => $file]);
+            }
+        }
+    }
+
     public function hapusPendaftaran(int $id)
     {
         $pendaftaranModel = new PendaftaranModel();
@@ -413,6 +579,7 @@ class AdminController extends Controller
             'file_ttd_pelaksana' => $file_ttd,
             'tanggal_miqat'      => $tgl_miqat_input,
             'tanggal_cetak'      => $tgl_cetak_input,
+            'koreksi_hijriah'    => $koreksi_hijriah,
             'status'             => 'selesai'
         ]);
 

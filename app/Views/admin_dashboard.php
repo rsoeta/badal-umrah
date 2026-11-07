@@ -304,6 +304,16 @@
                                         <?php else: ?>
                                             <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
                                         <?php endif; ?>
+                                        <button type="button" class="btn btn-outline-primary rounded-pill btn-edit-pendaftaran"
+                                            data-id="<?= $row['id']; ?>"
+                                            data-nama-pemesan="<?= esc($row['nama_pemesan'], 'attr'); ?>"
+                                            data-no-wa="<?= esc($row['no_wa_pemesan'], 'attr'); ?>"
+                                            data-nama-diumrahkan="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                            data-paket="<?= esc($row['paket_pilihan'], 'attr'); ?>"
+                                            aria-label="Edit data pendaftar <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                            title="Edit Data">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
                                         <button type="button" class="btn btn-outline-success rounded-pill btn-video-arsip"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
@@ -324,6 +334,48 @@
 
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Pendaftaran -->
+    <div class="modal fade" id="modalEditPendaftaran" tabindex="-1" aria-labelledby="modalEditPendaftaranLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="modalEditPendaftaranLabel"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Data Pendaftar</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form id="formEditPendaftaran">
+                    <div class="modal-body p-4 bg-light">
+                        <input type="hidden" name="id_pendaftaran" id="editIdPendaftaran">
+                        <div class="mb-3">
+                            <label for="editNamaPemesan" class="form-label text-muted fw-bold small">Nama Lengkap Pemesan</label>
+                            <input type="text" name="nama_pemesan" id="editNamaPemesan" class="form-control rounded-3" maxlength="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNoWaPemesan" class="form-label text-muted fw-bold small">Nomor WhatsApp</label>
+                            <input type="tel" name="no_wa_pemesan" id="editNoWaPemesan" class="form-control rounded-3" maxlength="20" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNamaDiumrahkan" class="form-label text-muted fw-bold small">Nama yang Di-umrahkan</label>
+                            <input type="text" name="nama_diumrahkan" id="editNamaDiumrahkan" class="form-control rounded-3" maxlength="150" required>
+                        </div>
+                        <div>
+                            <label for="editPaketPilihan" class="form-label text-muted fw-bold small">Pilihan Paket</label>
+                            <select name="paket_pilihan" id="editPaketPilihan" class="form-select rounded-3" required>
+                                <option value="Paket Standar (Rp 1.5 Jt)">Paket Standar (Rp 1,5 Jt)</option>
+                                <option value="Paket Paripurna (Rp 2 Jt)">Paket Paripurna + Santunan (Rp 2 Jt)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
+                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnSimpanEditPendaftaran" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -609,12 +661,55 @@
             });
         });
 
+        const modalEditPendaftaran = document.getElementById('modalEditPendaftaran');
+        const formEditPendaftaran = document.getElementById('formEditPendaftaran');
+        const btnSimpanEditPendaftaran = document.getElementById('btnSimpanEditPendaftaran');
+        const pendaftaranBaseUrl = '<?= base_url('admin/pendaftaran'); ?>';
+
+        document.querySelectorAll('.btn-edit-pendaftaran').forEach(button => {
+            button.addEventListener('click', function() {
+                document.getElementById('editIdPendaftaran').value = this.dataset.id;
+                document.getElementById('editNamaPemesan').value = this.dataset.namaPemesan;
+                document.getElementById('editNoWaPemesan').value = this.dataset.noWa;
+                document.getElementById('editNamaDiumrahkan').value = this.dataset.namaDiumrahkan;
+                document.getElementById('editPaketPilihan').value = this.dataset.paket;
+                bootstrap.Modal.getOrCreateInstance(modalEditPendaftaran).show();
+            });
+        });
+
+        formEditPendaftaran.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const registrationId = document.getElementById('editIdPendaftaran').value;
+            btnSimpanEditPendaftaran.disabled = true;
+            btnSimpanEditPendaftaran.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Menyimpan...';
+
+            try {
+                const response = await fetch(`${pendaftaranBaseUrl}/${registrationId}/edit`, {
+                    method: 'POST',
+                    body: new FormData(this)
+                });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(data.message || 'Data pendaftar gagal diperbarui.');
+                }
+
+                bootstrap.Modal.getOrCreateInstance(modalEditPendaftaran).hide();
+                await Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                location.reload();
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Data pendaftar gagal diperbarui.' });
+            } finally {
+                btnSimpanEditPendaftaran.disabled = false;
+                btnSimpanEditPendaftaran.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan';
+            }
+        });
+
         const modalArsipVideo = document.getElementById('modalArsipVideo');
         const videoArsipNama = document.getElementById('videoArsipNama');
         const daftarVideoArsip = document.getElementById('daftarVideoArsip');
         const formUnggahVideo = document.getElementById('formUnggahVideo');
         const btnUnggahVideo = document.getElementById('btnUnggahVideo');
-        const videoBaseUrl = '<?= base_url('admin/pendaftaran'); ?>';
+        const videoBaseUrl = pendaftaranBaseUrl;
         let activePendaftaranVideoId = null;
 
         const formatUkuranVideo = bytes => {

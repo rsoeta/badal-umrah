@@ -27,6 +27,7 @@ class PendaftaranModel extends Model
         'tempat_miqat',
         'tanggal_miqat',
         'tanggal_cetak',
+        'koreksi_hijriah',
         'status',
         'deleted_at'
     ];
