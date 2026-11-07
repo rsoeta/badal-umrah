@@ -726,17 +726,38 @@
             return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
         };
 
-        const copyShareUrl = async shareUrl => {
+        const copyShareText = async (text, fallbackUrl = '') => {
+            let copied = false;
             if (navigator.clipboard && window.isSecureContext) {
                 try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    return;
+                    await navigator.clipboard.writeText(text);
+                    copied = true;
                 } catch (error) {
-                    console.warn('Clipboard access unavailable; showing the share URL for manual copying.', error);
+                    console.warn('Clipboard access unavailable; falling back to textarea.', error);
                 }
             }
 
-            window.prompt('Salin tautan video ini:', shareUrl);
+            if (!copied) {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.setAttribute('readonly', '');
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    copied = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                } catch (err) {
+                    console.warn('execCommand copy failed.', err);
+                }
+            }
+
+            if (!copied) {
+                window.prompt('Salin teks dan tautan video ini:', text || fallbackUrl);
+            }
+            return copied;
         };
 
         const requestVideoJson = async (url, options = {}) => {
@@ -800,6 +821,7 @@
                 shareButton.className = `btn btn-sm rounded-pill ${video.share_url ? 'btn-success' : 'btn-outline-primary'} btn-bagikan-video`;
                 shareButton.dataset.id = video.id;
                 shareButton.dataset.shareUrl = video.share_url || '';
+                shareButton.dataset.videoName = video.original_name || '';
                 shareButton.setAttribute('aria-label', video.share_url ? `Salin tautan video ${video.original_name}` : `Buat tautan video ${video.original_name}`);
                 shareButton.title = video.share_url ? 'Salin tautan berbagi' : 'Buat tautan berbagi';
                 shareButton.innerHTML = video.share_url
@@ -891,8 +913,20 @@
                         await loadVideoArchive();
                     }
 
-                    await copyShareUrl(shareUrl);
-                    Swal.fire({ icon: 'success', title: 'Tautan siap dibagikan', text: 'Salin tautan untuk membagikan video secara daring.' });
+                    const namaJamaah = (videoArsipNama.textContent || '').trim();
+                    const shareTitle = namaJamaah
+                        ? `Video Dokumentasi Badal Umrah - ${namaJamaah}`
+                        : 'Video Dokumentasi Badal Umrah';
+                    const shareText = `${shareTitle}\n\n${shareUrl}`;
+
+                    await copyShareText(shareText, shareUrl);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tautan & Judul Disalin!',
+                        html: `Teks judul dan tautan video telah disalin ke clipboard:<div class="mt-3 p-2 bg-light border rounded text-start small font-monospace user-select-all text-break"><strong>${shareTitle}</strong><br><br><a href="${shareUrl}" target="_blank" class="text-success text-decoration-none">${shareUrl}</a></div>`,
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#198754'
+                    });
                 } catch (error) {
                     Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Tautan video gagal disiapkan atau disalin.' });
                 }

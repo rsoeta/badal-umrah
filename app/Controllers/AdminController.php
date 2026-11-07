@@ -297,14 +297,16 @@ class AdminController extends Controller
             ->findAll();
 
         $items = array_map(static function (array $video) use ($id): array {
+            $shareToken = $video['share_token'] ?? null;
+
             return [
                 'id'            => (int) $video['id'],
                 'original_name' => $video['original_name'],
                 'file_size'     => (int) $video['file_size'],
                 'created_at'    => $video['created_at'],
                 'download_url'  => base_url('admin/pendaftaran/' . $id . '/videos/' . $video['id'] . '/download'),
-                'share_url'     => $video['share_token'] !== null
-                    ? base_url('video/' . $video['share_token'])
+                'share_url'     => ($shareToken !== null && $shareToken !== '')
+                    ? base_url('video/' . $shareToken)
                     : null,
             ];
         }, $videos);
@@ -330,8 +332,8 @@ class AdminController extends Controller
             ]);
         }
 
-        $token = $video['share_token'] ?? bin2hex(random_bytes(32));
-        if ($video['share_token'] === null && ! $videoModel->update($videoId, ['share_token' => $token])) {
+        $token = (! empty($video['share_token'])) ? $video['share_token'] : bin2hex(random_bytes(32));
+        if (empty($video['share_token']) && ! $videoModel->update($videoId, ['share_token' => $token])) {
             log_message('error', 'Failed to enable public sharing for video {videoId}.', ['videoId' => $videoId]);
 
             return $this->response->setStatusCode(500)->setJSON([
@@ -365,7 +367,7 @@ class AdminController extends Controller
             ]);
         }
 
-        if ($video['share_token'] !== null && ! $videoModel->update($videoId, ['share_token' => null])) {
+        if (! empty($video['share_token']) && ! $videoModel->update($videoId, ['share_token' => null])) {
             log_message('error', 'Failed to revoke public sharing for video {videoId}.', ['videoId' => $videoId]);
 
             return $this->response->setStatusCode(500)->setJSON([

@@ -726,11 +726,23 @@
                     player.preload = 'metadata';
                     player.playsInline = true;
                     player.src = video.stream_url;
+                    const actionContainer = document.createElement('div');
+                    actionContainer.className = 'd-flex flex-wrap gap-2 mt-2';
+
+                    const watchLink = document.createElement('a');
+                    watchLink.className = 'btn btn-sm btn-gold text-white';
+                    watchLink.href = video.watch_url || video.stream_url;
+                    watchLink.target = '_blank';
+                    watchLink.rel = 'noopener';
+                    watchLink.innerHTML = '<i class="fa-solid fa-up-right-from-square me-1"></i> Tonton Halaman Penuh';
+
                     const download = document.createElement('a');
-                    download.className = 'btn btn-sm btn-outline-light mt-2';
+                    download.className = 'btn btn-sm btn-outline-light';
                     download.href = video.download_url;
                     download.innerHTML = '<i class="fa-solid fa-download me-1"></i> Unduh Video';
-                    videoCard.append(name, player, download);
+
+                    actionContainer.append(watchLink, download);
+                    videoCard.append(name, player, actionContainer);
                     resultCard.append(videoCard);
                 });
             }

@@ -4,7 +4,8 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
-$routes->get('video/(:segment)', 'PendaftaranController::streamVideo/$1');
+$routes->get('video/(:segment)', 'PendaftaranController::tontonVideo/$1');
+$routes->get('video/(:segment)/stream', 'PendaftaranController::streamVideo/$1');
 $routes->get('video/(:segment)/download', 'PendaftaranController::downloadSharedVideo/$1');
 
 // Rute Login

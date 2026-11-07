@@ -107,10 +107,13 @@ class PendaftaranController extends Controller
                 ->where('share_token IS NOT NULL', null, false)
                 ->findAll();
             $sharedVideos = array_map(static function (array $video): array {
+                $token = $video['share_token'] ?? '';
+
                 return [
                     'name'         => $video['original_name'],
-                    'stream_url'   => base_url('video/' . $video['share_token']),
-                    'download_url' => base_url('video/' . $video['share_token'] . '/download'),
+                    'stream_url'   => base_url('video/' . $token . '/stream'),
+                    'watch_url'    => base_url('video/' . $token),
+                    'download_url' => base_url('video/' . $token . '/download'),
                 ];
             }, $videos);
 
@@ -147,6 +150,48 @@ class PendaftaranController extends Controller
                 'message' => 'Data tidak ditemukan. Pastikan Nomor Registrasi sudah diketik dengan benar.'
             ]);
         }
+    }
+
+    public function tontonVideo(string $token)
+    {
+        if (! preg_match('/\A[a-f0-9]{64}\z/', $token)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Video tidak ditemukan.');
+        }
+
+        $video = (new VideoDokumentasiModel())
+            ->where('share_token', $token)
+            ->first();
+
+        if (! $video) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Tautan video tidak tersedia atau telah dicabut.');
+        }
+
+        $videoPath = WRITEPATH . 'uploads/videos/' . basename($video['file_name']);
+        if (! is_file($videoPath)) {
+            log_message('error', 'Shared video file is missing: {file}', ['file' => $videoPath]);
+
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Berkas video tidak ditemukan di server.');
+        }
+
+        // Jika klien meminta video stream langsung (misal: Range header atau query parameter stream/raw)
+        $accept = (string) $this->request->getHeaderLine('Accept');
+        $hasRange = $this->request->hasHeader('Range');
+        $wantsStream = $this->request->getGet('stream') !== null || $this->request->getGet('raw') !== null;
+        $isPureMediaClient = (! str_contains($accept, 'text/html') && str_contains($accept, 'video/'));
+
+        if ($hasRange || $wantsStream || $isPureMediaClient) {
+            return $this->sharedVideoResponse($token, false);
+        }
+
+        $pendaftaran = (new PendaftaranModel())->find($video['pendaftaran_id']);
+
+        return view('video_watch', [
+            'video'       => $video,
+            'pendaftaran' => $pendaftaran,
+            'streamUrl'   => base_url('video/' . $token . '/stream'),
+            'downloadUrl' => base_url('video/' . $token . '/download'),
+            'shareUrl'    => base_url('video/' . $token),
+        ]);
     }
 
     public function streamVideo(string $token)
@@ -238,7 +283,16 @@ class PendaftaranController extends Controller
         $response->setContentType($video['mime_type'], '');
         $response->setHeader('Accept-Ranges', 'bytes');
         $response->setHeader('Content-Length', (string) $length);
-        $response->setHeader('Content-Disposition', ($download ? 'attachment' : 'inline') . '; filename="video.' . pathinfo($videoPath, PATHINFO_EXTENSION) . '"');
+
+        if ($download) {
+            $downloadFilename = ! empty($video['original_name'])
+                ? basename($video['original_name'])
+                : ('video.' . pathinfo($videoPath, PATHINFO_EXTENSION));
+            $response->setHeader('Content-Disposition', 'attachment; filename="' . addcslashes($downloadFilename, '"\\') . '"; filename*=UTF-8\'\'' . rawurlencode($downloadFilename));
+        } else {
+            $response->setHeader('Content-Disposition', 'inline');
+        }
+
         $response->setHeader('X-Content-Type-Options', 'nosniff');
         $response->setHeader('X-Robots-Tag', 'noindex, nofollow');
         $response->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
