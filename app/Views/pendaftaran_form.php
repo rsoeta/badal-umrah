@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Pendaftaran Badal Umrah - Abdul Aziz</title>
-    <meta name="title" content="Abdul Aziz - Layanan Badal Umrah Amanah">
+    <title>Form Pendaftaran Badal Umrah - Azis Rustandi</title>
+    <meta name="title" content="Azis Rustandi - Layanan Badal Umrah Amanah">
     <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png'); ?>" />
 
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= base_url(); ?>">
-    <meta property="og:title" content="Form Pendaftaran Badal Umrah - Abdul Aziz">
+    <meta property="og:title" content="Form Pendaftaran Badal Umrah - Azis Rustandi">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
-    <meta property="og:image" content="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -84,8 +84,8 @@
     <div class="bg-green py-3 shadow-sm">
         <div class="container d-flex align-items-center justify-content-between">
             <a href="<?= base_url('/'); ?>" class="text-white text-decoration-none d-flex align-items-center">
-                <img src="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" alt="Logo" style="height: 40px; object-fit: contain;" class="me-2 bg-white rounded p-1">
-                <span class="fw-bold font-serif d-none d-md-block">Abdul Aziz</span>
+                <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Azis Rustandi" style="height: 40px; object-fit: contain;" class="me-2 bg-white rounded p-1">
+                <span class="fw-bold font-serif d-none d-md-block">Azis Rustandi</span>
             </a>
             <a href="<?= base_url('/'); ?>" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> Kembali</a>
         </div>
@@ -102,7 +102,7 @@
 
                 <div class="card card-form">
                     <div class="card-body p-4 p-md-5">
-                        <form id="formPendaftaran">
+                        <form id="formPendaftaran" enctype="multipart/form-data">
 
                             <h6 class="fw-bold text-gold mb-3 border-bottom pb-2"><i class="fa-solid fa-user-pen me-2"></i>Data Pemesan (Keluarga)</h6>
                             <div class="mb-3">
@@ -120,6 +120,12 @@
                                 <label class="form-label small fw-medium">Nama Lengkap yang Di-umrahkan <span class="text-danger">*</span></label>
                                 <input type="text" name="nama_diumrahkan" class="form-control" placeholder="Contoh: H. Fulan bin Fulan" required>
                                 <div class="form-text" style="font-size: 0.7rem;">Tuliskan nama lengkap beserta nama ayah (Bin/Binti).</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-medium">Foto untuk Sertifikat <span class="text-muted">(Opsional)</span></label>
+                                <input type="file" name="foto_jamaah" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <div class="form-text" style="font-size: 0.7rem;">Format JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4 pada sertifikat.</div>
                             </div>
 
                             <div class="mb-4">

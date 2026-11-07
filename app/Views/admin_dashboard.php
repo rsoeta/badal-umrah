@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables Bootstrap 5 -->
     <link href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Flatpickr -->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Quicksand -->
@@ -17,7 +19,7 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Favicon yang Benar -->
-    <link rel="icon" type="image/jpeg" href="<?= base_url('img/Gemini_Generated_Image_wfab1ywfab1ywfab.jpeg'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png'); ?>" />
 
     <style>
         /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */
@@ -80,6 +82,119 @@
             letter-spacing: 0.5px;
             font-size: 0.9rem;
         }
+
+        @media (max-width: 767.98px) {
+
+            #pendaftarTable,
+            #pendaftarTable tbody {
+                display: block;
+                width: 100%;
+            }
+
+            #pendaftarTable {
+                table-layout: auto;
+            }
+
+            #pendaftarTable thead {
+                display: none;
+            }
+
+            #pendaftarTable tbody tr {
+                display: block;
+                margin: 0.75rem;
+                padding: 0.5rem 0.85rem;
+                border: 1px solid #e5e9e6;
+                border-radius: 0.9rem;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            #pendaftarTable tbody td {
+                display: grid;
+                grid-template-columns: minmax(6rem, 34%) minmax(0, 1fr);
+                align-items: start;
+                gap: 0.5rem;
+                width: 100% !important;
+                padding: 0.65rem 0;
+                border: 0;
+                border-bottom: 1px solid #edf0ee;
+                text-align: left !important;
+                white-space: normal !important;
+                overflow-wrap: anywhere;
+            }
+
+            #pendaftarTable tbody td:last-child {
+                border-bottom: 0;
+            }
+
+            #pendaftarTable tbody td::before {
+                content: attr(data-label);
+                color: #66736b;
+                font-size: 0.78rem;
+                font-weight: 700;
+            }
+
+            #pendaftarTable .badge {
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            #pendaftarTable .btn-proses,
+            #pendaftarTable .btn-outline-danger,
+            #pendaftarTable .btn-hapus-pendaftaran {
+                padding: 0.375rem 0.5rem !important;
+            }
+
+            #pendaftarTable .d-flex {
+                justify-content: flex-start !important;
+            }
+        }
+
+        .date-field-card {
+            height: 100%;
+            padding: 1rem;
+            border: 1px solid #e5e9e6;
+            border-radius: 1rem;
+            background: #fff;
+        }
+
+        .date-field-card .input-group-text {
+            color: #0f3d23;
+            background: #f1f6f2;
+            border-color: #dee5df;
+        }
+
+        .date-field-card .form-control {
+            border-color: #dee5df;
+        }
+
+        .date-field-card .form-control:focus {
+            border-color: #6a9c7d;
+            box-shadow: 0 0 0 0.2rem rgba(15, 61, 35, 0.12);
+        }
+
+        .flatpickr-calendar {
+            z-index: 1060;
+        }
+
+        @media (max-width: 575.98px) {
+            .navbar-admin .navbar-actions {
+                gap: 0.25rem !important;
+                margin-left: auto;
+                flex-wrap: nowrap;
+            }
+
+            .navbar-admin .navbar-actions .btn {
+                padding-right: 0.5rem !important;
+                padding-left: 0.5rem !important;
+                flex-shrink: 0;
+            }
+
+            .navbar-admin .navbar-brand {
+                flex-shrink: 0;
+                margin-right: 0.25rem;
+            }
+        }
     </style>
 </head>
 
@@ -92,23 +207,23 @@
                 <i class="fa-solid fa-kaaba me-2 text-warning"></i> Admin Panel
             </a>
 
-            <div class="d-flex gap-2 align-items-center">
-                <a href="<?= base_url('/'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" target="_blank">
+            <div class="d-flex gap-2 align-items-center navbar-actions">
+                <a href="<?= base_url('/'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" target="_blank" aria-label="Buka Web">
                     <i class="fa-solid fa-globe me-1"></i> <span class="d-none d-sm-inline">Web</span>
                 </a>
 
-                <a href="<?= base_url('admin/pengaturan'); ?>" class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-success fw-bold">
+                <a href="<?= base_url('admin/pengaturan'); ?>" class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-success fw-bold" aria-label="Pengaturan">
                     <i class="fa-solid fa-sliders me-1"></i> <span class="d-none d-sm-inline">Pengaturan</span>
                 </a>
 
-                <a href="<?= base_url('admin/sampah'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm">
-                    <i class="fa-solid fa-trash me-1"></i> Sampah
+                <a href="<?= base_url('admin/sampah'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" aria-label="Sampah">
+                    <i class="fa-solid fa-trash me-1"></i><span class="d-none d-sm-inline">Sampah</span>
                     <?php if ($jumlah_sampah > 0): ?>
                         <span class="badge bg-warning text-dark ms-1"><?= $jumlah_sampah; ?></span>
                     <?php endif; ?>
                 </a>
 
-                <a href="#" id="btn-logout" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                <a href="#" id="btn-logout" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm" aria-label="Logout">
                     <i class="fa-solid fa-right-from-bracket me-1"></i> <span class="d-none d-sm-inline">Logout</span>
                 </a>
             </div>
@@ -144,10 +259,10 @@
                         <?php $i = 1;
                         foreach ($pendaftar as $row): ?>
                             <tr>
-                                <td><?= $i++; ?></td>
-                                <td>
+                                <td data-label="No"><?= $i++; ?></td>
+                                <td data-label="Registrasi & Pemesan">
                                     <div>
-                                        <strong class="text-dark d-block mb-1"><?= $row['uuid']; ?></strong>
+                                        <strong class="text-dark d-block mb-1"><?= esc($row['uuid']); ?></strong>
 
                                         <?php
                                         // FORMAT NOMOR WA AGAR LINK WA.ME BERFUNGSI (Ubah awalan '0' jadi '62')
@@ -159,30 +274,43 @@
 
                                         <!-- Link WA Clickable -->
                                         <a href="https://wa.me/<?= $no_wa_clean; ?>" target="_blank" class="text-success text-decoration-none fw-medium bg-success bg-opacity-10 px-2 py-1 rounded">
-                                            <i class="fa-brands fa-whatsapp"></i> <?= $row['nama_pemesan']; ?>
+                                            <i class="fa-brands fa-whatsapp"></i> <?= esc($row['nama_pemesan']); ?>
                                         </a>
                                     </div>
                                 </td>
-                                <td class="fw-bold text-success fs-6"><?= $row['nama_diumrahkan']; ?></td>
-                                <td><span class="badge bg-light text-dark border p-2"><?= $row['paket_pilihan']; ?></span></td>
-                                <td>
+                                <td data-label="Di-umrahkan" class="fw-bold text-success fs-6">
+                                    <?= esc($row['nama_diumrahkan']); ?>
+                                    <?php if (! empty($row['foto_jamaah'])): ?>
+                                        <span class="badge bg-info text-dark">Foto disertakan</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="Paket"><span class="badge bg-light text-dark border p-2"><?= esc($row['paket_pilihan']); ?></span></td>
+                                <td data-label="Status">
                                     <?php if ($row['status'] == 'pending'): ?>
                                         <span class="badge bg-warning text-dark rounded-pill p-2"><i class="fa-regular fa-clock me-1"></i> Pending</span>
                                     <?php else: ?>
                                         <span class="badge bg-success rounded-pill p-2"><i class="fa-solid fa-check-double me-1"></i> Selesai</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-center text-nowrap">
+                                <td data-label="Aksi" class="text-center">
                                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                                         <?php if ($row['status'] == 'pending'): ?>
                                             <button class="btn btn-primary rounded-pill px-3 btn-proses shadow-sm"
                                                 data-id="<?= $row['id']; ?>"
-                                                data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>">
-                                                <i class="fa-solid fa-gear me-1"></i> Proses
+                                                data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                                data-koreksi-hijriah="<?= esc((string) $koreksi_hijriah, 'attr'); ?>">
+                                                <i class="fa-solid fa-gear me-1"></i>Proses
                                             </button>
                                         <?php else: ?>
-                                            <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                                            <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
                                         <?php endif; ?>
+                                        <button type="button" class="btn btn-outline-success rounded-pill btn-video-arsip"
+                                            data-id="<?= $row['id']; ?>"
+                                            data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                            aria-label="Arsip video dokumentasi untuk <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                            title="Arsip Video Dokumentasi">
+                                            <i class="fa-solid fa-video"></i>
+                                        </button>
                                         <button type="button" class="btn btn-outline-secondary rounded-pill btn-hapus-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
@@ -200,6 +328,41 @@
         </div>
     </div>
 
+    <!-- Modal Arsip Video Dokumentasi -->
+    <div class="modal fade" id="modalArsipVideo" tabindex="-1" aria-labelledby="modalArsipVideoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-success text-white border-0 rounded-top-4">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="modalArsipVideoLabel"><i class="fa-solid fa-video me-2"></i>Arsip Video Dokumentasi</h5>
+                        <div class="small text-white-50" id="videoArsipNama"></div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <form id="formUnggahVideo" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="inputVideoDokumentasi" class="form-label fw-bold">Tambah video</label>
+                            <input type="file" id="inputVideoDokumentasi" name="videos[]" class="form-control" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" multiple required>
+                            <div class="form-text">Pilih satu atau beberapa video. Format MP4, WEBM, atau MOV; maksimal 500 MB per video.</div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" id="btnUnggahVideo" class="btn btn-success rounded-pill px-4">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Unggah ke Arsip
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold mb-3">Video yang Diarsipkan</h6>
+                    <div id="daftarVideoArsip" class="d-flex flex-column gap-2" aria-live="polite">
+                        <div class="text-muted small">Memuat daftar video...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Tambah Pendaftar Manual -->
     <div class="modal fade" id="modalTambahPendaftar" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -208,7 +371,7 @@
                     <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Input Pendaftaran Manual</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="formTambahPendaftar">
+                <form id="formTambahPendaftar" enctype="multipart/form-data">
                     <div class="modal-body p-4 bg-light">
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold small">Nama Lengkap Pemesan</label>
@@ -222,6 +385,11 @@
                             <label class="form-label text-muted fw-bold small">Nama Yang Di-umrahkan</label>
                             <input type="text" name="nama_diumrahkan" class="form-control rounded-3" required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
+                            <input type="file" name="foto_jamaah" class="form-control rounded-3" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</div>
+                        </div>
                         <div class="mb-2">
                             <label class="form-label text-muted fw-bold small">Pilihan Paket</label>
                             <select name="paket_pilihan" class="form-select rounded-3" required>
@@ -231,7 +399,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0">
+                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
                         <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fa-solid fa-save me-1"></i> Simpan Data</button>
                     </div>
@@ -242,7 +410,7 @@
 
     <!-- Modal Form Eksekusi -->
     <div class="modal fade" id="modalProses" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-success text-white border-0 rounded-top-4">
                     <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-signature me-2"></i> Generate Sertifikat</h5>
@@ -259,7 +427,6 @@
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold">Mutawwif Pelaksana</label>
                             <select name="pelaksana_data" class="form-select rounded-3" required>
-                                <option value="">-- Pilih Ustaz --</option>
                                 <?php foreach ($list_mutawwif as $mutawwif): ?>
                                     <?php
                                     $parts = explode('|', $mutawwif);
@@ -272,22 +439,38 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label text-muted fw-bold">Tgl Miqat</label>
-                                <input type="date" name="tanggal_miqat" class="form-control rounded-3" required>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="date-field-card">
+                                    <label for="tanggalMiqat" class="form-label fw-bold text-dark">
+                                        <i class="fa-solid fa-kaaba me-2 text-success"></i>Tanggal Miqat
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                                        <input type="text" name="tanggal_miqat" id="tanggalMiqat" class="form-control" placeholder="Pilih tanggal miqat" required>
+                                    </div>
+                                    <div class="form-text">Pilih tanggal pelaksanaan ibadah di miqat.</div>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label text-muted fw-bold">Tgl Cetak</label>
-                                <input type="date" name="tanggal_cetak" class="form-control rounded-3" required>
+                            <div class="col-md-6">
+                                <div class="date-field-card">
+                                    <label for="tanggalCetak" class="form-label fw-bold text-dark">
+                                        <i class="fa-solid fa-file-circle-check me-2 text-success"></i>Tanggal Cetak Sertifikat
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-check"></i></span>
+                                        <input type="text" name="tanggal_cetak" id="tanggalCetak" class="form-control" placeholder="Pilih tanggal cetak" required>
+                                    </div>
+                                    <div class="form-text">Tanggal sertifikat diterbitkan. Otomatis diisi hari ini.</div>
+                                </div>
                             </div>
                         </div>
                         <div>
                             <label class="form-label text-muted fw-bold">Koreksi Hijriah (Opsional)</label>
-                            <input type="number" name="koreksi_hijriah" class="form-control rounded-3" value="0">
+                            <input type="number" name="koreksi_hijriah" id="inputKoreksiHijriah" class="form-control rounded-3" step="1" value="<?= esc((string) $koreksi_hijriah); ?>">
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0">
+                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
                         <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="fa-solid fa-print me-1"></i> Simpan & Generate</button>
                     </div>
@@ -303,6 +486,9 @@
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Flatpickr with Indonesian locale -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js"></script>
 
     <script>
         new DataTable('#pendaftarTable', {
@@ -352,10 +538,34 @@
         });
 
         // Membuka Modal saat tombol Proses diklik
+        const tanggalMiqatInput = document.getElementById('tanggalMiqat');
+        const tanggalCetakInput = document.getElementById('tanggalCetak');
+        const datePickerOptions = {
+            locale: flatpickr.l10ns.id,
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'l, j F Y',
+            altInputClass: 'form-control',
+            allowInput: true,
+            disableMobile: true,
+            position: 'below'
+        };
+        const tanggalMiqatPicker = flatpickr(tanggalMiqatInput, datePickerOptions);
+        const tanggalCetakPicker = flatpickr(tanggalCetakInput, datePickerOptions);
+
         document.querySelectorAll('.btn-proses').forEach(button => {
             button.addEventListener('click', function() {
                 document.getElementById('id_pendaftaran').value = this.getAttribute('data-id');
                 document.getElementById('lbl_nama_diumrahkan').innerText = this.getAttribute('data-nama');
+                document.getElementById('inputKoreksiHijriah').value = this.getAttribute('data-koreksi-hijriah') || '0';
+
+                if (!tanggalCetakInput.value) {
+                    const today = new Date();
+                    const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+                        .toISOString()
+                        .slice(0, 10);
+                    tanggalCetakPicker.setDate(localDate, false);
+                }
 
                 new bootstrap.Modal(document.getElementById('modalProses')).show();
             });
@@ -377,16 +587,162 @@
                 }).then(result => {
                     if (!result.isConfirmed) return;
 
-                    fetch(`<?= base_url('admin/pendaftaran'); ?>/${id}/hapus`, { method: 'POST' })
+                    fetch(`<?= base_url('admin/pendaftaran'); ?>/${id}/hapus`, {
+                            method: 'POST'
+                        })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status !== 'success') throw new Error(data.message);
-                            return Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                            return Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: data.message
+                            });
                         })
                         .then(() => location.reload())
-                        .catch(error => Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Terjadi kesalahan sistem.' }));
+                        .catch(error => Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: error.message || 'Terjadi kesalahan sistem.'
+                        }));
                 });
             });
+        });
+
+        const modalArsipVideo = document.getElementById('modalArsipVideo');
+        const videoArsipNama = document.getElementById('videoArsipNama');
+        const daftarVideoArsip = document.getElementById('daftarVideoArsip');
+        const formUnggahVideo = document.getElementById('formUnggahVideo');
+        const btnUnggahVideo = document.getElementById('btnUnggahVideo');
+        const videoBaseUrl = '<?= base_url('admin/pendaftaran'); ?>';
+        let activePendaftaranVideoId = null;
+
+        const formatUkuranVideo = bytes => {
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+        };
+
+        const requestVideoJson = async (url, options = {}) => {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (!response.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Permintaan arsip video gagal.');
+            }
+            return data;
+        };
+
+        const loadVideoArchive = async () => {
+            daftarVideoArsip.textContent = 'Memuat daftar video...';
+            const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos`);
+            daftarVideoArsip.replaceChildren();
+
+            if (data.videos.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'text-muted small py-2';
+                empty.textContent = 'Belum ada video yang diarsipkan untuk pendaftar ini.';
+                daftarVideoArsip.append(empty);
+                return;
+            }
+
+            data.videos.forEach(video => {
+                const item = document.createElement('div');
+                item.className = 'd-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 p-3 bg-white border rounded-3';
+
+                const details = document.createElement('div');
+                details.className = 'min-w-0';
+                const filename = document.createElement('div');
+                filename.className = 'fw-semibold text-break';
+                filename.textContent = video.original_name;
+                const metadata = document.createElement('div');
+                metadata.className = 'text-muted small';
+                const uploadedAt = video.created_at
+                    ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(video.created_at.replace(' ', 'T')))
+                    : '';
+                metadata.textContent = `${formatUkuranVideo(video.file_size)}${uploadedAt ? ` · Diunggah ${uploadedAt}` : ''}`;
+                details.append(filename, metadata);
+
+                const actions = document.createElement('div');
+                actions.className = 'd-flex gap-2 flex-shrink-0';
+                const downloadLink = document.createElement('a');
+                downloadLink.className = 'btn btn-sm btn-outline-success rounded-pill';
+                downloadLink.href = video.download_url;
+                downloadLink.target = '_blank';
+                downloadLink.rel = 'noopener';
+                downloadLink.setAttribute('aria-label', `Unduh video ${video.original_name}`);
+                downloadLink.innerHTML = '<i class="fa-solid fa-download"></i>';
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn btn-sm btn-outline-danger rounded-pill btn-hapus-video';
+                deleteButton.dataset.id = video.id;
+                deleteButton.setAttribute('aria-label', `Hapus video ${video.original_name}`);
+                deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                actions.append(downloadLink, deleteButton);
+                item.append(details, actions);
+                daftarVideoArsip.append(item);
+            });
+        };
+
+        document.querySelectorAll('.btn-video-arsip').forEach(button => {
+            button.addEventListener('click', function() {
+                activePendaftaranVideoId = this.dataset.id;
+                videoArsipNama.textContent = this.dataset.nama;
+                formUnggahVideo.reset();
+                bootstrap.Modal.getOrCreateInstance(modalArsipVideo).show();
+                loadVideoArchive().catch(error => {
+                    daftarVideoArsip.textContent = error.message;
+                });
+            });
+        });
+
+        formUnggahVideo.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            btnUnggahVideo.disabled = true;
+            btnUnggahVideo.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Mengunggah...';
+
+            try {
+                const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos`, {
+                    method: 'POST',
+                    body: new FormData(this)
+                });
+                this.reset();
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                loadVideoArchive().catch(error => {
+                    daftarVideoArsip.textContent = error.message;
+                });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Unggah Gagal', text: error.message || 'Video gagal diarsipkan.' });
+            } finally {
+                btnUnggahVideo.disabled = false;
+                btnUnggahVideo.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-1"></i> Unggah ke Arsip';
+            }
+        });
+
+        daftarVideoArsip.addEventListener('click', async event => {
+            const button = event.target.closest('.btn-hapus-video');
+            if (!button) return;
+
+            const confirmation = await Swal.fire({
+                title: 'Hapus video?',
+                text: 'Video ini akan dihapus permanen dari arsip.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#dc3545'
+            });
+            if (!confirmation.isConfirmed) return;
+
+            try {
+                const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos/${button.dataset.id}/hapus`, {
+                    method: 'POST'
+                });
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                loadVideoArchive().catch(error => {
+                    daftarVideoArsip.textContent = error.message;
+                });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Video gagal dihapus.' });
+            }
         });
 
         // Submit Form ke Backend

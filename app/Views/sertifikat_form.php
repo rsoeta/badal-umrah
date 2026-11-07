@@ -40,6 +40,11 @@
             box-sizing: border-box;
         }
 
+        input[type="file"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
         button {
             width: 100%;
             padding: 12px;
@@ -80,7 +85,7 @@
 
     <div class="card">
         <h3 style="text-align: center; color: #333; margin-top: 0;">Sertifikat Badal Umrah</h3>
-        <form id="formSertifikat">
+        <form id="formSertifikat" enctype="multipart/form-data">
             <div class="form-group">
                 <label>Nama Pelaksana</label>
                 <select name="pelaksana_data" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
@@ -94,6 +99,11 @@
             <div class="form-group">
                 <label>Nama Di-umrahkan</label>
                 <input type="text" name="nama_diumrahkan" required placeholder="Contoh: Hj. Siti Aminah binti Fulan">
+            </div>
+            <div class="form-group">
+                <label>Foto untuk Sertifikat (Opsional)</label>
+                <input type="file" name="foto_jamaah" accept="image/jpeg,image/png,image/webp">
+                <small>JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</small>
             </div>
             <div class="form-group">
                 <label>Tanggal Miqat (Masehi)</label>
@@ -140,32 +150,42 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
-                        // SweetAlert2 Berhasil dengan Opsi Salin Tautan (Mobile Custom)
+                    if (data.status !== 'success') {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Selesai!',
-                            text: 'Sertifikat berhasil di-generate.',
-                            showDenyButton: true,
-                            confirmButtonText: '<i class="fa fa-file-pdf"></i> Buka PDF',
-                            denyButtonText: '<i class="fa fa-image"></i> Buka JPG',
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || 'Sertifikat gagal dibuat.',
                             customClass: {
-                                popup: 'swal-mobile-custom',
-                                title: 'swal-title-custom',
-                                confirmButton: 'swal-btn-custom',
-                                denyButton: 'swal-btn-custom'
-                            }
-                        }).then((result) => {
-                            // Memberikan opsi apakah admin ingin membuka PDF atau JPG-nya
-                            if (result.isConfirmed) {
-                                window.open(data.url_pdf, '_blank');
-                            } else if (result.isDenied) {
-                                window.open(data.url_jpg, '_blank');
+                                popup: 'swal-mobile-custom'
                             }
                         });
-                        // Reset form jika sudah selesai
-                        document.getElementById('formSertifikat').reset();
+                        return;
                     }
+
+                    // SweetAlert2 Berhasil dengan Opsi Salin Tautan (Mobile Custom)
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Selesai!',
+                        text: 'Sertifikat berhasil di-generate.',
+                        showDenyButton: true,
+                        confirmButtonText: '<i class="fa fa-file-pdf"></i> Buka PDF',
+                        denyButtonText: '<i class="fa fa-image"></i> Buka JPG',
+                        customClass: {
+                            popup: 'swal-mobile-custom',
+                            title: 'swal-title-custom',
+                            confirmButton: 'swal-btn-custom',
+                            denyButton: 'swal-btn-custom'
+                        }
+                    }).then((result) => {
+                        // Memberikan opsi apakah admin ingin membuka PDF atau JPG-nya
+                        if (result.isConfirmed) {
+                            window.open(data.url_pdf, '_blank');
+                        } else if (result.isDenied) {
+                            window.open(data.url_jpg, '_blank');
+                        }
+                    });
+                    // Reset form jika sudah selesai
+                    document.getElementById('formSertifikat').reset();
                 })
                 .catch(error => {
                     Swal.fire({

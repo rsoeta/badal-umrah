@@ -20,6 +20,7 @@ class PendaftaranModel extends Model
         'nama_pemesan',
         'no_wa_pemesan',
         'nama_diumrahkan',
+        'foto_jamaah',
         'paket_pilihan',
         'nama_pelaksana',
         'file_ttd_pelaksana',

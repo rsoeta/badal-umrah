@@ -37,10 +37,23 @@
             background-color: #f8f9fa;
             font-family: 'Quicksand', sans-serif;
             color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .navbar-admin {
             background-color: #0f3d23;
+        }
+
+        .settings-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            max-width: 1140px;
+            margin: 0 auto;
         }
 
         .card-custom {
@@ -94,12 +107,12 @@
         </div>
     </nav>
 
-    <div class="container-fluid px-md-4 pb-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="container-fluid px-md-4 pb-5 settings-content">
+        <div class="d-flex justify-content-center align-items-center mb-3">
             <h5 class="mb-0 fw-bold">Pengaturan Data Master</h5>
         </div>
 
-        <div class="row">
+        <div class="row justify-content-center">
             <div class="col-lg-6">
                 <div class="card card-custom mb-4 border-top border-warning border-4">
                     <div class="card-body p-4">
@@ -113,6 +126,14 @@
                                     Pisahkan mutawwif baru dengan <b>Baris Baru (Enter)</b>. Pastikan file TTD sudah di-upload ke folder <code>public/signatures/</code>.
                                 </p>
                                 <textarea name="list_mutawwif" class="form-control rounded-3" rows="5" required><?= esc($list_mutawwif); ?></textarea>
+                            </div>
+
+                            <div class="mb-4 pt-3 border-top border-light border-2">
+                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i> Koreksi Hijriah</label>
+                                <p class="text-muted mb-2" style="font-size: 0.75rem;">
+                                    Nilai ini akan otomatis dikirim ke formulir proses sertifikat. Isi <b>1</b> atau <b>-1</b> jika tanggal Hijriah perlu dikoreksi, atau <b>0</b> jika tidak ada koreksi.
+                                </p>
+                                <input type="number" name="koreksi_hijriah" class="form-control rounded-3" step="1" value="<?= esc((string) $koreksi_hijriah); ?>">
                             </div>
 
                             <!-- Setting: Kredensial Akun -->
@@ -181,7 +202,7 @@
                             }
                         });
                     } else {
-                        Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
+                        Swal.fire('Gagal', data.message || 'Terjadi kesalahan.', 'error');
                     }
                 })
                 .catch(error => {

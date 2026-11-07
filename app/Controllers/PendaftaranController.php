@@ -18,12 +18,53 @@ class PendaftaranController extends Controller
 
         // Membuat Nomor Registrasi (Format: RCP-Tahun-6KarakterAcak)
         $uuid = 'RCP-' . date('Y') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+        $fotoJamaah = $this->request->getFile('foto_jamaah');
+        $fotoJamaahName = null;
+
+        if ($fotoJamaah !== null && $fotoJamaah->getError() !== UPLOAD_ERR_NO_FILE) {
+            if (! $this->validate([
+                'foto_jamaah' => 'uploaded[foto_jamaah]|is_image[foto_jamaah]|mime_in[foto_jamaah,image/jpeg,image/png,image/webp]|max_size[foto_jamaah,5120]',
+            ])) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => implode(' ', $this->validator->getErrors()),
+                ]);
+            }
+
+            $extension = match ($fotoJamaah->getMimeType()) {
+                'image/jpeg' => 'jpg',
+                'image/png'  => 'png',
+                'image/webp' => 'webp',
+                default      => null,
+            };
+
+            if ($extension === null) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Format foto harus JPG, PNG, atau WEBP.',
+                ]);
+            }
+
+            $uploadDirectory = WRITEPATH . 'uploads/pendaftaran-images';
+            if (! is_dir($uploadDirectory) && ! mkdir($uploadDirectory, 0750, true) && ! is_dir($uploadDirectory)) {
+                log_message('error', 'Failed to create registration image directory: {directory}', ['directory' => $uploadDirectory]);
+
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Foto gagal disimpan. Silakan coba kembali.',
+                ]);
+            }
+
+            $fotoJamaahName = $uuid . '.' . $extension;
+            $fotoJamaah->move($uploadDirectory, $fotoJamaahName);
+        }
 
         $data = [
             'uuid'            => $uuid,
             'nama_pemesan'    => $this->request->getPost('nama_pemesan'),
             'no_wa_pemesan'   => $this->request->getPost('no_wa_pemesan'),
             'nama_diumrahkan' => $this->request->getPost('nama_diumrahkan'),
+            'foto_jamaah'     => $fotoJamaahName,
             'paket_pilihan'   => $this->request->getPost('paket_pilihan'),
             'status'          => 'pending' // Status awal saat pendaftaran masuk
         ];
@@ -36,6 +77,13 @@ class PendaftaranController extends Controller
                 'uuid'    => $uuid
             ]);
         } else {
+            if ($fotoJamaahName !== null) {
+                $fotoJamaahPath = WRITEPATH . 'uploads/pendaftaran-images/' . $fotoJamaahName;
+                if (is_file($fotoJamaahPath) && ! unlink($fotoJamaahPath)) {
+                    log_message('error', 'Failed to remove registration image after database insert failure: {file}', ['file' => $fotoJamaahPath]);
+                }
+            }
+
             return $this->response->setJSON([
                 'status'  => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data.'

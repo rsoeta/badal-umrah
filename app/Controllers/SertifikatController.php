@@ -21,6 +21,21 @@ class SertifikatController extends Controller
         $file_ttd       = $pelaksana_data[1] ?? '';
 
         $nama_diumrahkan = $this->request->getPost('nama_diumrahkan');
+        $fotoJamaah = $this->request->getFile('foto_jamaah');
+        $fotoJamaahPath = null;
+
+        if ($fotoJamaah !== null && $fotoJamaah->getError() !== UPLOAD_ERR_NO_FILE) {
+            if (! $this->validate([
+                'foto_jamaah' => 'uploaded[foto_jamaah]|is_image[foto_jamaah]|mime_in[foto_jamaah,image/jpeg,image/png,image/webp]|max_size[foto_jamaah,5120]',
+            ])) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => implode(' ', $this->validator->getErrors()),
+                ]);
+            }
+
+            $fotoJamaahPath = $fotoJamaah->getTempName();
+        }
 
         // Data Tanggal & Koreksi Hijriah
         $tgl_miqat_input = $this->request->getPost('tanggal_miqat');
@@ -46,7 +61,8 @@ class SertifikatController extends Controller
             $tanggal_cetak_hijriah,
             $file_ttd,
             $outputJpg,
-            $outputPdf
+            $outputPdf,
+            $fotoJamaahPath
         );
 
         // 5. Kembalikan Response ke Frontend

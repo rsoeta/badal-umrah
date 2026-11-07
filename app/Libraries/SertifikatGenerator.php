@@ -15,9 +15,19 @@ class SertifikatGenerator
         string $tanggalCetakHijriah,
         string $fileTtd,
         string $outputJpg,
-        string $outputPdf
+        string $outputPdf,
+        ?string $fotoJamaah = null
     ): void {
-        $templatePath = FCPATH . 'templates/template_sertifikat.png';
+        $withImage = $fotoJamaah !== null;
+        if ($withImage && ! is_file($fotoJamaah)) {
+            throw new \RuntimeException('Foto jamaah untuk sertifikat tidak ditemukan.');
+        }
+
+        $templatePath = FCPATH . 'templates/' . ($withImage ? 'template_sertifikat_with_image.png' : 'template_sertifikat.png');
+        if (! is_file($templatePath)) {
+            throw new \RuntimeException('Template sertifikat tidak ditemukan: ' . basename($templatePath));
+        }
+
         $fontPath = FCPATH . 'fonts/Amiri-Bold.ttf';
         $manager = new ImageManager(new Driver());
         $image = $manager->read($templatePath);
@@ -32,18 +42,25 @@ class SertifikatGenerator
             });
         };
 
-        $writeText($namaPelaksana, 706, 899, 'center', 42);
-        $writeText($namaDiumrahkan, 706, 1078, 'center', 42);
+        $nameCenterX = $withImage ? 820 : 706;
+        $writeText($namaPelaksana, $nameCenterX, 899, 'center', 42);
+        $writeText($namaDiumrahkan, $nameCenterX, $withImage ? 1065 : 1078, 'center', 42);
         $writeText($tanggalMiqat, 489, 1262, 'left', 36);
         // The template already prints "M /" and "H" between these date fields.
         $writeText($tanggalCetakMasehi, 821, 1588, 'left', 30);
         $writeText($tanggalCetakHijriah, 1120, 1588, 'left', 30);
 
+        if ($withImage) {
+            $photo = $manager->read($fotoJamaah);
+            $photo->cover(254, 341);
+            $image->place($photo, 'top-left', 169, 801);
+        }
+
         $witnessSignaturePath = FCPATH . 'signatures/ttd-rian.png';
         if (is_file($witnessSignaturePath)) {
             $witnessSignature = $manager->read($witnessSignaturePath);
             $witnessSignature->trim()->scale(width: 370);
-            $image->place($witnessSignature, 'top-left', 185, 1615);
+            $image->place($witnessSignature, 'top-left', 185 + random_int(-24, 24), 1615 + random_int(-24, 24));
         }
 
         if ($fileTtd !== '') {
@@ -51,7 +68,7 @@ class SertifikatGenerator
             if (is_file($signaturePath)) {
                 $signature = $manager->read($signaturePath);
                 $signature->trim()->resize(230, 170);
-                $image->place($signature, 'top-left', 1000 + rand(-8, 8), 1615 + rand(-8, 8));
+                $image->place($signature, 'top-left', 1000 + random_int(-24, 24), 1615 + random_int(-24, 24));
             }
         }
 
@@ -59,8 +76,8 @@ class SertifikatGenerator
         if (is_file($stampPath)) {
             $stamp = $manager->read($stampPath);
             $stamp->scale(width: 190);
-            $stamp->rotate(rand(-4, 4), 'transparent');
-            $image->place($stamp, 'top-left', 910 + rand(-5, 5), 1610 + rand(-5, 5));
+            $stamp->rotate(random_int(-8, 8), 'transparent');
+            $image->place($stamp, 'top-left', 910 + random_int(-20, 20), 1610 + random_int(-20, 20));
         }
 
         $image->save($outputJpg, 90);

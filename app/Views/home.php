@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Primary Meta Tags -->
-    <title>Abdul Aziz - Layanan Badal Umrah Amanah</title>
-    <meta name="title" content="Abdul Aziz - Layanan Badal Umrah Amanah">
+    <title>Azis Rustandi - Layanan Badal Umrah Amanah</title>
+    <meta name="title" content="Azis Rustandi - Layanan Badal Umrah Amanah">
     <meta name="description" content="Jasa Badal Umrah terpercaya untuk orang tercinta yang sudah meninggal atau udzur syar'i. Amanah, bersertifikat resmi, dan didokumentasikan lengkap.">
 
     <!-- Favicon -->
@@ -16,7 +16,7 @@
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= base_url(); ?>">
-    <meta property="og:title" content="🕋 Badal Umrah - Abdul Aziz">
+    <meta property="og:title" content="🕋 Badal Umrah - Azis Rustandi">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
     <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
@@ -348,9 +348,9 @@
                 <div class="col-lg-7 col-md-12">
                     <!-- Menggunakan Logo Perusahaan Asli -->
                     <div class="d-flex align-items-center mb-4">
-                        <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Abdul Aziz" style="max-height: 100px; object-fit: contain;" class="me-3">
+                        <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Azis Rustandi" style="max-height: 100px; object-fit: contain;" class="me-3">
                         <div>
-                            <h2 class="mb-0 fw-bold text-green font-serif" style="line-height: 1;">Abdul Aziz</h2>
+                            <h2 class="mb-0 fw-bold text-green font-serif" style="line-height: 1;">Azis Rustandi</h2>
                             <small class="text-muted" style="font-size: 0.9rem;">Amanah dalam Ibadah, Indah dalam Layanan</small>
                         </div>
                     </div>
@@ -566,10 +566,10 @@
                     <div class="d-flex">
                         <img src="https://ui-avatars.com/api/?name=Siti+Rahayu&background=b8924b&color=fff" class="testi-avatar">
                         <div>
-                            <p class="small text-muted fst-italic mb-2">"Alhamdulillah, prosesnya sangat mudah dan terpercaya. Sertifikat dan videonya lengkap. Terima kasih Abdul Aziz."</p>
+                            <p class="small text-muted fst-italic mb-2">"Alhamdulillah, prosesnya sangat mudah dan terpercaya. Sertifikat dan videonya lengkap. Terima kasih Azis Rustandi."</p>
                             <div class="text-warning mb-1" style="font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Ibu Siti Rahayu</h6>
-                            <p class="text-muted mb-0" style="font-size: 0.7rem;">(Anak dari Almarhum Bapak H. Mulyadi)</p>
+                            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Ibu Ripa Sopianti</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.7rem;">(Anak dari Almarhumah Ibu Ereh)</p>
                         </div>
                     </div>
                 </div>
@@ -590,7 +590,7 @@
                         <div>
                             <p class="small text-muted fst-italic mb-2">"Pelayanannya sangat baik, komunikatif, dan dokumentasinya lengkap. Semoga semakin banyak yang terbantu."</p>
                             <div class="text-warning mb-1" style="font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Ibu Nur Aisyah</h6>
+                            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Ibu Nani</h6>
                             <p class="text-muted mb-0" style="font-size: 0.7rem;">(Orang Tua Jamaah)</p>
                         </div>
                     </div>
@@ -642,7 +642,7 @@
             <div class="d-flex align-items-center mb-3 mb-md-0">
                 <i class="fa-solid fa-kaaba fa-2x text-gold me-3"></i>
                 <div>
-                    <h6 class="mb-0 fw-bold font-serif text-white">Abdul Aziz</h6>
+                    <h6 class="mb-0 fw-bold font-serif text-white">Azis Rustandi</h6>
                     <small class="text-gold" style="font-size: 0.7rem;">Amanah dalam Ibadah, Indah dalam Layanan</small>
                 </div>
             </div>
