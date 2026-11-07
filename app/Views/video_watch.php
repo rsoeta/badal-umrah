@@ -22,7 +22,8 @@
     <meta name="description" content="Tonton langsung video dokumentasi pelaksanaan Badal Umrah atas nama <?= esc($namaDiumrahkan); ?>. Amanah, transparan, dan terpercaya.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
+    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
 
     <!-- Open Graph / WhatsApp / Facebook Preview -->
     <meta property="og:type" content="video.other">

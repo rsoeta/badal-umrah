@@ -43,3 +43,15 @@ $routes->post('pendaftaran/submit', 'PendaftaranController::submit');
 
 // Rute Cek Sertifikat (Frontend)
 $routes->post('cek-sertifikat', 'PendaftaranController::cekSertifikat');
+
+$routes->get('favicon.ico', static function () {
+    $path = FCPATH . 'favicon.ico';
+    if (! is_file($path)) {
+        return service('response')->setStatusCode(404);
+    }
+
+    return service('response')
+        ->setContentType('image/x-icon')
+        ->setHeader('Cache-Control', 'public, max-age=3600, must-revalidate')
+        ->setBody(file_get_contents($path));
+});

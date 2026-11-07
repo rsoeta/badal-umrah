@@ -187,4 +187,62 @@ final class AdminEditFotoTest extends CIUnitTestCase
             unlink($dummyPath);
         }
     }
+
+    public function testEditPendaftaranReturnsUrlPdfWhenStatusIsSelesai(): void
+    {
+        $pendaftaranModel = new PendaftaranModel();
+        $id = $pendaftaranModel->insert([
+            'uuid'                 => 'RCP-2026-TESTPDF',
+            'nama_pemesan'         => 'Pemesan Selesai',
+            'no_wa_pemesan'        => '0815555555',
+            'nama_diumrahkan'      => 'Jamaah Selesai',
+            'paket_pilihan'        => 'Paket Standar (Rp 1.5 Jt)',
+            'status'               => 'selesai',
+            'tanggal_miqat'        => '2026-11-01',
+            'tanggal_cetak'        => '2026-11-02',
+            'nama_pelaksana'       => 'Ustadz Pelaksana',
+            'file_ttd_pelaksana'   => '',
+            'foto_jamaah'          => null,
+        ]);
+
+        $controller = new AdminController();
+
+        $postData = [
+            'nama_pemesan'    => 'Pemesan Selesai Diupdate',
+            'no_wa_pemesan'   => '0815555555',
+            'nama_diumrahkan' => 'Jamaah Selesai Diupdate',
+            'paket_pilihan'   => 'Paket Standar (Rp 1.5 Jt)',
+        ];
+
+        $_POST = $postData;
+        $_REQUEST = $postData;
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $request = $request->withMethod('POST');
+        $request->setGlobal('post', $postData);
+        $request->setGlobal('request', $postData);
+        Services::injectMock('request', $request);
+
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $res = $controller->editPendaftaran((int) $id);
+        $this->assertSame(200, $res->getStatusCode(), 'Response: ' . $res->getBody());
+
+        $body = json_decode($res->getBody(), true);
+        $this->assertSame('success', $body['status']);
+        $this->assertArrayHasKey('url_pdf', $body);
+        $this->assertStringContainsString('storage/certificates/RCP-2026-TESTPDF.pdf', $body['url_pdf']);
+    }
+
+    public function testPublicFaviconIsPresentAndValidIco(): void
+    {
+        $faviconPath = FCPATH . 'favicon.ico';
+        $this->assertFileExists($faviconPath);
+        $this->assertGreaterThan(5000, filesize($faviconPath));
+
+        $header = unpack('vreserved/vtype/vcount', file_get_contents($faviconPath, false, null, 0, 6));
+        $this->assertSame(0, $header['reserved']);
+        $this->assertSame(1, $header['type']); // 1 = ICO
+        $this->assertGreaterThan(0, $header['count']);
+    }
 }

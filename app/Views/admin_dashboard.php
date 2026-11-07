@@ -19,7 +19,8 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Favicon yang Benar -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png'); ?>" />
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
+    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
 
     <style>
         /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */
@@ -755,6 +756,9 @@
                 }
 
                 bootstrap.Modal.getOrCreateInstance(modalEditPendaftaran).hide();
+                if (data.url_pdf) {
+                    window.open(data.url_pdf, '_blank');
+                }
                 await Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
                 location.reload();
             } catch (error) {

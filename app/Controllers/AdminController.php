@@ -254,12 +254,18 @@ class AdminController extends Controller
 
         $this->cleanupCertificateEditFiles(array_merge(array_keys($certificateFiles), array_filter($backupFiles)));
 
-        return $this->response->setJSON([
+        $responseData = [
             'status'  => 'success',
             'message' => $pendaftaran['status'] === 'selesai'
                 ? 'Data pendaftaran dan sertifikat berhasil diperbarui.'
                 : 'Data pendaftaran berhasil diperbarui.',
-        ]);
+        ];
+
+        if ($pendaftaran['status'] === 'selesai') {
+            $responseData['url_pdf'] = base_url('storage/certificates/' . basename($pendaftaran['uuid']) . '.pdf');
+        }
+
+        return $this->response->setJSON($responseData);
     }
 
     public function lihatFoto(int $id)
