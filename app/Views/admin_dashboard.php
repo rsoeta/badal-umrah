@@ -354,12 +354,17 @@
                                             title="Edit Data">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
-                                        <button type="button" class="btn btn-outline-success rounded-pill btn-video-arsip"
+                                        <?php $totalVideo = (int) ($row['total_video'] ?? 0); ?>
+                                        <button type="button" class="btn btn-outline-success rounded-pill btn-video-arsip position-relative"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                             aria-label="Arsip video dokumentasi untuk <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
-                                            title="Arsip Video Dokumentasi">
+                                            title="Arsip Video Dokumentasi (<?= $totalVideo; ?> video)">
                                             <i class="fa-solid fa-video"></i>
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light badge-video-count<?= $totalVideo > 0 ? '' : ' d-none'; ?>" style="font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 1.25rem;">
+                                                <?= $totalVideo; ?>
+                                                <span class="visually-hidden">video diarsipkan</span>
+                                            </span>
                                         </button>
                                         <button type="button" class="btn btn-outline-secondary rounded-pill btn-hapus-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
@@ -923,10 +928,39 @@
             return data;
         };
 
+        const updateButtonVideoBadge = (pendaftaranId, count) => {
+            const btn = document.querySelector(`.btn-video-arsip[data-id="${pendaftaranId}"]`);
+            if (!btn) return;
+
+            let badge = btn.querySelector('.badge-video-count');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light badge-video-count';
+                badge.style.fontSize = '0.65rem';
+                badge.style.padding = '0.25em 0.45em';
+                badge.style.minWidth = '1.25rem';
+                btn.appendChild(badge);
+            }
+
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('d-none');
+                btn.title = `Arsip Video Dokumentasi (${count} video)`;
+            } else {
+                badge.textContent = '0';
+                badge.classList.add('d-none');
+                btn.title = 'Arsip Video Dokumentasi (0 video)';
+            }
+        };
+
         const loadVideoArchive = async () => {
             daftarVideoArsip.textContent = 'Memuat daftar video...';
             const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos`);
             daftarVideoArsip.replaceChildren();
+
+            if (data && Array.isArray(data.videos)) {
+                updateButtonVideoBadge(activePendaftaranVideoId, data.videos.length);
+            }
 
             if (data.videos.length === 0) {
                 const empty = document.createElement('div');

@@ -16,7 +16,24 @@ class AdminController extends Controller
         $pendaftaranModel = new PendaftaranModel();
         $pengaturanModel  = new PengaturanModel();
 
-        $data['pendaftar'] = $pendaftaranModel->orderBy('created_at', 'DESC')->findAll();
+        $pendaftar = $pendaftaranModel->orderBy('created_at', 'DESC')->findAll();
+
+        $videoCounts = (new VideoDokumentasiModel())
+            ->select('pendaftaran_id, COUNT(*) as total_video')
+            ->groupBy('pendaftaran_id')
+            ->findAll();
+
+        $videoCountsMap = [];
+        foreach ($videoCounts as $vc) {
+            $videoCountsMap[(int) $vc['pendaftaran_id']] = (int) $vc['total_video'];
+        }
+
+        foreach ($pendaftar as &$row) {
+            $row['total_video'] = $videoCountsMap[(int) $row['id']] ?? 0;
+        }
+        unset($row);
+
+        $data['pendaftar'] = $pendaftar;
         $data['jumlah_sampah'] = (new PendaftaranModel())->onlyDeleted()->countAllResults();
 
         // Ambil data Mutawwif, pecah berdasarkan baris baru (enter) menjadi array

@@ -158,4 +158,46 @@ final class AdminVideoTest extends CIUnitTestCase
         // Verify pendaftaran is completely removed
         $this->assertNull($pendaftaranModel->withDeleted()->find($id));
     }
+
+    public function testDashboardRendersVideoNotificationBadge(): void
+    {
+        $pendaftaranModel = new PendaftaranModel();
+        $id = $pendaftaranModel->insert([
+            'uuid'            => 'test-video-badge-uuid',
+            'nama_pemesan'    => 'Pemesan Badge',
+            'no_wa_pemesan'   => '0812345678',
+            'nama_diumrahkan' => 'Jamaah Badge Video',
+            'paket_pilihan'   => 'Paket Standar',
+            'status'          => 'pending',
+        ]);
+
+        $videoModel = new VideoDokumentasiModel();
+        $videoModel->insert([
+            'pendaftaran_id' => $id,
+            'file_name'      => 'vid1.mp4',
+            'original_name'  => 'video1.mp4',
+            'mime_type'      => 'video/mp4',
+            'file_size'      => 1024,
+            'created_at'     => date('Y-m-d H:i:s'),
+        ]);
+        $videoModel->insert([
+            'pendaftaran_id' => $id,
+            'file_name'      => 'vid2.mp4',
+            'original_name'  => 'video2.mp4',
+            'mime_type'      => 'video/mp4',
+            'file_size'      => 2048,
+            'created_at'     => date('Y-m-d H:i:s'),
+        ]);
+
+        $controller = new AdminController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $html = $controller->index();
+        $this->assertIsString($html);
+        $this->assertStringContainsString('badge-video-count', $html);
+        $this->assertStringContainsString('data-id="' . $id . '"', $html);
+        $this->assertStringContainsString('Arsip Video Dokumentasi (2 video)', $html);
+    }
 }
