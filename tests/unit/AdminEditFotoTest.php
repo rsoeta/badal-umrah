@@ -245,4 +245,29 @@ final class AdminEditFotoTest extends CIUnitTestCase
         $this->assertSame(1, $header['type']); // 1 = ICO
         $this->assertGreaterThan(0, $header['count']);
     }
+
+    public function testDashboardRendersMiniFotoWhenAvailable(): void
+    {
+        $pendaftaranModel = new PendaftaranModel();
+        $id = $pendaftaranModel->insert([
+            'uuid'            => 'test-foto-mini-uuid',
+            'nama_pemesan'    => 'Pemesan Mini',
+            'no_wa_pemesan'   => '0812345678',
+            'nama_diumrahkan' => 'Jamaah Mini Foto',
+            'paket_pilihan'   => 'Paket Standar (Rp 1.5 Jt)',
+            'status'          => 'pending',
+            'foto_jamaah'     => 'sample_photo.jpg',
+        ]);
+
+        $controller = new AdminController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $html = $controller->index();
+        $this->assertIsString($html);
+        $this->assertStringContainsString('admin/pendaftaran/' . $id . '/foto', $html);
+        $this->assertStringContainsString('Jamaah Mini Foto', $html);
+        $this->assertStringNotContainsString('Foto disertakan', $html);
+    }
 }

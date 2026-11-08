@@ -297,11 +297,22 @@
                                         </a>
                                     </div>
                                 </td>
-                                <td data-label="Di-umrahkan" class="fw-bold text-success fs-6">
-                                    <?= esc($row['nama_diumrahkan']); ?>
-                                    <?php if (! empty($row['foto_jamaah'])): ?>
-                                        <span class="badge bg-info text-dark">Foto disertakan</span>
-                                    <?php endif; ?>
+                                <td data-label="Di-umrahkan">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <?php if (! empty($row['foto_jamaah'])): ?>
+                                            <a href="<?= base_url('admin/pendaftaran/' . $row['id'] . '/foto'); ?>" target="_blank" title="Lihat Foto <?= esc($row['nama_diumrahkan'], 'attr'); ?>" class="flex-shrink-0 text-decoration-none">
+                                                <img src="<?= base_url('admin/pendaftaran/' . $row['id'] . '/foto'); ?>"
+                                                    alt="Foto <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                                    class="rounded border shadow-sm"
+                                                    style="width: 36px; height: 46px; object-fit: cover;"
+                                                    loading="lazy"
+                                                    onerror="this.parentElement.style.display='none'">
+                                            </a>
+                                        <?php endif; ?>
+                                        <span class="fw-bold text-success fs-6 text-break">
+                                            <?= esc($row['nama_diumrahkan']); ?>
+                                        </span>
+                                    </div>
                                 </td>
                                 <td data-label="Paket"><span class="badge bg-light text-dark border p-2"><?= esc($row['paket_pilihan']); ?></span></td>
                                 <td data-label="Status">
