@@ -16,7 +16,8 @@ class SertifikatGenerator
         string $fileTtd,
         string $outputJpg,
         string $outputPdf,
-        ?string $fotoJamaah = null
+        ?string $fotoJamaah = null,
+        ?string $nomorRegistrasi = null
     ): void {
         $withImage = $fotoJamaah !== null;
         if ($withImage && ! is_file($fotoJamaah)) {
@@ -49,6 +50,15 @@ class SertifikatGenerator
         // The template already prints "M /" and "H" between these date fields.
         $writeText($tanggalCetakMasehi, 821, 1588, 'left', 30);
         $writeText($tanggalCetakHijriah, 1120, 1588, 'left', 30);
+
+        if ($nomorRegistrasi !== null && trim($nomorRegistrasi) !== '') {
+            $nomorRegistrasiClean = trim($nomorRegistrasi);
+            $teksNomorRegistrasi = str_starts_with($nomorRegistrasiClean, 'No. Registrasi:')
+                ? $nomorRegistrasiClean
+                : 'No. Registrasi: ' . $nomorRegistrasiClean;
+
+            $writeText($teksNomorRegistrasi, 707, 1974, 'center', 30);
+        }
 
         if ($withImage) {
             $photo = $manager->read($fotoJamaah);

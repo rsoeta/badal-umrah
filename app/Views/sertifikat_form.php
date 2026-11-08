@@ -104,6 +104,10 @@
                 <input type="text" name="nama_diumrahkan" required placeholder="Contoh: Hj. Siti Aminah binti Fulan">
             </div>
             <div class="form-group">
+                <label>Nomor Registrasi (Opsional)</label>
+                <input type="text" name="nomor_registrasi" placeholder="Otomatis jika dikosongkan (RCP-<?= date('Y') ?>-XXXXXX)">
+            </div>
+            <div class="form-group">
                 <label>Foto untuk Sertifikat (Opsional)</label>
                 <input type="file" name="foto_jamaah" accept="image/jpeg,image/png,image/webp">
                 <small>JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</small>

@@ -149,7 +149,8 @@ class AdminController extends Controller
                 $temporaryPdf,
                 ! empty($effectiveFoto)
                     ? WRITEPATH . 'uploads/pendaftaran-images/' . basename($effectiveFoto)
-                    : null
+                    : null,
+                $pendaftaran['uuid']
             );
 
             $certificateFiles = [
@@ -784,7 +785,8 @@ class AdminController extends Controller
             $file_ttd,
             $outputJpg,
             $outputPdf,
-            $fotoJamaahPath
+            $fotoJamaahPath,
+            $uuid
         );
 
         // 5. UPDATE DATABASE (Tandai Selesai)

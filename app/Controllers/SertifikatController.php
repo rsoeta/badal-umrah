@@ -47,6 +47,12 @@ class SertifikatController extends Controller
         $tanggal_cetak_masehi = $this->formatMasehi($tgl_cetak_input);
         $tanggal_cetak_hijriah = $this->gregorianToHijri($tgl_cetak_input, $koreksi_hijriah);
 
+        // Nomor Registrasi (Format: RCP-Tahun-6KarakterAcak)
+        $nomorRegistrasi = trim((string) $this->request->getPost('nomor_registrasi'));
+        if ($nomorRegistrasi === '') {
+            $nomorRegistrasi = 'RCP-' . date('Y') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+        }
+
         // UUID untuk nama file rahasia
         $uuid = bin2hex(random_bytes(8));
 
@@ -62,7 +68,8 @@ class SertifikatController extends Controller
             $file_ttd,
             $outputJpg,
             $outputPdf,
-            $fotoJamaahPath
+            $fotoJamaahPath,
+            $nomorRegistrasi
         );
 
         // 5. Kembalikan Response ke Frontend
