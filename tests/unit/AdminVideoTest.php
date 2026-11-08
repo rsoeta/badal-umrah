@@ -101,4 +101,61 @@ final class AdminVideoTest extends CIUnitTestCase
         $this->assertNotNull($tokenedVideo['share_url']);
         $this->assertNull($unsharedVideo['share_url']);
     }
+
+    public function testHapusPermanenDeletesVideoFilesAndMetadata(): void
+    {
+        $videoDir = WRITEPATH . 'uploads/videos';
+        if (! is_dir($videoDir)) {
+            mkdir($videoDir, 0755, true);
+        }
+
+        $pendaftaranModel = new PendaftaranModel();
+        $id = $pendaftaranModel->insert([
+            'uuid'            => 'uuid-trash-test-1',
+            'nama_pemesan'    => 'Pemesan Sampah',
+            'no_wa_pemesan'   => '0812999999',
+            'nama_diumrahkan' => 'Alm Sampah',
+            'paket_pilihan'   => 'Paket Badal Umrah',
+            'status'          => 'selesai',
+        ]);
+
+        // Soft delete the pendaftaran to put it in trash
+        $pendaftaranModel->delete($id);
+
+        $dummyVideoName = 'test_trash_video_' . uniqid() . '.mp4';
+        $dummyVideoPath = $videoDir . DIRECTORY_SEPARATOR . $dummyVideoName;
+        file_put_contents($dummyVideoPath, 'fake-mp4-data');
+
+        $videoModel = new VideoDokumentasiModel();
+        $videoId = $videoModel->insert([
+            'pendaftaran_id' => $id,
+            'file_name'      => $dummyVideoName,
+            'original_name'  => 'asli_video.mp4',
+            'mime_type'      => 'video/mp4',
+            'file_size'      => 13,
+            'created_at'     => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertFileExists($dummyVideoPath);
+
+        $controller = new AdminController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $res = $controller->hapusPermanen((int) $id);
+        $this->assertSame(200, $res->getStatusCode());
+
+        $body = json_decode($res->getBody(), true);
+        $this->assertSame('success', $body['status']);
+
+        // Verify video file is deleted from disk
+        $this->assertFileDoesNotExist($dummyVideoPath);
+
+        // Verify video metadata is deleted from database
+        $this->assertNull($videoModel->find($videoId));
+
+        // Verify pendaftaran is completely removed
+        $this->assertNull($pendaftaranModel->withDeleted()->find($id));
+    }
 }

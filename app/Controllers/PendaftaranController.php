@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 use App\Models\PendaftaranModel;
+use App\Models\PengaturanModel;
 use App\Models\VideoDokumentasiModel;
 use App\Libraries\VideoStreamResponse;
 
@@ -154,23 +155,34 @@ class PendaftaranController extends Controller
 
     public function tontonVideo(string $token)
     {
-        if (! preg_match('/\A[a-f0-9]{64}\z/', $token)) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Video tidak ditemukan.');
+        $isValidToken = (bool) preg_match('/\A[a-f0-9]{64}\z/', $token);
+
+        $video = null;
+        if ($isValidToken) {
+            $video = (new VideoDokumentasiModel())
+                ->where('share_token', $token)
+                ->first();
         }
 
-        $video = (new VideoDokumentasiModel())
-            ->where('share_token', $token)
-            ->first();
-
-        if (! $video) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Tautan video tidak tersedia atau telah dicabut.');
+        $pendaftaran = null;
+        if ($video !== null) {
+            $pendaftaran = (new PendaftaranModel())->find($video['pendaftaran_id']);
         }
 
-        $videoPath = WRITEPATH . 'uploads/videos/' . basename($video['file_name']);
-        if (! is_file($videoPath)) {
+        $videoPath = $video !== null ? WRITEPATH . 'uploads/videos/' . basename($video['file_name']) : null;
+        $videoFileExists = ($videoPath !== null && is_file($videoPath));
+
+        if ($video !== null && ! $videoFileExists) {
             log_message('error', 'Shared video file is missing: {file}', ['file' => $videoPath]);
+        }
 
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Berkas video tidak ditemukan di server.');
+        if (! $isValidToken || $video === null || $pendaftaran === null || ! $videoFileExists) {
+            $pendaftaranFallback = null;
+            if ($video !== null) {
+                $pendaftaranFallback = (new PendaftaranModel())->withDeleted()->find($video['pendaftaran_id']);
+            }
+
+            return $this->tampilkanHalamanVideoTidakTersedia($token, $video, $pendaftaranFallback);
         }
 
         // Jika klien meminta video stream langsung (misal: Range header atau query parameter stream/raw)
@@ -182,8 +194,6 @@ class PendaftaranController extends Controller
         if ($hasRange || $wantsStream || $isPureMediaClient) {
             return $this->sharedVideoResponse($token, false);
         }
-
-        $pendaftaran = (new PendaftaranModel())->find($video['pendaftaran_id']);
 
         return view('video_watch', [
             'video'       => $video,
@@ -206,7 +216,14 @@ class PendaftaranController extends Controller
 
     private function sharedVideoResponse(string $token, bool $download)
     {
+        $accept = (string) $this->request->getHeaderLine('Accept');
+        $isBrowser = $download || str_contains($accept, 'text/html');
+
         if (! preg_match('/\A[a-f0-9]{64}\z/', $token)) {
+            if ($isBrowser) {
+                return redirect()->to(base_url('video/' . $token));
+            }
+
             return $this->response->setStatusCode(404)->setBody('Video tidak ditemukan.');
         }
 
@@ -214,12 +231,29 @@ class PendaftaranController extends Controller
             ->where('share_token', $token)
             ->first();
         if (! $video) {
+            if ($isBrowser) {
+                return redirect()->to(base_url('video/' . $token));
+            }
+
             return $this->response->setStatusCode(404)->setBody('Tautan video tidak tersedia atau telah dicabut.');
+        }
+
+        $pendaftaran = (new PendaftaranModel())->find($video['pendaftaran_id']);
+        if (! $pendaftaran) {
+            if ($isBrowser) {
+                return redirect()->to(base_url('video/' . $token));
+            }
+
+            return $this->response->setStatusCode(404)->setBody('Data pendaftaran tidak aktif.');
         }
 
         $videoPath = WRITEPATH . 'uploads/videos/' . basename($video['file_name']);
         if (! is_file($videoPath)) {
             log_message('error', 'Shared video file is missing: {file}', ['file' => $videoPath]);
+
+            if ($isBrowser) {
+                return redirect()->to(base_url('video/' . $token));
+            }
 
             return $this->response->setStatusCode(404)->setBody('Berkas video tidak ditemukan.');
         }
@@ -315,5 +349,59 @@ class PendaftaranController extends Controller
             ->setHeader('Content-Range', 'bytes */' . $fileSize)
             ->setHeader('Accept-Ranges', 'bytes')
             ->setBody('Rentang byte video tidak valid.');
+    }
+
+    private function tampilkanHalamanVideoTidakTersedia(string $token, ?array $video = null, ?array $pendaftaran = null)
+    {
+        $accept = (string) $this->request->getHeaderLine('Accept');
+        $isPureMediaClient = (! str_contains($accept, 'text/html') && str_contains($accept, 'video/'));
+        if ($isPureMediaClient) {
+            return $this->response->setStatusCode(404)->setBody('Video tidak tersedia atau telah dihapus.');
+        }
+
+        $pengaturanModel = new PengaturanModel();
+        $rawWaAdmin = $pengaturanModel->getSetting('no_wa_admin') ?? '082111133929';
+        $cleanWaAdmin = preg_replace('/[^0-9]/', '', $rawWaAdmin);
+        if (str_starts_with($cleanWaAdmin, '0')) {
+            $cleanWaAdmin = '62' . substr($cleanWaAdmin, 1);
+        }
+        if ($cleanWaAdmin === '') {
+            $cleanWaAdmin = '6282111133929';
+        }
+
+        $shareUrl = base_url('video/' . $token);
+
+        $namaDiumrahkan = ! empty($pendaftaran['nama_diumrahkan']) ? $pendaftaran['nama_diumrahkan'] : null;
+        $namaPelaksana = ! empty($pendaftaran['nama_pelaksana']) ? $pendaftaran['nama_pelaksana'] : null;
+        $namaPemesan = ! empty($pendaftaran['nama_pemesan']) ? $pendaftaran['nama_pemesan'] : null;
+
+        if ($namaDiumrahkan !== null) {
+            $waText = "Assalamu'alaikum Admin / Pelaksana Badal Umrah,\n\n"
+                . "Saya ingin menanyakan tautan video dokumentasi Badal Umrah atas nama:\n"
+                . "• Nama Jamaah: " . $namaDiumrahkan . "\n"
+                . ($namaPelaksana ? "• Pelaksana: " . $namaPelaksana . "\n" : "")
+                . "• Tautan: " . $shareUrl . "\n\n"
+                . "Tautan tersebut saat ini tidak dapat diakses / video telah dihapus. Mohon bantuan informasinya. Terima kasih.";
+        } else {
+            $waText = "Assalamu'alaikum Admin / Pelaksana Badal Umrah,\n\n"
+                . "Saya ingin menanyakan tautan video dokumentasi Badal Umrah berikut yang saat ini tidak dapat diakses (video telah dihapus/tidak ditemukan):\n"
+                . $shareUrl . "\n\n"
+                . "Mohon bantuan informasinya. Terima kasih.";
+        }
+
+        $waAdminUrl = 'https://wa.me/' . $cleanWaAdmin . '?text=' . rawurlencode($waText);
+
+        return $this->response
+            ->setStatusCode(404)
+            ->setBody(view('video_unavailable', [
+                'token'          => $token,
+                'shareUrl'       => $shareUrl,
+                'pendaftaran'    => $pendaftaran,
+                'namaDiumrahkan' => $namaDiumrahkan,
+                'namaPelaksana'  => $namaPelaksana,
+                'namaPemesan'    => $namaPemesan,
+                'cleanWaAdmin'   => $cleanWaAdmin,
+                'waAdminUrl'     => $waAdminUrl,
+            ]));
     }
 }

@@ -187,9 +187,6 @@
                         <h1 class="font-serif fw-bold text-green fs-2 mt-2 mb-1">
                             <?= esc($namaDiumrahkan); ?>
                         </h1>
-                        <p class="text-muted small mb-0">
-                            <i class="fa-solid fa-file-video text-gold me-1"></i> <?= esc($namaVideo); ?>
-                        </p>
                     </div>
 
                     <!-- Pemutar Video Realtime -->
@@ -197,7 +194,7 @@
                         <video id="playerVideo" controls autoplay playsinline preload="auto">
                             <source src="<?= esc($streamUrl); ?>" type="video/mp4">
                             <?php if ($video['mime_type'] !== 'video/mp4'): ?>
-                            <source src="<?= esc($streamUrl); ?>" type="<?= esc($video['mime_type']); ?>">
+                                <source src="<?= esc($streamUrl); ?>" type="<?= esc($video['mime_type']); ?>">
                             <?php endif; ?>
                             <source src="<?= esc($streamUrl); ?>">
                             Browser Anda tidak mendukung pemutar video HTML5. Silakan unduh berkas video menggunakan tombol di bawah.
@@ -249,22 +246,22 @@
                                 <div class="meta-value"><?= esc($namaDiumrahkan); ?></div>
                             </div>
                             <?php if (! empty($pendaftaran['nama_pemesan'])): ?>
-                            <div class="col-sm-6 col-md-4">
-                                <div class="meta-label">Pemesan / Keluarga</div>
-                                <div class="meta-value"><?= esc($pendaftaran['nama_pemesan']); ?></div>
-                            </div>
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="meta-label">Pemesan / Keluarga</div>
+                                    <div class="meta-value"><?= esc($pendaftaran['nama_pemesan']); ?></div>
+                                </div>
                             <?php endif; ?>
                             <?php if (! empty($pendaftaran['paket_pilihan'])): ?>
-                            <div class="col-sm-6 col-md-4">
-                                <div class="meta-label">Paket Badal Umrah</div>
-                                <div class="meta-value"><?= esc($pendaftaran['paket_pilihan']); ?></div>
-                            </div>
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="meta-label">Paket Badal Umrah</div>
+                                    <div class="meta-value"><?= esc($pendaftaran['paket_pilihan']); ?></div>
+                                </div>
                             <?php endif; ?>
                             <?php if (! empty($pendaftaran['tempat_miqat'])): ?>
-                            <div class="col-sm-6 col-md-4">
-                                <div class="meta-label">Tempat Miqat</div>
-                                <div class="meta-value"><?= esc($pendaftaran['tempat_miqat']); ?></div>
-                            </div>
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="meta-label">Tempat Miqat</div>
+                                    <div class="meta-value"><?= esc($pendaftaran['tempat_miqat']); ?></div>
+                                </div>
                             <?php endif; ?>
                             <div class="col-sm-6 col-md-4">
                                 <div class="meta-label">Waktu Pengunggahan</div>
@@ -303,7 +300,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const shareText = <?= json_encode("Video Dokumentasi Badal Umrah - " . $namaDiumrahkan . "\n\n" . $shareUrl); ?>;
             const btnSalin = document.getElementById('btnSalinTautan');
 
@@ -341,7 +338,7 @@
             };
 
             if (btnSalin) {
-                btnSalin.addEventListener('click', async function () {
+                btnSalin.addEventListener('click', async function() {
                     await copyToClipboard(shareText);
                     Swal.fire({
                         icon: 'success',
@@ -349,7 +346,9 @@
                         html: `Teks judul dan tautan video berhasil disalin ke clipboard:<div class="mt-3 p-2 bg-light border rounded text-start small font-monospace user-select-all text-break">${shareText.replace(/\n\n/g, '<br><br>')}</div>`,
                         confirmButtonText: 'Tutup',
                         confirmButtonColor: '#198754',
-                        customClass: { popup: 'swal-mobile-custom' }
+                        customClass: {
+                            popup: 'swal-mobile-custom'
+                        }
                     });
                 });
             }

@@ -303,7 +303,14 @@
                                                 <i class="fa-solid fa-gear me-1"></i>Proses
                                             </button>
                                         <?php else: ?>
-                                            <a href="<?= base_url('storage/certificates/' . $row['uuid'] . '.pdf'); ?>" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+                                            <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm btn-preview-pdf"
+                                                data-url="<?= base_url('storage/certificates/' . rawurlencode($row['uuid']) . '.pdf'); ?>"
+                                                data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                                data-uuid="<?= esc($row['uuid'], 'attr'); ?>"
+                                                aria-label="Preview sertifikat PDF untuk <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
+                                                title="Preview Sertifikat PDF">
+                                                <i class="fa-solid fa-file-pdf me-1"></i>PDF
+                                            </button>
                                         <?php endif; ?>
                                         <button type="button" class="btn btn-outline-primary rounded-pill btn-edit-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
@@ -547,6 +554,59 @@
                         <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="fa-solid fa-print me-1"></i> Simpan & Generate</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Preview PDF Sertifikat -->
+    <div class="modal fade" id="modalPreviewPdf" tabindex="-1" aria-labelledby="modalPreviewPdfLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-danger text-white border-0 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-file-pdf fs-4"></i>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="modalPreviewPdfLabel">Preview Sertifikat PDF</h5>
+                            <div class="small text-white-50" id="previewPdfNamaJamaah"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-3 bg-light">
+                    <!-- Action Toolbar di atas preview -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-2 bg-white rounded-3 border shadow-sm">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill small">
+                                <i class="fa-solid fa-certificate me-1"></i> Sertifikat Resmi
+                            </span>
+                            <span class="small text-muted d-none d-md-inline font-monospace" id="previewPdfUuid"></span>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" id="btnSalinLinkPdf" class="btn btn-outline-success rounded-pill px-3 shadow-sm btn-sm">
+                                <i class="fa-solid fa-share-nodes me-1"></i> Salin Link Sertifikat
+                            </button>
+                            <a id="btnDownloadPdf" href="#" download class="btn btn-danger rounded-pill px-3 shadow-sm btn-sm">
+                                <i class="fa-solid fa-download me-1"></i> Download PDF
+                            </a>
+                            <a id="btnWaPdf" href="#" target="_blank" rel="noopener" class="btn btn-success rounded-pill px-3 shadow-sm btn-sm" title="Bagikan via WhatsApp">
+                                <i class="fa-brands fa-whatsapp me-1"></i> Kirim WA
+                            </a>
+                            <a id="btnBukaTabPdf" href="#" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" title="Buka di tab baru">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Tab Baru
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Container Iframe PDF Preview -->
+                    <div class="rounded-3 overflow-hidden border bg-dark position-relative shadow-sm" style="height: 70vh; min-height: 420px;">
+                        <iframe id="iframePreviewPdf" src="" class="w-100 h-100 border-0" style="display: block;" title="Preview PDF Sertifikat"></iframe>
+                    </div>
+
+                    <div class="small text-muted mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="fa-solid fa-circle-info text-primary me-1"></i> Jika PDF tidak tampil otomatis di browser perangkat Anda, silakan klik tombol <strong>Download PDF</strong> atau <strong>Tab Baru</strong>.</span>
+                        <span class="text-secondary small">Badal Umrah Amanah & Terpercaya</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -811,7 +871,7 @@
             }
 
             if (!copied) {
-                window.prompt('Salin teks dan tautan video ini:', text || fallbackUrl);
+                window.prompt('Salin teks dan tautan ini:', text || fallbackUrl);
             }
             return copied;
         };
@@ -1040,6 +1100,106 @@
                 Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Video gagal dihapus.' });
             }
         });
+
+        // ================= PDF Preview Modal =================
+        const modalPreviewPdf = document.getElementById('modalPreviewPdf');
+        const iframePreviewPdf = document.getElementById('iframePreviewPdf');
+        const previewPdfNamaJamaah = document.getElementById('previewPdfNamaJamaah');
+        const previewPdfUuid = document.getElementById('previewPdfUuid');
+        const btnSalinLinkPdf = document.getElementById('btnSalinLinkPdf');
+        const btnDownloadPdf = document.getElementById('btnDownloadPdf');
+        const btnBukaTabPdf = document.getElementById('btnBukaTabPdf');
+        const btnWaPdf = document.getElementById('btnWaPdf');
+        let currentPdfUrl = '';
+        let currentPdfNama = '';
+        let currentPdfUuid = '';
+
+        const escapeHtml = str => String(str).replace(/[&<>"']/g, match => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[match]));
+
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('.btn-preview-pdf');
+            if (!button) return;
+
+            currentPdfUrl = button.dataset.url || '';
+            currentPdfNama = (button.dataset.nama || '').trim();
+            currentPdfUuid = (button.dataset.uuid || '').trim();
+
+            if (previewPdfNamaJamaah) {
+                previewPdfNamaJamaah.textContent = currentPdfNama ? `Jamaah: ${currentPdfNama}` : '';
+            }
+            if (previewPdfUuid) {
+                previewPdfUuid.textContent = currentPdfUuid ? `ID: ${currentPdfUuid}` : '';
+            }
+
+            if (btnDownloadPdf) {
+                btnDownloadPdf.href = currentPdfUrl;
+                const safeNama = (currentPdfNama || 'Jamaah').replace(/[^a-zA-Z0-9_\-]/g, '_');
+                btnDownloadPdf.setAttribute('download', `Sertifikat-Badal-Umrah-${safeNama}.pdf`);
+            }
+
+            if (btnBukaTabPdf) {
+                btnBukaTabPdf.href = currentPdfUrl;
+            }
+
+            if (btnWaPdf) {
+                const shareTitle = `Sertifikat Badal Umrah - ${currentPdfNama || 'Jamaah'}`;
+                const waText = `${shareTitle}\n\n${currentPdfUrl}`;
+                btnWaPdf.href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+            }
+
+            if (iframePreviewPdf) {
+                iframePreviewPdf.src = currentPdfUrl;
+            }
+
+            bootstrap.Modal.getOrCreateInstance(modalPreviewPdf).show();
+        });
+
+        if (modalPreviewPdf && iframePreviewPdf) {
+            modalPreviewPdf.addEventListener('hidden.bs.modal', function() {
+                iframePreviewPdf.src = 'about:blank';
+            });
+        }
+
+        if (btnSalinLinkPdf) {
+            btnSalinLinkPdf.addEventListener('click', async function() {
+                if (!currentPdfUrl) return;
+
+                const shareTitle = `Sertifikat Badal Umrah - ${currentPdfNama || 'Jamaah'}`;
+                const shareText = `${shareTitle}\n\n${currentPdfUrl}`;
+
+                try {
+                    await copyShareText(shareText, currentPdfUrl);
+
+                    const originalHtml = btnSalinLinkPdf.innerHTML;
+                    btnSalinLinkPdf.className = 'btn btn-success rounded-pill px-3 shadow-sm btn-sm';
+                    btnSalinLinkPdf.innerHTML = '<i class="fa-solid fa-check me-1"></i> Disalin!';
+                    setTimeout(() => {
+                        btnSalinLinkPdf.className = 'btn btn-outline-success rounded-pill px-3 shadow-sm btn-sm';
+                        btnSalinLinkPdf.innerHTML = originalHtml;
+                    }, 2500);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tautan & Format Disalin!',
+                        html: `Format teks dan tautan sertifikat berhasil disalin ke clipboard:<div class="mt-3 p-3 bg-light border rounded text-start small font-monospace user-select-all text-break"><strong>${escapeHtml(shareTitle)}</strong><br><br><a href="${currentPdfUrl}" target="_blank" class="text-success text-decoration-none">${currentPdfUrl}</a></div>`,
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#198754'
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Tautan sertifikat gagal disalin.'
+                    });
+                }
+            });
+        }
 
         // Submit Form ke Backend
         document.getElementById('formProsesSertifikat').addEventListener('submit', function(e) {

@@ -126,7 +126,7 @@
             button.addEventListener('click', () => sendTrashAction(
                 `<?= base_url('admin/pendaftaran'); ?>/${button.dataset.id}/hapus-permanen`,
                 'Hapus permanen?',
-                `Data ${button.dataset.uuid} dan berkas sertifikatnya tidak dapat dipulihkan.`,
+                `Data ${button.dataset.uuid}, berkas sertifikat, dan video dokumentasinya tidak dapat dipulihkan.`,
                 'Berhasil dihapus'
             ));
         });

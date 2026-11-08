@@ -140,4 +140,62 @@ final class VideoWatchTest extends CIUnitTestCase
         $this->assertStringContainsString('attachment', $downloadResponse->getHeaderLine('Content-Disposition'));
         $this->assertStringContainsString('Pelaksanaan Tawaf.mp4', $downloadResponse->getHeaderLine('Content-Disposition'));
     }
+
+    public function testTontonVideoShowsUnavailablePageWhenTokenNotFound(): void
+    {
+        $controller = new PendaftaranController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $request->setHeader('Accept', 'text/html,application/xhtml+xml');
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $randomToken = str_repeat('f', 64);
+        $result = $controller->tontonVideo($randomToken);
+
+        $this->assertInstanceOf(Response::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+        $body = (string) $result->getBody();
+        $this->assertStringContainsString('Video Dokumentasi Tidak Ditemukan', $body);
+        $this->assertStringContainsString('Hubungi Admin / Pelaksana via WhatsApp', $body);
+        $this->assertStringContainsString('https://wa.me/', $body);
+    }
+
+    public function testTontonVideoShowsUnavailablePageWhenPhysicalVideoFileMissing(): void
+    {
+        // Delete the physical file created in setUp
+        if (is_file($this->testVideoPath)) {
+            unlink($this->testVideoPath);
+        }
+
+        $controller = new PendaftaranController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $request->setHeader('Accept', 'text/html,application/xhtml+xml');
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $result = $controller->tontonVideo($this->token);
+
+        $this->assertInstanceOf(Response::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+        $body = (string) $result->getBody();
+        $this->assertStringContainsString('Video Dokumentasi Tidak Ditemukan', $body);
+        $this->assertStringContainsString('Alm. Bpk. H. Ahmad Dahlan', $body);
+        $this->assertStringContainsString('Hubungi Admin / Pelaksana via WhatsApp', $body);
+        $this->assertStringContainsString('https://wa.me/', $body);
+    }
+
+    public function testDownloadRedirectsToUnavailablePageWhenVideoNotFound(): void
+    {
+        $controller = new PendaftaranController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $randomToken = str_repeat('e', 64);
+        $res = $controller->downloadSharedVideo($randomToken);
+
+        $this->assertInstanceOf(Response::class, $res);
+        $this->assertSame(302, $res->getStatusCode());
+        $this->assertStringContainsString('video/' . $randomToken, $res->getHeaderLine('Location'));
+    }
 }

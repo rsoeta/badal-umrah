@@ -336,12 +336,13 @@ class AdminController extends Controller
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data di sampah tidak ditemukan.']);
         }
 
+        $videoModel = new VideoDokumentasiModel();
+        $videos = $videoModel->where('pendaftaran_id', $id)->findAll();
+
         if (!$pendaftaranModel->delete($id, true)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data gagal dihapus permanen.']);
         }
 
-        $videoModel = new VideoDokumentasiModel();
-        $videos = $videoModel->where('pendaftaran_id', $id)->findAll();
         $uuid = basename($pendaftaran['uuid']);
         $files = [
             FCPATH . 'storage/certificates/' . $uuid . '.jpg',
