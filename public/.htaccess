@@ -26,6 +26,11 @@ Options -Indexes
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
 
+	# Redirect WhatsApp / Facebook / Twitter crawlers requesting PDF to HTML preview page
+	# so that link preview card with image and description is generated
+	RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|WhatsApp|Twitterbot|TelegramBot) [NC]
+	RewriteRule ^storage/certificates/([a-zA-Z0-9_\-]+)\.pdf$ sertifikat/$1 [R=302,L]
+
 	# Checks to see if the user is attempting to access a valid file,
 	# such as an image or css document, if this isn't true it sends the
 	# request to the front controller, index.php

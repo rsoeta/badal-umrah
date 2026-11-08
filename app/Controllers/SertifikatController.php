@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 use App\Libraries\SertifikatGenerator;
+use App\Models\PendaftaranModel;
+use App\Models\VideoDokumentasiModel;
 
 class SertifikatController extends Controller
 {
@@ -120,5 +122,59 @@ class SertifikatController extends Controller
         $bulan_hijri = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir', 'Rajab', "Sya'ban", 'Ramadhan', 'Syawal', 'Dzulqa\'dah', 'Dzulhijjah'];
 
         return $d_hijri . ' ' . $bulan_hijri[$m_hijri - 1] . ' ' . $y_hijri;
+    }
+
+    public function lihat(string $uuid)
+    {
+        $uuid = basename(trim($uuid));
+        if ($uuid === '' || ! preg_match('/\A[a-zA-Z0-9_\-]+\z/', $uuid)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Sertifikat tidak ditemukan.');
+        }
+
+        $pendaftaran = (new PendaftaranModel())->where('uuid', $uuid)->first();
+
+        $pdfPath = FCPATH . 'storage/certificates/' . $uuid . '.pdf';
+        $jpgPath = FCPATH . 'storage/certificates/' . $uuid . '.jpg';
+
+        $hasPdf = is_file($pdfPath);
+        $hasJpg = is_file($jpgPath);
+
+        if (! $hasPdf && ! $hasJpg && ! $pendaftaran) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Sertifikat tidak ditemukan.');
+        }
+
+        $namaDiumrahkan = $pendaftaran['nama_diumrahkan'] ?? 'Jamaah';
+        $namaPelaksana = $pendaftaran['nama_pelaksana'] ?? null;
+        $tanggalMiqat = $pendaftaran['tanggal_miqat'] ?? null;
+        $tanggalCetak = $pendaftaran['tanggal_cetak'] ?? null;
+        $paketPilihan = $pendaftaran['paket_pilihan'] ?? null;
+
+        $urlPdf = base_url('storage/certificates/' . rawurlencode($uuid) . '.pdf');
+        $urlJpg = $hasJpg
+            ? base_url('storage/certificates/' . rawurlencode($uuid) . '.jpg')
+            : base_url('img/logo-utama.png');
+        $shareUrl = base_url('sertifikat/' . rawurlencode($uuid));
+
+        $videos = [];
+        if (! empty($pendaftaran['id'])) {
+            $videos = (new VideoDokumentasiModel())
+                ->where('pendaftaran_id', $pendaftaran['id'])
+                ->where('share_token IS NOT NULL', null, false)
+                ->findAll();
+        }
+
+        return view('sertifikat_view', [
+            'uuid'            => $uuid,
+            'pendaftaran'     => $pendaftaran,
+            'namaDiumrahkan'  => $namaDiumrahkan,
+            'namaPelaksana'   => $namaPelaksana,
+            'tanggalMiqat'    => $tanggalMiqat,
+            'tanggalCetak'    => $tanggalCetak,
+            'paketPilihan'    => $paketPilihan,
+            'urlPdf'          => $urlPdf,
+            'urlJpg'          => $urlJpg,
+            'shareUrl'        => $shareUrl,
+            'videos'          => $videos,
+        ]);
     }
 }

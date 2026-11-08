@@ -5,6 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Badal Umrah</title>
+    <meta name="title" content="Admin Dashboard - Badal Umrah">
+    <meta name="description" content="Panel Administrasi Layanan Badal Umrah. Kelola data pendaftar, pencetakan sertifikat, dan arsip video dokumentasi.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
+    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= base_url('admin'); ?>">
+    <meta property="og:title" content="Admin Dashboard - Badal Umrah">
+    <meta property="og:description" content="Panel Administrasi Layanan Badal Umrah. Kelola data pendaftar, sertifikat, dan video dokumentasi.">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Admin Dashboard - Badal Umrah">
+    <meta name="twitter:description" content="Panel Administrasi Layanan Badal Umrah. Kelola data pendaftar, sertifikat, dan video dokumentasi.">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,9 +39,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Favicon yang Benar -->
-    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
-    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
 
     <style>
         /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */
@@ -305,6 +323,7 @@
                                         <?php else: ?>
                                             <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm btn-preview-pdf"
                                                 data-url="<?= base_url('storage/certificates/' . rawurlencode($row['uuid']) . '.pdf'); ?>"
+                                                data-share-url="<?= base_url('sertifikat/' . rawurlencode($row['uuid'])); ?>"
                                                 data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                                 data-uuid="<?= esc($row['uuid'], 'attr'); ?>"
                                                 aria-label="Preview sertifikat PDF untuk <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
@@ -1111,6 +1130,7 @@
         const btnBukaTabPdf = document.getElementById('btnBukaTabPdf');
         const btnWaPdf = document.getElementById('btnWaPdf');
         let currentPdfUrl = '';
+        let currentPdfShareUrl = '';
         let currentPdfNama = '';
         let currentPdfUuid = '';
 
@@ -1127,6 +1147,7 @@
             if (!button) return;
 
             currentPdfUrl = button.dataset.url || '';
+            currentPdfShareUrl = button.dataset.shareUrl || currentPdfUrl;
             currentPdfNama = (button.dataset.nama || '').trim();
             currentPdfUuid = (button.dataset.uuid || '').trim();
 
@@ -1149,7 +1170,8 @@
 
             if (btnWaPdf) {
                 const shareTitle = `Sertifikat Badal Umrah - ${currentPdfNama || 'Jamaah'}`;
-                const waText = `${shareTitle}\n\n${currentPdfUrl}`;
+                const shareTargetUrl = currentPdfShareUrl || currentPdfUrl;
+                const waText = `${shareTitle}\n\n${shareTargetUrl}`;
                 btnWaPdf.href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
             }
 
@@ -1171,10 +1193,11 @@
                 if (!currentPdfUrl) return;
 
                 const shareTitle = `Sertifikat Badal Umrah - ${currentPdfNama || 'Jamaah'}`;
-                const shareText = `${shareTitle}\n\n${currentPdfUrl}`;
+                const shareTargetUrl = currentPdfShareUrl || currentPdfUrl;
+                const shareText = `${shareTitle}\n\n${shareTargetUrl}`;
 
                 try {
-                    await copyShareText(shareText, currentPdfUrl);
+                    await copyShareText(shareText, shareTargetUrl);
 
                     const originalHtml = btnSalinLinkPdf.innerHTML;
                     btnSalinLinkPdf.className = 'btn btn-success rounded-pill px-3 shadow-sm btn-sm';
@@ -1187,7 +1210,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Tautan & Format Disalin!',
-                        html: `Format teks dan tautan sertifikat berhasil disalin ke clipboard:<div class="mt-3 p-3 bg-light border rounded text-start small font-monospace user-select-all text-break"><strong>${escapeHtml(shareTitle)}</strong><br><br><a href="${currentPdfUrl}" target="_blank" class="text-success text-decoration-none">${currentPdfUrl}</a></div>`,
+                        html: `Format teks dan tautan sertifikat berhasil disalin ke clipboard:<div class="mt-3 p-3 bg-light border rounded text-start small font-monospace user-select-all text-break"><strong>${escapeHtml(shareTitle)}</strong><br><br><a href="${shareTargetUrl}" target="_blank" class="text-success text-decoration-none">${shareTargetUrl}</a></div>`,
                         confirmButtonText: 'Tutup',
                         confirmButtonColor: '#198754'
                     });

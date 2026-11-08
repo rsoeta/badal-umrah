@@ -5,9 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generator Sertifikat Badal Umrah</title>
+    <meta name="title" content="Generator Sertifikat Badal Umrah">
+    <meta name="description" content="Formulir pembuatan dan cetak sertifikat resmi pelaksanaan Badal Umrah. Amanah, transparan, dan terpercaya.">
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
     <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= base_url('sertifikat'); ?>">
+    <meta property="og:title" content="Generator Sertifikat Badal Umrah">
+    <meta property="og:description" content="Pembuatan dan cetak sertifikat resmi pelaksanaan Badal Umrah. Amanah, transparan, dan terpercaya.">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Generator Sertifikat Badal Umrah">
+    <meta name="twitter:description" content="Pembuatan dan cetak sertifikat resmi pelaksanaan Badal Umrah.">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
     <style>
         body {
             font-family: Arial, sans-serif;

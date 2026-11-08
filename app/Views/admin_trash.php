@@ -5,11 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sampah Pendaftaran - Admin</title>
+    <meta name="title" content="Sampah Pendaftaran - Admin">
+    <meta name="description" content="Kelola sampah pendaftaran dan pemulihan arsip data pendaftar Badal Umrah.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
+    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= base_url('admin/sampah'); ?>">
+    <meta property="og:title" content="Sampah Pendaftaran - Admin">
+    <meta property="og:description" content="Kelola sampah pendaftaran dan pemulihan arsip data pendaftar Badal Umrah.">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Sampah Pendaftaran - Admin">
+    <meta name="twitter:description" content="Kelola sampah pendaftaran dan pemulihan arsip data pendaftar Badal Umrah.">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
-    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
 </head>
 
 <body class="bg-light">

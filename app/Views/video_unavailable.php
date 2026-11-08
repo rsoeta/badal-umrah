@@ -9,15 +9,35 @@
     $pageTitle = ! empty($namaDiumrahkan)
         ? 'Video Dokumentasi Tidak Tersedia - ' . $namaDiumrahkan
         : 'Video Dokumentasi Tidak Tersedia';
+    $ogDesc = ! empty($namaDiumrahkan)
+        ? 'Informasi video dokumentasi pelaksanaan Badal Umrah atas nama ' . $namaDiumrahkan . '. Tautan video saat ini tidak tersedia atau telah dihapus.'
+        : 'Informasi video dokumentasi pelaksanaan Badal Umrah yang tidak tersedia atau telah dihapus. Hubungi Admin / Pelaksana untuk bantuan.';
     ?>
 
     <title><?= esc($pageTitle); ?> | Badal Umrah</title>
     <meta name="title" content="<?= esc($pageTitle); ?>">
-    <meta name="description" content="Informasi video dokumentasi pelaksanaan Badal Umrah yang tidak tersedia atau telah dihapus.">
+    <meta name="description" content="<?= esc($ogDesc); ?>">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
     <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= esc($shareUrl ?? current_url()); ?>">
+    <meta property="og:title" content="<?= esc($pageTitle); ?> | Badal Umrah">
+    <meta property="og:description" content="<?= esc($ogDesc); ?>">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="<?= esc($shareUrl ?? current_url()); ?>">
+    <meta name="twitter:title" content="<?= esc($pageTitle); ?> | Badal Umrah">
+    <meta name="twitter:description" content="<?= esc($ogDesc); ?>">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

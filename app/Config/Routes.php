@@ -35,6 +35,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 });
 
 $routes->get('sertifikat', 'SertifikatController::index');
+$routes->get('sertifikat/(:segment)', 'SertifikatController::lihat/$1');
 $routes->post('sertifikat/generate', 'SertifikatController::generate');
 
 // Halaman Form Pendaftaran

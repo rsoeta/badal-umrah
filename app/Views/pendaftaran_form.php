@@ -14,10 +14,17 @@
 
     <!-- Open Graph / WhatsApp / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="<?= base_url(); ?>">
+    <meta property="og:url" content="<?= base_url('pendaftaran'); ?>">
     <meta property="og:title" content="Form Pendaftaran Badal Umrah - Azis Rustandi">
     <meta property="og:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
     <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Form Pendaftaran Badal Umrah - Azis Rustandi">
+    <meta name="twitter:description" content="Menghadirkan Cinta dan Doa di Tanah Suci untuk Mereka yang Tercinta. Layanan Badal Umrah profesional dengan sertifikat eksklusif.">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

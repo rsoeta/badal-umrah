@@ -158,6 +158,9 @@ final class VideoWatchTest extends CIUnitTestCase
         $this->assertStringContainsString('Video Dokumentasi Tidak Ditemukan', $body);
         $this->assertStringContainsString('Hubungi Admin / Pelaksana via WhatsApp', $body);
         $this->assertStringContainsString('https://wa.me/', $body);
+        $this->assertStringContainsString('property="og:image"', $body);
+        $this->assertStringContainsString('property="og:title"', $body);
+        $this->assertStringContainsString('property="og:description"', $body);
     }
 
     public function testTontonVideoShowsUnavailablePageWhenPhysicalVideoFileMissing(): void

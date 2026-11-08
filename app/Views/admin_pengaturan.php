@@ -5,10 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pengaturan Master - Badal Umrah</title>
+    <meta name="title" content="Pengaturan Master - Badal Umrah">
+    <meta name="description" content="Pengaturan master sistem Badal Umrah, daftar mutawwif, dan konfigurasi kalender Hijriah.">
+    <meta name="robots" content="noindex, nofollow">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= base_url('img/logo-utama.png?v=2'); ?>" />
     <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico?v=2'); ?>" />
+
+    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= base_url('admin/pengaturan'); ?>">
+    <meta property="og:title" content="Pengaturan Master - Badal Umrah">
+    <meta property="og:description" content="Pengaturan master sistem Badal Umrah, daftar mutawwif, dan konfigurasi kalender Hijriah.">
+    <meta property="og:image" content="<?= base_url('img/logo-utama.png'); ?>">
+    <meta property="og:site_name" content="Badal Umrah">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Pengaturan Master - Badal Umrah">
+    <meta name="twitter:description" content="Pengaturan master sistem Badal Umrah, daftar mutawwif, dan konfigurasi kalender Hijriah.">
+    <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
