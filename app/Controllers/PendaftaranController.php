@@ -103,10 +103,21 @@ class PendaftaranController extends Controller
         $data = $pendaftaranModel->where('uuid', $uuid)->first();
 
         if ($data) {
-            $videos = (new VideoDokumentasiModel())
+            $videoModel = new VideoDokumentasiModel();
+            $rawVideos = $videoModel
                 ->where('pendaftaran_id', $data['id'])
-                ->where('share_token IS NOT NULL', null, false)
                 ->findAll();
+
+            $videos = [];
+            foreach ($rawVideos as $vid) {
+                if (empty($vid['share_token'])) {
+                    $token = bin2hex(random_bytes(32));
+                    $videoModel->update($vid['id'], ['share_token' => $token]);
+                    $vid['share_token'] = $token;
+                }
+                $videos[] = $vid;
+            }
+
             $sharedVideos = array_map(static function (array $video): array {
                 $token = $video['share_token'] ?? '';
 

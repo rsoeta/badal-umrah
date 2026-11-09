@@ -157,10 +157,20 @@ class SertifikatController extends Controller
 
         $videos = [];
         if (! empty($pendaftaran['id'])) {
-            $videos = (new VideoDokumentasiModel())
+            $videoModel = new VideoDokumentasiModel();
+            $rawVideos = $videoModel
                 ->where('pendaftaran_id', $pendaftaran['id'])
-                ->where('share_token IS NOT NULL', null, false)
                 ->findAll();
+
+            foreach ($rawVideos as $vid) {
+                // Pastikan video memiliki share_token valid agar link tontonan langsung dapat diakses
+                if (empty($vid['share_token'])) {
+                    $token = bin2hex(random_bytes(32));
+                    $videoModel->update($vid['id'], ['share_token' => $token]);
+                    $vid['share_token'] = $token;
+                }
+                $videos[] = $vid;
+            }
         }
 
         return view('sertifikat_view', [

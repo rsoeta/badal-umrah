@@ -648,12 +648,14 @@ class AdminController extends Controller
                 ]);
             }
 
+            $shareToken = bin2hex(random_bytes(32));
             $videoId = $videoModel->insert([
                 'pendaftaran_id' => $id,
                 'file_name'      => $storedName,
                 'original_name'  => $validatedFile['original_name'],
                 'mime_type'      => $validatedFile['mime_type'],
                 'file_size'      => $validatedFile['file_size'],
+                'share_token'    => $shareToken,
                 'created_at'     => date('Y-m-d H:i:s'),
             ]);
 

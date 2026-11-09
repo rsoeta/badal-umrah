@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Controllers\SertifikatController;
 use App\Models\PendaftaranModel;
+use App\Models\VideoDokumentasiModel;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -91,6 +92,41 @@ final class SertifikatViewTest extends CIUnitTestCase
         $this->assertStringContainsString($this->testUuid . '.jpg', $html);
         $this->assertStringContainsString($this->testUuid . '.pdf', $html);
         $this->assertStringContainsString('name="twitter:card"', $html);
+    }
+
+    public function testLihatDisplaysDokumentasiVideoWhenVideoAttached(): void
+    {
+        $videoModel = new VideoDokumentasiModel();
+        $videoId = $videoModel->insert([
+            'pendaftaran_id' => $this->pendaftaranId,
+            'file_name'      => 'test_dokumentasi_umrah.mp4',
+            'original_name'  => 'Dokumentasi-Thawaf.mp4',
+            'mime_type'      => 'video/mp4',
+            'file_size'      => 1048576,
+            'share_token'    => null, // Sengaja null untuk memverifikasi auto-generate token
+            'created_at'     => date('Y-m-d H:i:s'),
+        ]);
+
+        $controller = new SertifikatController();
+        $request = new IncomingRequest(new App(), service('uri'), null, new UserAgent());
+        $response = new Response(new App());
+        $controller->initController($request, $response, Services::logger());
+
+        $html = $controller->lihat($this->testUuid);
+
+        $this->assertIsString($html);
+        $this->assertStringContainsString('Dokumentasi Video Pelaksanaan', $html);
+        $this->assertStringContainsString('Dokumentasi-Thawaf.mp4', $html);
+        $this->assertStringContainsString('Tonton Video', $html);
+
+        // Verifikasi bahwa share_token otomatis dibuat di database
+        $updatedVideo = $videoModel->find($videoId);
+        $this->assertNotNull($updatedVideo['share_token']);
+        $this->assertSame(64, strlen($updatedVideo['share_token']));
+        $this->assertStringContainsString('/video/' . $updatedVideo['share_token'], $html);
+
+        // Clean up
+        $videoModel->delete($videoId, true);
     }
 
     public function testLihatThrows404ForNonexistentUuid(): void
