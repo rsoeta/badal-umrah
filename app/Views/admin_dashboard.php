@@ -237,7 +237,7 @@
 
                 <a href="<?= base_url('admin/sampah'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" aria-label="Sampah">
                     <i class="fa-solid fa-trash me-1"></i><span class="d-none d-sm-inline">Sampah</span>
-                    <?php if ($jumlah_sampah > 0): ?>
+                    <?php if (! empty($jumlah_sampah) && $jumlah_sampah > 0): ?>
                         <span class="badge bg-warning text-dark ms-1"><?= $jumlah_sampah; ?></span>
                     <?php endif; ?>
                 </a>
@@ -610,11 +610,25 @@
                 <div class="modal-body p-3 bg-light">
                     <!-- Action Toolbar di atas preview -->
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-2 bg-white rounded-3 border shadow-sm">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
                             <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill small">
                                 <i class="fa-solid fa-certificate me-1"></i> Sertifikat Resmi
                             </span>
                             <span class="small text-muted d-none d-md-inline font-monospace" id="previewPdfUuid"></span>
+
+                            <!-- Zoom Controls for PDF.js -->
+                            <div class="btn-group btn-group-sm shadow-sm ms-md-2" role="group" aria-label="Kontrol Zoom PDF">
+                                <button type="button" id="btnPdfZoomOut" class="btn btn-outline-secondary" title="Perkecil">
+                                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                                </button>
+                                <button type="button" id="btnPdfZoomFit" class="btn btn-outline-secondary px-2" title="Sesuaikan Lebar Layar">
+                                    <i class="fa-solid fa-arrows-left-right me-1"></i>Fit
+                                </button>
+                                <button type="button" id="btnPdfZoomIn" class="btn btn-outline-secondary" title="Perbesar">
+                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                </button>
+                                <span id="pdfZoomLabel" class="btn btn-outline-secondary disabled font-monospace text-dark bg-light px-2" style="opacity: 1;">100%</span>
+                            </div>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" id="btnSalinLinkPdf" class="btn btn-outline-success rounded-pill px-3 shadow-sm btn-sm">
@@ -632,13 +646,37 @@
                         </div>
                     </div>
 
-                    <!-- Container Iframe PDF Preview -->
-                    <div class="rounded-3 overflow-hidden border bg-dark position-relative shadow-sm" style="height: 70vh; min-height: 420px;">
-                        <iframe id="iframePreviewPdf" src="" class="w-100 h-100 border-0" style="display: block;" title="Preview PDF Sertifikat"></iframe>
+                    <!-- Container Mozilla PDF.js Canvas Preview -->
+                    <div id="pdfViewerWrapper" class="rounded-3 overflow-auto border bg-secondary bg-opacity-25 position-relative shadow-sm d-flex flex-column align-items-center p-2 p-md-3" style="height: 70vh; min-height: 420px; max-height: 85vh; -webkit-overflow-scrolling: touch;">
+                        <!-- Loading State -->
+                        <div id="pdfLoadingSpinner" class="text-center my-auto py-5">
+                            <div class="spinner-border text-danger mb-2" role="status">
+                                <span class="visually-hidden">Memuat PDF...</span>
+                            </div>
+                            <div class="small text-muted fw-semibold">Memuat pratinjau sertifikat via Mozilla PDF.js...</div>
+                        </div>
+
+                        <!-- Error Fallback Notice -->
+                        <div id="pdfErrorNotice" class="alert alert-danger d-none text-center my-auto p-4 m-3 rounded-3 shadow-sm" style="max-width: 500px;">
+                            <i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-danger"></i>
+                            <div class="fw-bold mb-1">Pratinjau PDF Tidak Dapat Ditampilkan</div>
+                            <div class="small mb-3 text-muted" id="pdfErrorMessage">Browser mengalami kendala saat merender berkas PDF langsung.</div>
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <a id="btnFallbackDownloadPdf" href="#" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" download>
+                                    <i class="fa-solid fa-download me-1"></i> Unduh PDF
+                                </a>
+                                <a id="btnFallbackTabPdf" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka di Tab Baru
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Container -->
+                        <div id="pdfPagesContainer" class="d-flex flex-column align-items-center w-100"></div>
                     </div>
 
                     <div class="small text-muted mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <span><i class="fa-solid fa-circle-info text-primary me-1"></i> Jika PDF tidak tampil otomatis di browser perangkat Anda, silakan klik tombol <strong>Download PDF</strong> atau <strong>Tab Baru</strong>.</span>
+                        <span><i class="fa-solid fa-shield-halved text-success me-1"></i> Pratinjau kompatibel untuk layar ponsel & desktop via Mozilla PDF.js.</span>
                         <span class="text-secondary small">Badal Umrah Amanah & Terpercaya</span>
                     </div>
                 </div>
@@ -656,6 +694,8 @@
     <!-- Flatpickr with Indonesian locale -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js"></script>
+    <!-- Mozilla PDF.js (Cross-Device Mobile & Desktop PDF Viewer) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <script>
         // Blur active element before SweetAlert2 shows to avoid WAI-ARIA aria-hidden console warning on modal descendants
@@ -1165,19 +1205,223 @@
             }
         });
 
-        // ================= PDF Preview Modal =================
+        // ================= Mozilla PDF.js Preview Modal =================
         const modalPreviewPdf = document.getElementById('modalPreviewPdf');
-        const iframePreviewPdf = document.getElementById('iframePreviewPdf');
+        const pdfViewerWrapper = document.getElementById('pdfViewerWrapper');
+        const pdfPagesContainer = document.getElementById('pdfPagesContainer');
+        const pdfLoadingSpinner = document.getElementById('pdfLoadingSpinner');
+        const pdfErrorNotice = document.getElementById('pdfErrorNotice');
+        const pdfErrorMessage = document.getElementById('pdfErrorMessage');
+        const btnPdfZoomOut = document.getElementById('btnPdfZoomOut');
+        const btnPdfZoomFit = document.getElementById('btnPdfZoomFit');
+        const btnPdfZoomIn = document.getElementById('btnPdfZoomIn');
+        const pdfZoomLabel = document.getElementById('pdfZoomLabel');
+
         const previewPdfNamaJamaah = document.getElementById('previewPdfNamaJamaah');
         const previewPdfUuid = document.getElementById('previewPdfUuid');
         const btnSalinLinkPdf = document.getElementById('btnSalinLinkPdf');
         const btnDownloadPdf = document.getElementById('btnDownloadPdf');
         const btnBukaTabPdf = document.getElementById('btnBukaTabPdf');
         const btnWaPdf = document.getElementById('btnWaPdf');
+        const btnFallbackDownloadPdf = document.getElementById('btnFallbackDownloadPdf');
+        const btnFallbackTabPdf = document.getElementById('btnFallbackTabPdf');
+
         let currentPdfUrl = '';
         let currentPdfShareUrl = '';
         let currentPdfNama = '';
         let currentPdfUuid = '';
+
+        let currentPdfDoc = null;
+        let currentPdfLoadingTask = null;
+        let currentRenderTasks = [];
+        let currentZoomScale = 1.0;
+        let isZoomFit = true;
+
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        const updateZoomLabel = () => {
+            if (!pdfZoomLabel) return;
+            const pct = Math.round((isZoomFit ? 1.0 : currentZoomScale) * 100);
+            pdfZoomLabel.textContent = `${pct}%`;
+        };
+
+        const cancelAllRenderTasks = () => {
+            currentRenderTasks.forEach(task => {
+                try { task.cancel(); } catch (e) {}
+            });
+            currentRenderTasks = [];
+        };
+
+        const renderPdfDocument = async () => {
+            if (!currentPdfDoc || !pdfPagesContainer || !pdfViewerWrapper) return;
+
+            cancelAllRenderTasks();
+            pdfPagesContainer.innerHTML = '';
+            if (pdfLoadingSpinner) pdfLoadingSpinner.classList.remove('d-none');
+            if (pdfErrorNotice) pdfErrorNotice.classList.add('d-none');
+
+            try {
+                const numPages = currentPdfDoc.numPages;
+                const wrapperWidth = pdfViewerWrapper.clientWidth > 0
+                    ? pdfViewerWrapper.clientWidth
+                    : (window.innerWidth < 768 ? window.innerWidth - 32 : 720);
+                const availableWidth = Math.max(260, wrapperWidth - 28);
+
+                const firstPage = await currentPdfDoc.getPage(1);
+                const unscaledViewport = firstPage.getViewport({ scale: 1.0 });
+                const baseFitScale = availableWidth / unscaledViewport.width;
+                const effectiveScale = isZoomFit ? baseFitScale : (baseFitScale * currentZoomScale);
+                updateZoomLabel();
+
+                const pixelRatio = Math.min(window.devicePixelRatio || 1, 2.5);
+
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                    const page = (pageNum === 1) ? firstPage : await currentPdfDoc.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: effectiveScale });
+
+                    const pageWrapper = document.createElement('div');
+                    pageWrapper.className = 'pdf-page-wrapper my-2 position-relative text-center w-100 d-flex justify-content-center';
+
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'pdf-canvas shadow rounded bg-white';
+                    const context = canvas.getContext('2d');
+
+                    canvas.width = Math.floor(viewport.width * pixelRatio);
+                    canvas.height = Math.floor(viewport.height * pixelRatio);
+                    canvas.style.width = Math.floor(viewport.width) + 'px';
+                    canvas.style.height = Math.floor(viewport.height) + 'px';
+
+                    const transform = pixelRatio !== 1 ? [pixelRatio, 0, 0, pixelRatio, 0, 0] : null;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport,
+                        transform: transform
+                    };
+
+                    pageWrapper.appendChild(canvas);
+
+                    if (numPages > 1) {
+                        const badge = document.createElement('div');
+                        badge.className = 'badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 end-0 m-2 px-2 py-1 small rounded';
+                        badge.textContent = `${pageNum} / ${numPages}`;
+                        pageWrapper.appendChild(badge);
+                    }
+
+                    pdfPagesContainer.appendChild(pageWrapper);
+
+                    const renderTask = page.render(renderContext);
+                    currentRenderTasks.push(renderTask);
+                    await renderTask.promise;
+                }
+
+                if (pdfLoadingSpinner) pdfLoadingSpinner.classList.add('d-none');
+            } catch (err) {
+                if (err && err.name === 'RenderingCancelledException') {
+                    return;
+                }
+                console.error('PDF.js render error:', err);
+                if (pdfLoadingSpinner) pdfLoadingSpinner.classList.add('d-none');
+                if (pdfErrorNotice) {
+                    pdfErrorNotice.classList.remove('d-none');
+                    if (pdfErrorMessage) {
+                        pdfErrorMessage.textContent = err.message || 'Gagal memproses pratinjau halaman PDF.';
+                    }
+                }
+            }
+        };
+
+        const loadAndRenderPdf = async (url) => {
+            if (!url) return;
+
+            cancelAllRenderTasks();
+            if (currentPdfLoadingTask) {
+                try { currentPdfLoadingTask.destroy(); } catch (e) {}
+                currentPdfLoadingTask = null;
+            }
+            if (currentPdfDoc) {
+                try { currentPdfDoc.destroy(); } catch (e) {}
+                currentPdfDoc = null;
+            }
+
+            if (pdfPagesContainer) pdfPagesContainer.innerHTML = '';
+            if (pdfLoadingSpinner) pdfLoadingSpinner.classList.remove('d-none');
+            if (pdfErrorNotice) pdfErrorNotice.classList.add('d-none');
+
+            isZoomFit = true;
+            currentZoomScale = 1.0;
+            updateZoomLabel();
+
+            if (!window.pdfjsLib) {
+                if (pdfLoadingSpinner) pdfLoadingSpinner.classList.add('d-none');
+                if (pdfErrorNotice) {
+                    pdfErrorNotice.classList.remove('d-none');
+                    if (pdfErrorMessage) {
+                        pdfErrorMessage.textContent = 'Library Mozilla PDF.js belum selesai dimuat. Silakan periksa koneksi internet Anda atau gunakan tombol unduh.';
+                    }
+                }
+                return;
+            }
+
+            try {
+                currentPdfLoadingTask = pdfjsLib.getDocument({
+                    url: url,
+                    withCredentials: false
+                });
+                currentPdfDoc = await currentPdfLoadingTask.promise;
+                await renderPdfDocument();
+            } catch (err) {
+                if (err && err.name === 'RenderingCancelledException') return;
+                console.error('PDF.js getDocument error:', err);
+                if (pdfLoadingSpinner) pdfLoadingSpinner.classList.add('d-none');
+                if (pdfErrorNotice) {
+                    pdfErrorNotice.classList.remove('d-none');
+                    if (pdfErrorMessage) {
+                        pdfErrorMessage.textContent = err.message || 'Berkas PDF tidak dapat diakses atau dimuat oleh browser.';
+                    }
+                }
+            }
+        };
+
+        // Zoom button event handlers
+        if (btnPdfZoomIn) {
+            btnPdfZoomIn.addEventListener('click', function() {
+                if (!currentPdfDoc) return;
+                isZoomFit = false;
+                currentZoomScale = Math.min(3.0, Math.round((currentZoomScale + 0.25) * 100) / 100);
+                renderPdfDocument();
+            });
+        }
+        if (btnPdfZoomOut) {
+            btnPdfZoomOut.addEventListener('click', function() {
+                if (!currentPdfDoc) return;
+                isZoomFit = false;
+                currentZoomScale = Math.max(0.5, Math.round((currentZoomScale - 0.25) * 100) / 100);
+                renderPdfDocument();
+            });
+        }
+        if (btnPdfZoomFit) {
+            btnPdfZoomFit.addEventListener('click', function() {
+                if (!currentPdfDoc) return;
+                isZoomFit = true;
+                currentZoomScale = 1.0;
+                renderPdfDocument();
+            });
+        }
+
+        // Window resize debounce
+        let pdfResizeTimeout = null;
+        window.addEventListener('resize', function() {
+            if (!modalPreviewPdf || !modalPreviewPdf.classList.contains('show') || !currentPdfDoc) return;
+            if (isZoomFit) {
+                clearTimeout(pdfResizeTimeout);
+                pdfResizeTimeout = setTimeout(() => {
+                    renderPdfDocument();
+                }, 200);
+            }
+        });
 
         const escapeHtml = str => String(str).replace(/[&<>"']/g, match => ({
             '&': '&amp;',
@@ -1203,14 +1447,23 @@
                 previewPdfUuid.textContent = currentPdfUuid ? `ID: ${currentPdfUuid}` : '';
             }
 
+            const safeNama = (currentPdfNama || 'Jamaah').replace(/[^a-zA-Z0-9_\-]/g, '_');
+            const downloadFilename = `Sertifikat-Badal-Umrah-${safeNama}.pdf`;
+
             if (btnDownloadPdf) {
                 btnDownloadPdf.href = currentPdfUrl;
-                const safeNama = (currentPdfNama || 'Jamaah').replace(/[^a-zA-Z0-9_\-]/g, '_');
-                btnDownloadPdf.setAttribute('download', `Sertifikat-Badal-Umrah-${safeNama}.pdf`);
+                btnDownloadPdf.setAttribute('download', downloadFilename);
+            }
+            if (btnFallbackDownloadPdf) {
+                btnFallbackDownloadPdf.href = currentPdfUrl;
+                btnFallbackDownloadPdf.setAttribute('download', downloadFilename);
             }
 
             if (btnBukaTabPdf) {
                 btnBukaTabPdf.href = currentPdfUrl;
+            }
+            if (btnFallbackTabPdf) {
+                btnFallbackTabPdf.href = currentPdfUrl;
             }
 
             if (btnWaPdf) {
@@ -1220,16 +1473,33 @@
                 btnWaPdf.href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
             }
 
-            if (iframePreviewPdf) {
-                iframePreviewPdf.src = currentPdfUrl;
-            }
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalPreviewPdf);
+            modalInstance.show();
 
-            bootstrap.Modal.getOrCreateInstance(modalPreviewPdf).show();
+            // Load and render PDF with Mozilla PDF.js
+            loadAndRenderPdf(currentPdfUrl);
         });
 
-        if (modalPreviewPdf && iframePreviewPdf) {
+        if (modalPreviewPdf) {
+            modalPreviewPdf.addEventListener('shown.bs.modal', function() {
+                if (currentPdfDoc && isZoomFit) {
+                    renderPdfDocument();
+                }
+            });
+
             modalPreviewPdf.addEventListener('hidden.bs.modal', function() {
-                iframePreviewPdf.src = 'about:blank';
+                cancelAllRenderTasks();
+                if (currentPdfLoadingTask) {
+                    try { currentPdfLoadingTask.destroy(); } catch (e) {}
+                    currentPdfLoadingTask = null;
+                }
+                if (currentPdfDoc) {
+                    try { currentPdfDoc.destroy(); } catch (e) {}
+                    currentPdfDoc = null;
+                }
+                if (pdfPagesContainer) pdfPagesContainer.innerHTML = '';
+                if (pdfLoadingSpinner) pdfLoadingSpinner.classList.remove('d-none');
+                if (pdfErrorNotice) pdfErrorNotice.classList.add('d-none');
             });
         }
 
