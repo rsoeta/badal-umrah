@@ -130,6 +130,18 @@
                 <small>JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</small>
             </div>
             <div class="form-group">
+                <label>Tempat Miqat</label>
+                <input type="text" name="tempat_miqat" list="listMiqatForm" placeholder="Pilih atau ketik tempat miqat..." value="Tan'im, Makkah Al-Mukarramah" required>
+                <datalist id="listMiqatForm">
+                    <option value="Tan'im, Makkah Al-Mukarramah">
+                    <option value="Bir Ali (Zulhulaifah)">
+                    <option value="Ji'ranah">
+                    <option value="Hudaibiyah">
+                    <option value="Yalamlam">
+                    <option value="Qarnul Manazil">
+                </datalist>
+            </div>
+            <div class="form-group">
                 <label>Tanggal Miqat (Masehi)</label>
                 <!-- Menggunakan input date -->
                 <input type="date" name="tanggal_miqat" required>

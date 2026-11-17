@@ -40,6 +40,10 @@ class SertifikatController extends Controller
         }
 
         // Data Tanggal & Koreksi Hijriah
+        $tempat_miqat_input = trim((string) $this->request->getPost('tempat_miqat'));
+        if ($tempat_miqat_input === '') {
+            $tempat_miqat_input = "Tan'im, Makkah Al-Mukarramah";
+        }
         $tgl_miqat_input = $this->request->getPost('tanggal_miqat');
         $tgl_cetak_input = $this->request->getPost('tanggal_cetak');
         $koreksi_hijriah = (int) $this->request->getPost('koreksi_hijriah');
@@ -71,7 +75,8 @@ class SertifikatController extends Controller
             $outputJpg,
             $outputPdf,
             $fotoJamaahPath,
-            $nomorRegistrasi
+            $nomorRegistrasi,
+            $tempat_miqat_input
         );
 
         // 5. Kembalikan Response ke Frontend
@@ -148,6 +153,7 @@ class SertifikatController extends Controller
         $tanggalMiqat = $pendaftaran['tanggal_miqat'] ?? null;
         $tanggalCetak = $pendaftaran['tanggal_cetak'] ?? null;
         $paketPilihan = $pendaftaran['paket_pilihan'] ?? null;
+        $tempatMiqat = $pendaftaran['tempat_miqat'] ?? null;
 
         $urlPdf = base_url('storage/certificates/' . rawurlencode($uuid) . '.pdf');
         $urlJpg = $hasJpg
@@ -178,6 +184,7 @@ class SertifikatController extends Controller
             'pendaftaran'     => $pendaftaran,
             'namaDiumrahkan'  => $namaDiumrahkan,
             'namaPelaksana'   => $namaPelaksana,
+            'tempatMiqat'     => $tempatMiqat,
             'tanggalMiqat'    => $tanggalMiqat,
             'tanggalCetak'    => $tanggalCetak,
             'paketPilihan'    => $paketPilihan,

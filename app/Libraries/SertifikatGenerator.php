@@ -17,7 +17,8 @@ class SertifikatGenerator
         string $outputJpg,
         string $outputPdf,
         ?string $fotoJamaah = null,
-        ?string $nomorRegistrasi = null
+        ?string $nomorRegistrasi = null,
+        string $tempatMiqat = "Tan'im, Makkah Al-Mukarramah"
     ): void {
         $withImage = $fotoJamaah !== null;
         if ($withImage && ! is_file($fotoJamaah)) {
@@ -46,6 +47,9 @@ class SertifikatGenerator
         $nameCenterX = $withImage ? 820 : 706;
         $writeText($namaPelaksana, $nameCenterX, 899, 'center', 42);
         $writeText($namaDiumrahkan, $nameCenterX, $withImage ? 1065 : 1078, 'center', 42);
+        if (trim($tempatMiqat) !== '') {
+            $writeText(trim($tempatMiqat), 489, 1195, 'left', 36);
+        }
         $writeText($tanggalMiqat, 489, 1262, 'left', 36);
         // The template already prints "M /" and "H" between these date fields.
         $writeText($tanggalCetakMasehi, 821, 1588, 'left', 30);

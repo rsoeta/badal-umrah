@@ -44,6 +44,12 @@ final class AdminDashboardPdfJsTest extends CIUnitTestCase
 
         // Pastikan iframe lama sudah diganti
         $this->assertStringNotContainsString('id="iframePreviewPdf"', $content);
+
+        // Pastikan Tom Select dan select tempat miqat tersedia
+        $this->assertStringContainsString('tom-select.bootstrap5.min.css', $content);
+        $this->assertStringContainsString('tom-select.complete.min.js', $content);
+        $this->assertStringContainsString('id="selectTempatMiqat"', $content);
+        $this->assertStringContainsString('name="tempat_miqat"', $content);
     }
 
     public function testDashboardViewRendersCleanly(): void
@@ -58,6 +64,7 @@ final class AdminDashboardPdfJsTest extends CIUnitTestCase
                     'nama_diumrahkan'  => 'Alm. Uji Jamaah',
                     'paket_pilihan'    => 'Paket Badal Umrah Spesial',
                     'status'           => 'selesai',
+                    'tempat_miqat'     => "Tan'im, Makkah Al-Mukarramah",
                     'foto_jamaah'      => '',
                     'nama_pelaksana'   => 'Ust. Ahmad',
                     'tanggal_selesai'  => '2026-11-09',
@@ -68,6 +75,7 @@ final class AdminDashboardPdfJsTest extends CIUnitTestCase
             'koreksi_hijriah' => 0,
             'jumlah_sampah'   => 2,
             'list_mutawwif'   => ['Ust. Ahmad Fadil|ttd-ahmad.png'],
+            'list_tempat_miqat' => ["Tan'im, Makkah Al-Mukarramah", "Bir Ali (Zulhulaifah)"],
         ];
 
         $html = view('admin_dashboard', $data);
@@ -75,6 +83,8 @@ final class AdminDashboardPdfJsTest extends CIUnitTestCase
         $this->assertStringContainsString('pdf.min.js', $html);
         $this->assertStringContainsString('id="pdfViewerWrapper"', $html);
         $this->assertStringContainsString('id="pdfPagesContainer"', $html);
+        $this->assertStringContainsString('id="selectTempatMiqat"', $html);
+        $this->assertStringContainsString("Tan'im, Makkah Al-Mukarramah", $html);
         $this->assertStringContainsString('Alm. Uji Jamaah', $html);
         $this->assertStringContainsString('RCP-2026-TEST01', $html);
     }

@@ -41,6 +41,26 @@ class AdminController extends Controller
         $data['list_mutawwif'] = array_filter(explode("\n", str_replace("\r", "", $list_mutawwif_raw)));
         $data['koreksi_hijriah'] = (int) ($pengaturanModel->getSetting('koreksi_hijriah') ?? 0);
 
+        // Ambil opsi tempat miqat dari database dengan group by agar tidak ada duplikasi
+        $list_tempat_miqat_db = (new PendaftaranModel())
+            ->select('tempat_miqat')
+            ->where('tempat_miqat IS NOT NULL', null, false)
+            ->where('TRIM(tempat_miqat) !=', '')
+            ->groupBy('tempat_miqat')
+            ->orderBy('tempat_miqat', 'ASC')
+            ->findColumn('tempat_miqat') ?? [];
+
+        $default_miqat = [
+            "Tan'im, Makkah Al-Mukarramah",
+            "Bir Ali (Zulhulaifah)",
+            "Ji'ranah",
+            "Hudaibiyah",
+            "Yalamlam",
+            "Qarnul Manazil",
+        ];
+
+        $data['list_tempat_miqat'] = array_values(array_unique(array_filter(array_merge($default_miqat, $list_tempat_miqat_db))));
+
         return view('admin_dashboard', $data);
     }
 
@@ -167,7 +187,8 @@ class AdminController extends Controller
                 ! empty($effectiveFoto)
                     ? WRITEPATH . 'uploads/pendaftaran-images/' . basename($effectiveFoto)
                     : null,
-                $pendaftaran['uuid']
+                $pendaftaran['uuid'],
+                ! empty($pendaftaran['tempat_miqat']) ? $pendaftaran['tempat_miqat'] : "Tan'im, Makkah Al-Mukarramah"
             );
 
             $certificateFiles = [
@@ -780,6 +801,11 @@ class AdminController extends Controller
         $nama_pelaksana = $pelaksana_data[0];
         $file_ttd       = $pelaksana_data[1] ?? '';
 
+        $tempat_miqat_input = trim((string) $this->request->getPost('tempat_miqat'));
+        if ($tempat_miqat_input === '') {
+            $tempat_miqat_input = "Tan'im, Makkah Al-Mukarramah";
+        }
+
         $tgl_miqat_input = $this->request->getPost('tanggal_miqat');
         $tgl_cetak_input = $this->request->getPost('tanggal_cetak');
         $koreksi_hijriah = (int) $this->request->getPost('koreksi_hijriah');
@@ -806,13 +832,15 @@ class AdminController extends Controller
             $outputJpg,
             $outputPdf,
             $fotoJamaahPath,
-            $uuid
+            $uuid,
+            $tempat_miqat_input
         );
 
         // 5. UPDATE DATABASE (Tandai Selesai)
         $pendaftaranModel->update($id_pendaftaran, [
             'nama_pelaksana'     => $nama_pelaksana,
             'file_ttd_pelaksana' => $file_ttd,
+            'tempat_miqat'       => $tempat_miqat_input,
             'tanggal_miqat'      => $tgl_miqat_input,
             'tanggal_cetak'      => $tgl_cetak_input,
             'koreksi_hijriah'    => $koreksi_hijriah,

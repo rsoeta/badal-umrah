@@ -37,6 +37,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tom Select (Bootstrap 5) for Multi-function Select Option -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -328,7 +330,8 @@
                                             <button class="btn btn-primary rounded-pill px-3 btn-proses shadow-sm"
                                                 data-id="<?= $row['id']; ?>"
                                                 data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
-                                                data-koreksi-hijriah="<?= esc((string) $koreksi_hijriah, 'attr'); ?>">
+                                                data-koreksi-hijriah="<?= esc((string) $koreksi_hijriah, 'attr'); ?>"
+                                                data-tempat-miqat="<?= esc($row['tempat_miqat'] ?? '', 'attr'); ?>">
                                                 <i class="fa-solid fa-gear me-1"></i>Proses
                                             </button>
                                         <?php else: ?>
@@ -553,6 +556,28 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="selectTempatMiqat" class="form-label text-muted fw-bold">
+                                <i class="fa-solid fa-location-dot text-success me-1"></i> Tempat Miqat
+                            </label>
+                            <select name="tempat_miqat" id="selectTempatMiqat" class="form-select rounded-3" required>
+                                <option value="">Pilih atau ketik tempat miqat...</option>
+                                <?php 
+                                $tempatMiqatOptions = ! empty($list_tempat_miqat) ? $list_tempat_miqat : [
+                                    "Tan'im, Makkah Al-Mukarramah",
+                                    "Bir Ali (Zulhulaifah)",
+                                    "Ji'ranah",
+                                    "Hudaibiyah",
+                                    "Yalamlam",
+                                    "Qarnul Manazil"
+                                ];
+                                ?>
+                                <?php foreach ($tempatMiqatOptions as $miqatOpt): ?>
+                                    <option value="<?= esc($miqatOpt); ?>"><?= esc($miqatOpt); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text">Pilih opsi yang ada atau ketik langsung jika tempat miqat belum ada di daftar.</div>
+                        </div>
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <div class="date-field-card">
@@ -696,6 +721,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js"></script>
     <!-- Mozilla PDF.js (Cross-Device Mobile & Desktop PDF Viewer) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Tom Select (Bootstrap 5) for Multi-function Select Option -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
     <script>
         // Blur active element before SweetAlert2 shows to avoid WAI-ARIA aria-hidden console warning on modal descendants
@@ -769,11 +796,32 @@
         const tanggalMiqatPicker = flatpickr(tanggalMiqatInput, datePickerOptions);
         const tanggalCetakPicker = flatpickr(tanggalCetakInput, datePickerOptions);
 
+        // Inisialisasi Tom Select untuk tempat miqat (select-option multi fungsi: pilih atau ketik langsung)
+        let tomSelectMiqat = null;
+        const elSelectMiqat = document.getElementById('selectTempatMiqat');
+        if (elSelectMiqat && window.TomSelect) {
+            tomSelectMiqat = new TomSelect('#selectTempatMiqat', {
+                create: true,
+                createOnBlur: true,
+                persist: false,
+                placeholder: 'Pilih atau ketik tempat miqat...',
+                maxItems: 1
+            });
+        }
+
         document.querySelectorAll('.btn-proses').forEach(button => {
             button.addEventListener('click', function() {
                 document.getElementById('id_pendaftaran').value = this.getAttribute('data-id');
                 document.getElementById('lbl_nama_diumrahkan').innerText = this.getAttribute('data-nama');
                 document.getElementById('inputKoreksiHijriah').value = this.getAttribute('data-koreksi-hijriah') || '0';
+
+                const miqatVal = this.getAttribute('data-tempat-miqat') || "Tan'im, Makkah Al-Mukarramah";
+                if (tomSelectMiqat) {
+                    tomSelectMiqat.addOption({value: miqatVal, text: miqatVal});
+                    tomSelectMiqat.setValue(miqatVal, true);
+                } else if (elSelectMiqat) {
+                    elSelectMiqat.value = miqatVal;
+                }
 
                 if (!tanggalCetakInput.value) {
                     const today = new Date();

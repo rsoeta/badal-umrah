@@ -53,4 +53,27 @@ final class SertifikatGeneratorTest extends CIUnitTestCase
         $this->assertGreaterThan(10000, filesize($this->tempJpg));
         $this->assertGreaterThan(10000, filesize($this->tempPdf));
     }
+
+    public function testGenerateSertifikatWithCustomTempatMiqat(): void
+    {
+        $generator = new SertifikatGenerator();
+        $generator->generate(
+            'Ust. Azis Rustandi',
+            'Alm. Fulan bin Fulan',
+            '1 Ramadan 1448 H',
+            '1 Maret 2026',
+            '1 Ramadan 1448',
+            '',
+            $this->tempJpg,
+            $this->tempPdf,
+            null,
+            'RCP-2026-MIQAT1',
+            'Bir Ali (Zulhulaifah)'
+        );
+
+        $this->assertFileExists($this->tempJpg);
+        $this->assertFileExists($this->tempPdf);
+        $this->assertGreaterThan(10000, filesize($this->tempJpg));
+        $this->assertGreaterThan(10000, filesize($this->tempPdf));
+    }
 }

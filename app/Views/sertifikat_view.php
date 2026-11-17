@@ -240,6 +240,12 @@
                                 <div class="meta-value"><?= esc($paketPilihan); ?></div>
                             </div>
                             <?php endif; ?>
+                            <?php if (! empty($tempatMiqat)): ?>
+                            <div class="col-sm-6 col-md-4">
+                                <div class="meta-label">Tempat Miqat</div>
+                                <div class="meta-value"><?= esc($tempatMiqat); ?></div>
+                            </div>
+                            <?php endif; ?>
                             <?php if (! empty($tanggalMiqat)): ?>
                             <div class="col-sm-6 col-md-4">
                                 <div class="meta-label">Tanggal Miqat</div>
