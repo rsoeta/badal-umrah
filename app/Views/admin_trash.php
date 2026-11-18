@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Sampah Pendaftaran - Admin</title>
     <meta name="title" content="Sampah Pendaftaran - Admin">
     <meta name="description" content="Kelola sampah pendaftaran dan pemulihan arsip data pendaftar Badal Umrah.">
@@ -27,79 +27,107 @@
     <meta name="twitter:description" content="Kelola sampah pendaftaran dan pemulihan arsip data pendaftar Badal Umrah.">
     <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
+    <!-- Smoked Glass Design System & Pre-Paint Theme Loader -->
+    <?= $this->include('partials/smoked_glass_head'); ?>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body class="bg-light">
-    <nav class="navbar navbar-dark shadow-sm mb-4" style="background-color: #0f3d23;">
-        <div class="container-fluid px-md-4">
-            <a class="navbar-brand fw-bold" href="<?= base_url('admin'); ?>">
-                <i class="fa-solid fa-kaaba me-2 text-warning"></i> Admin Panel
+<body class="sg-body">
+
+    <?= $this->include('partials/smoked_glass_bg'); ?>
+
+    <div class="sg-frame">
+        <header class="sg-topbar">
+            <a class="sg-brand" href="<?= base_url('admin'); ?>">
+                <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Admin Panel" class="sg-brand__logo">
+                <div class="sg-brand__meta">
+                    <span class="sg-brand__name">Admin Panel</span>
+                    <span class="sg-brand__sub">Sampah &amp; Pemulihan Arsip</span>
+                </div>
             </a>
-            <a href="<?= base_url('admin'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-            </a>
-        </div>
-    </nav>
 
-    <main class="container-fluid px-md-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <div>
-                <h4 class="fw-bold mb-1"><i class="fa-solid fa-trash me-2 text-secondary"></i>Sampah Pendaftaran</h4>
-                <p class="text-muted mb-0">Pulihkan pendaftaran atau hapus permanen beserta berkas sertifikatnya.</p>
+            <?= view('partials/admin_nav', [
+                'activeMenu'    => 'sampah',
+                'jumlah_sampah' => count($pendaftar),
+            ]); ?>
+
+            <div class="sg-actions">
+                <?= $this->include('partials/smoked_glass_customizer'); ?>
+                <a href="<?= base_url('admin'); ?>" class="sg-icon-btn" aria-label="Kembali ke Dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span class="sg-btn-label">Kembali</span>
+                </a>
             </div>
-            <span class="badge bg-secondary rounded-pill fs-6"><?= count($pendaftar); ?> data</span>
-        </div>
+        </header>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">No. Registrasi</th>
-                            <th>Pemesan</th>
-                            <th>Di-umrahkan</th>
-                            <th>Status</th>
-                            <th>Tanggal dihapus</th>
-                            <th class="text-end pe-4">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($pendaftar as $row): ?>
-                            <tr>
-                                <td class="ps-4 fw-bold"><?= esc($row['uuid']); ?></td>
-                                <td><?= esc($row['nama_pemesan']); ?></td>
-                                <td><?= esc($row['nama_diumrahkan']); ?></td>
-                                <td><span class="badge bg-<?= $row['status'] === 'selesai' ? 'success' : 'warning text-dark'; ?>"><?= esc(ucfirst($row['status'])); ?></span></td>
-                                <td><?= esc($row['deleted_at']); ?></td>
-                                <td class="text-end pe-4">
-                                    <div class="d-inline-flex gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-success btn-restore" data-id="<?= $row['id']; ?>">
-                                            <i class="fa-solid fa-rotate-left me-1"></i> Pulihkan
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-hapus-permanen" data-id="<?= $row['id']; ?>" data-uuid="<?= esc($row['uuid'], 'attr'); ?>">
-                                            <i class="fa-solid fa-trash-can me-1"></i> Hapus Permanen
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+        <main id="main-content" class="sg-pane sg-main">
+            <header class="sg-phead pb-3 mb-4 border-bottom">
+                <div>
+                    <div class="sg-phead__kicker">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Arsip Sementara</span>
+                    </div>
+                    <h1 class="sg-h1">Sampah Pendaftaran</h1>
+                    <p class="sg-phead__sub">Pulihkan pendaftaran atau hapus permanen beserta berkas sertifikatnya.</p>
+                </div>
+                <span class="sg-pill sg-pill--sig fs-6"><?= count($pendaftar); ?> data</span>
+            </header>
 
-                        <?php if ($pendaftar === []): ?>
+            <section class="sg-card sg-card--flush">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
-                                    <i class="fa-regular fa-folder-open fs-2 d-block mb-2"></i>
-                                    Sampah kosong.
-                                </td>
+                                <th class="ps-4">No. Registrasi</th>
+                                <th>Pemesan</th>
+                                <th>Di-umrahkan</th>
+                                <th>Status</th>
+                                <th>Tanggal dihapus</th>
+                                <th class="text-end pe-4">Aksi</th>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pendaftar as $row): ?>
+                                <tr>
+                                    <td class="ps-4 fw-bold sg-text-ink"><?= esc($row['uuid']); ?></td>
+                                    <td><?= esc($row['nama_pemesan']); ?></td>
+                                    <td class="fw-semibold sg-text-ink"><?= esc($row['nama_diumrahkan']); ?></td>
+                                    <td>
+                                        <span class="sg-pill <?= $row['status'] === 'selesai' ? 'sg-pill--good' : 'sg-pill--warn'; ?>">
+                                            <?= esc(ucfirst($row['status'])); ?>
+                                        </span>
+                                    </td>
+                                    <td><?= esc($row['deleted_at']); ?></td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-inline-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 btn-restore" data-id="<?= $row['id']; ?>">
+                                                <i class="fa-solid fa-rotate-left me-1"></i> Pulihkan
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 btn-hapus-permanen" data-id="<?= $row['id']; ?>" data-uuid="<?= esc($row['uuid'], 'attr'); ?>">
+                                                <i class="fa-solid fa-trash-can me-1"></i> Hapus Permanen
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+
+                            <?php if ($pendaftar === []): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center sg-text-muted py-5">
+                                        <i class="fa-regular fa-folder-open fs-2 d-block mb-2"></i>
+                                        Sampah kosong.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script>
         const sendTrashAction = (url, confirmTitle, confirmText, successTitle) => {

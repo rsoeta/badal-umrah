@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin Dashboard - Badal Umrah</title>
     <meta name="title" content="Admin Dashboard - Badal Umrah">
     <meta name="description" content="Panel Administrasi Layanan Badal Umrah. Kelola data pendaftar, pencetakan sertifikat, dan arsip video dokumentasi.">
@@ -27,6 +27,9 @@
     <meta name="twitter:description" content="Panel Administrasi Layanan Badal Umrah. Kelola data pendaftar, sertifikat, dan video dokumentasi.">
     <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
 
+    <!-- Smoked Glass Design System & Pre-Paint Theme Loader -->
+    <?= $this->include('partials/smoked_glass_head'); ?>
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables Bootstrap 5 -->
@@ -35,36 +38,17 @@
     <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Quicksand -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tom Select (Bootstrap 5) for Multi-function Select Option -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */
-        html {
-            font-size: 16px;
-        }
-
-        /* Ukuran Normal di Laptop */
-
         @media (max-width: 767.98px) {
             html {
-                font-size: 13.5px;
+                font-size: 14px;
             }
-
-            /* Mengecil serentak di HP */
         }
-
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Quicksand', sans-serif;
-            color: #333;
-        }
-
-        /* ... Sisa CSS Lainnya ... */
 
         h4,
         .h1,
@@ -73,8 +57,18 @@
             font-weight: 700;
         }
 
-        .navbar-admin {
-            background-color: #0f3d23;
+        .bu-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .bu-kpi-val {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.1;
         }
 
         /* Custom SweetAlert Mobile-friendly */
@@ -88,7 +82,6 @@
 
         .swal-title-custom {
             font-size: 1.1rem !important;
-            font-family: 'Quicksand', sans-serif !important;
             font-weight: 700 !important;
         }
 
@@ -101,7 +94,13 @@
         .table-custom th {
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .bu-kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         @media (max-width: 767.98px) {
@@ -124,10 +123,10 @@
                 display: block;
                 margin: 0.75rem;
                 padding: 0.5rem 0.85rem;
-                border: 1px solid #e5e9e6;
-                border-radius: 0.9rem;
-                background: #fff;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                border: 0;
+                border-radius: var(--r-md);
+                background: var(--card);
+                box-shadow: inset 0 0 0 1px var(--glass-rim), inset 1px 1px 0 var(--glass-top), var(--shadow-sm);
             }
 
             #pendaftarTable tbody td {
@@ -138,7 +137,7 @@
                 width: 100% !important;
                 padding: 0.65rem 0;
                 border: 0;
-                border-bottom: 1px solid #edf0ee;
+                border-bottom: 1px solid var(--glass-rim);
                 text-align: left !important;
                 white-space: normal !important;
                 overflow-wrap: anywhere;
@@ -150,7 +149,7 @@
 
             #pendaftarTable tbody td::before {
                 content: attr(data-label);
-                color: #66736b;
+                color: var(--muted);
                 font-size: 0.78rem;
                 font-weight: 700;
             }
@@ -174,110 +173,115 @@
         .date-field-card {
             height: 100%;
             padding: 1rem;
-            border: 1px solid #e5e9e6;
-            border-radius: 1rem;
-            background: #fff;
-        }
-
-        .date-field-card .input-group-text {
-            color: #0f3d23;
-            background: #f1f6f2;
-            border-color: #dee5df;
-        }
-
-        .date-field-card .form-control {
-            border-color: #dee5df;
-        }
-
-        .date-field-card .form-control:focus {
-            border-color: #6a9c7d;
-            box-shadow: 0 0 0 0.2rem rgba(15, 61, 35, 0.12);
+            border-radius: var(--r-md);
+            background: var(--card-2);
+            box-shadow: inset 0 0 0 1px var(--glass-rim);
         }
 
         .flatpickr-calendar {
             z-index: 1060;
         }
-
-        @media (max-width: 575.98px) {
-            .navbar-admin .navbar-actions {
-                gap: 0.25rem !important;
-                margin-left: auto;
-                flex-wrap: nowrap;
-            }
-
-            .navbar-admin .navbar-actions .btn {
-                padding-right: 0.5rem !important;
-                padding-left: 0.5rem !important;
-                flex-shrink: 0;
-            }
-
-            .navbar-admin .navbar-brand {
-                flex-shrink: 0;
-                margin-right: 0.25rem;
-            }
-        }
     </style>
 </head>
 
-<body>
+<body class="sg-body">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark navbar-admin shadow-sm mb-4 py-3">
-        <div class="container-fluid px-md-4">
-            <a class="navbar-brand mb-0 h1 fs-5 text-white text-decoration-none" href="<?= base_url('admin'); ?>">
-                <i class="fa-solid fa-kaaba me-2 text-warning"></i> Admin Panel
+    <?= $this->include('partials/smoked_glass_bg'); ?>
+
+    <?php
+    $totalPendaftar = count($pendaftar);
+    $totalPending = 0;
+    $totalSelesai = 0;
+    foreach ($pendaftar as $rowCount) {
+        if (($rowCount['status'] ?? '') === 'selesai') {
+            $totalSelesai++;
+        } else {
+            $totalPending++;
+        }
+    }
+    ?>
+
+    <div class="sg-frame">
+        <!-- Sticky Top Bar -->
+        <header class="sg-topbar">
+            <a class="sg-brand" href="<?= base_url('admin'); ?>">
+                <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Admin Panel" class="sg-brand__logo">
+                <div class="sg-brand__meta">
+                    <span class="sg-brand__name">Admin Panel</span>
+                    <span class="sg-brand__sub">Dashboard Pendaftaran &amp; Sertifikat</span>
+                </div>
             </a>
 
-            <div class="d-flex gap-2 align-items-center navbar-actions">
-                <a href="<?= base_url('/'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" target="_blank" aria-label="Buka Web">
-                    <i class="fa-solid fa-globe me-1"></i> <span class="d-none d-sm-inline">Web</span>
-                </a>
+            <?= view('partials/admin_nav', [
+                'activeMenu'     => 'pendaftar',
+                'totalPendaftar' => $totalPendaftar,
+                'jumlah_sampah'  => $jumlah_sampah ?? 0,
+            ]); ?>
 
-                <a href="<?= base_url('admin/pengaturan'); ?>" class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-success fw-bold" aria-label="Pengaturan">
-                    <i class="fa-solid fa-sliders me-1"></i> <span class="d-none d-sm-inline">Pengaturan</span>
-                </a>
-
-                <a href="<?= base_url('admin/sampah'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" aria-label="Sampah">
-                    <i class="fa-solid fa-trash me-1"></i><span class="d-none d-sm-inline">Sampah</span>
-                    <?php if (! empty($jumlah_sampah) && $jumlah_sampah > 0): ?>
-                        <span class="badge bg-warning text-dark ms-1"><?= $jumlah_sampah; ?></span>
-                    <?php endif; ?>
-                </a>
+            <div class="sg-actions">
+                <?= $this->include('partials/smoked_glass_customizer'); ?>
 
                 <?php if (session()->get('admin_picture')): ?>
-                    <img src="<?= esc(session()->get('admin_picture'), 'attr'); ?>" alt="Profil Google" class="rounded-circle border border-2 border-warning shadow-sm" style="width: 32px; height: 32px; object-fit: cover;" title="<?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>">
+                    <img src="<?= esc(session()->get('admin_picture'), 'attr'); ?>" alt="Profil Google" class="rounded-circle shadow-sm" style="width: 34px; height: 34px; object-fit: cover; border: 2px solid var(--sig);" title="<?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>">
                 <?php elseif (session()->get('admin_email')): ?>
-                    <span class="badge bg-light text-dark d-none d-lg-inline-flex align-items-center text-truncate shadow-sm" style="max-width: 170px;" title="<?= esc(session()->get('admin_email')); ?>">
-                        <i class="fa-brands fa-google text-danger me-1"></i><?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>
+                    <span class="sg-pill d-none d-xl-inline-flex text-truncate" style="max-width: 170px;" title="<?= esc(session()->get('admin_email')); ?>">
+                        <i class="fa-brands fa-google text-danger"></i><?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>
                     </span>
                 <?php endif; ?>
 
-                <a href="#" id="btn-logout" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm" aria-label="Logout">
-                    <i class="fa-solid fa-right-from-bracket me-1"></i> <span class="d-none d-sm-inline">Logout</span>
+                <a href="#" id="btn-logout" class="sg-icon-btn sg-icon-btn--danger" aria-label="Logout" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="sg-btn-label d-none d-sm-inline">Logout</span>
                 </a>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="container-fluid px-md-4">
-        <!-- Header Tabel Responsif (Tidak akan tergencet lagi di HP) -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2 pb-2 border-bottom">
-            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-list me-2 text-success"></i>Daftar Pendaftar</h5>
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahPendaftar">
-                    <i class="fa-solid fa-user-plus me-1"></i> Tambah Data
-                </button>
-                <span class="badge bg-secondary rounded-pill px-3 py-2 fs-6"><?= count($pendaftar); ?> Total</span>
+        <main id="main-content" class="sg-pane sg-main">
+            <!-- Page Header -->
+            <header class="sg-phead pb-3 mb-4 border-bottom">
+                <div>
+                    <div class="sg-phead__kicker">
+                        <i class="fa-solid fa-kaaba"></i>
+                        <span>Manajemen Layanan Badal Umrah</span>
+                    </div>
+                    <h1 class="sg-h1">Daftar Pendaftar</h1>
+                    <p class="sg-phead__sub">Kelola pendaftaran jamaah, proses penerbitan sertifikat resmi, dan arsip video dokumentasi.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button type="button" class="sg-btn sg-btn--sig" data-bs-toggle="modal" data-bs-target="#modalTambahPendaftar">
+                        <i class="fa-solid fa-user-plus"></i> Tambah Data
+                    </button>
+                    <span class="sg-pill"><?= $totalPendaftar; ?> Total</span>
+                </div>
+            </header>
+
+            <!-- Bento KPI Summary Row -->
+            <div class="bu-kpi-grid">
+                <section class="sg-card py-3">
+                    <div class="small sg-text-muted mb-1"><i class="fa-solid fa-users sg-text-sig me-1"></i> Total Pendaftar</div>
+                    <div class="bu-kpi-val"><?= $totalPendaftar; ?></div>
+                </section>
+                <section class="sg-card py-3">
+                    <div class="small sg-text-muted mb-1"><i class="fa-regular fa-clock text-warning me-1"></i> Menunggu Proses</div>
+                    <div class="bu-kpi-val text-warning"><?= $totalPending; ?></div>
+                </section>
+                <section class="sg-card py-3">
+                    <div class="small sg-text-muted mb-1"><i class="fa-solid fa-check-double text-success me-1"></i> Sertifikat Selesai</div>
+                    <div class="bu-kpi-val text-success"><?= $totalSelesai; ?></div>
+                </section>
+                <section class="sg-card py-3">
+                    <div class="small sg-text-muted mb-1"><i class="fa-solid fa-trash-can sg-text-sig me-1"></i> Di Sampah</div>
+                    <div class="bu-kpi-val"><?= (int) ($jumlah_sampah ?? 0); ?></div>
+                </section>
             </div>
-        </div>
 
-        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
-            <div class="card-body p-0">
+            <!-- Table Card -->
+            <section class="sg-card sg-card--flush">
                 <table id="pendaftarTable" class="table table-hover mb-0 align-middle table-custom w-100">
-                    <thead class="table-light text-muted">
+                    <thead>
                         <tr>
                             <th>No</th>
-                            <th>Registrasi & Pemesan</th>
+                            <th>Registrasi &amp; Pemesan</th>
                             <th>Di-umrahkan</th>
                             <th>Paket</th>
                             <th>Status</th>
@@ -291,18 +295,16 @@
                                 <td data-label="No"><?= $i++; ?></td>
                                 <td data-label="Registrasi & Pemesan">
                                     <div>
-                                        <strong class="text-dark d-block mb-1"><?= esc($row['uuid']); ?></strong>
+                                        <strong class="sg-text-ink d-block mb-1 font-monospace"><?= esc($row['uuid']); ?></strong>
 
                                         <?php
-                                        // FORMAT NOMOR WA AGAR LINK WA.ME BERFUNGSI (Ubah awalan '0' jadi '62')
                                         $no_wa_clean = preg_replace('/[^0-9]/', '', $row['no_wa_pemesan']);
                                         if (substr($no_wa_clean, 0, 1) === '0') {
                                             $no_wa_clean = '62' . substr($no_wa_clean, 1);
                                         }
                                         ?>
 
-                                        <!-- Link WA Clickable -->
-                                        <a href="https://wa.me/<?= $no_wa_clean; ?>" target="_blank" class="text-success text-decoration-none fw-medium bg-success bg-opacity-10 px-2 py-1 rounded">
+                                        <a href="https://wa.me/<?= $no_wa_clean; ?>" target="_blank" class="sg-pill sg-pill--good text-decoration-none">
                                             <i class="fa-brands fa-whatsapp"></i> <?= esc($row['nama_pemesan']); ?>
                                         </a>
                                     </div>
@@ -319,23 +321,23 @@
                                                     onerror="this.parentElement.style.display='none'">
                                             </a>
                                         <?php endif; ?>
-                                        <span class="fw-bold text-success fs-6 text-break">
+                                        <span class="fw-bold sg-text-ink fs-6 text-break">
                                             <?= esc($row['nama_diumrahkan']); ?>
                                         </span>
                                     </div>
                                 </td>
-                                <td data-label="Paket"><span class="badge bg-light text-dark border p-2"><?= esc($row['paket_pilihan']); ?></span></td>
+                                <td data-label="Paket"><span class="sg-pill"><?= esc($row['paket_pilihan']); ?></span></td>
                                 <td data-label="Status">
                                     <?php if ($row['status'] == 'pending'): ?>
-                                        <span class="badge bg-warning text-dark rounded-pill p-2"><i class="fa-regular fa-clock me-1"></i> Pending</span>
+                                        <span class="sg-pill sg-pill--warn"><i class="fa-regular fa-clock"></i> Pending</span>
                                     <?php else: ?>
-                                        <span class="badge bg-success rounded-pill p-2"><i class="fa-solid fa-check-double me-1"></i> Selesai</span>
+                                        <span class="sg-pill sg-pill--good"><i class="fa-solid fa-check-double"></i> Selesai</span>
                                     <?php endif; ?>
                                 </td>
                                 <td data-label="Aksi" class="text-center">
                                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                                         <?php if ($row['status'] == 'pending'): ?>
-                                            <button class="btn btn-primary rounded-pill px-3 btn-proses shadow-sm"
+                                            <button class="btn btn-sm btn-primary rounded-pill px-3 btn-proses shadow-sm"
                                                 data-id="<?= $row['id']; ?>"
                                                 data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                                 data-koreksi-hijriah="<?= esc((string) $koreksi_hijriah, 'attr'); ?>"
@@ -343,7 +345,7 @@
                                                 <i class="fa-solid fa-gear me-1"></i>Proses
                                             </button>
                                         <?php else: ?>
-                                            <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm btn-preview-pdf"
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm btn-preview-pdf"
                                                 data-url="<?= base_url('storage/certificates/' . rawurlencode($row['uuid']) . '.pdf'); ?>"
                                                 data-share-url="<?= base_url('sertifikat/' . rawurlencode($row['uuid'])); ?>"
                                                 data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
@@ -353,7 +355,7 @@
                                                 <i class="fa-solid fa-file-pdf me-1"></i>PDF
                                             </button>
                                         <?php endif; ?>
-                                        <button type="button" class="btn btn-outline-primary rounded-pill btn-edit-pendaftaran"
+                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill btn-edit-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama-pemesan="<?= esc($row['nama_pemesan'], 'attr'); ?>"
                                             data-no-wa="<?= esc($row['no_wa_pemesan'], 'attr'); ?>"
@@ -366,7 +368,7 @@
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <?php $totalVideo = (int) ($row['total_video'] ?? 0); ?>
-                                        <button type="button" class="btn btn-outline-success rounded-pill btn-video-arsip position-relative"
+                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill btn-video-arsip position-relative"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                             aria-label="Arsip video dokumentasi untuk <?= esc($row['nama_diumrahkan'], 'attr'); ?>"
@@ -377,7 +379,7 @@
                                                 <span class="visually-hidden">video diarsipkan</span>
                                             </span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary rounded-pill btn-hapus-pendaftaran"
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill btn-hapus-pendaftaran"
                                             data-id="<?= $row['id']; ?>"
                                             data-nama="<?= esc($row['nama_diumrahkan'], 'attr'); ?>"
                                             aria-label="Pindahkan pendaftaran ke sampah">
@@ -390,39 +392,39 @@
 
                     </tbody>
                 </table>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
     <!-- Modal Edit Pendaftaran -->
     <div class="modal fade" id="modalEditPendaftaran" tabindex="-1" aria-labelledby="modalEditPendaftaranLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h5 class="modal-title fw-bold" id="modalEditPendaftaranLabel"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Data Pendaftar</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalEditPendaftaranLabel"><i class="fa-solid fa-pen-to-square me-2 sg-text-sig"></i>Edit Data Pendaftar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <form id="formEditPendaftaran" enctype="multipart/form-data">
-                    <div class="modal-body p-4 bg-light">
+                    <div class="modal-body p-4">
                         <input type="hidden" name="id_pendaftaran" id="editIdPendaftaran">
                         <div class="mb-3">
-                            <label for="editNamaPemesan" class="form-label text-muted fw-bold small">Nama Lengkap Pemesan</label>
+                            <label for="editNamaPemesan" class="form-label fw-bold small">Nama Lengkap Pemesan</label>
                             <input type="text" name="nama_pemesan" id="editNamaPemesan" class="form-control rounded-3" maxlength="100" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editNoWaPemesan" class="form-label text-muted fw-bold small">Nomor WhatsApp</label>
+                            <label for="editNoWaPemesan" class="form-label fw-bold small">Nomor WhatsApp</label>
                             <input type="tel" name="no_wa_pemesan" id="editNoWaPemesan" class="form-control rounded-3" maxlength="20" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editNamaDiumrahkan" class="form-label text-muted fw-bold small">Nama yang Di-umrahkan</label>
+                            <label for="editNamaDiumrahkan" class="form-label fw-bold small">Nama yang Di-umrahkan</label>
                             <input type="text" name="nama_diumrahkan" id="editNamaDiumrahkan" class="form-control rounded-3" maxlength="150" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editFotoJamaah" class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
-                            <div id="editFotoCurrentWrapper" class="d-none mb-2 p-2 bg-white border rounded-3 d-flex align-items-center gap-3">
+                            <label for="editFotoJamaah" class="form-label fw-bold small">Foto untuk Sertifikat (Opsional)</label>
+                            <div id="editFotoCurrentWrapper" class="d-none mb-2 p-2 sg-subpanel d-flex align-items-center gap-3">
                                 <img id="editFotoPreview" src="" alt="Foto Jamaah" class="rounded border" style="width: 50px; height: 65px; object-fit: cover;">
                                 <div class="small">
-                                    <div class="fw-semibold text-dark"><i class="fa-solid fa-image text-primary me-1"></i> Foto Saat Ini Tersedia</div>
+                                    <div class="fw-semibold sg-text-ink"><i class="fa-solid fa-image sg-text-sig me-1"></i> Foto Saat Ini Tersedia</div>
                                     <div class="form-check mt-1">
                                         <input class="form-check-input" type="checkbox" name="hapus_foto_jamaah" value="1" id="editHapusFoto">
                                         <label class="form-check-label text-danger small fw-medium" for="editHapusFoto">
@@ -435,17 +437,17 @@
                             <div class="form-text">JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4. Kosongkan jika tidak ingin mengubah foto.</div>
                         </div>
                         <div>
-                            <label for="editPaketPilihan" class="form-label text-muted fw-bold small">Pilihan Paket</label>
+                            <label for="editPaketPilihan" class="form-label fw-bold small">Pilihan Paket</label>
                             <select name="paket_pilihan" id="editPaketPilihan" class="form-select rounded-3" required>
                                 <option value="Paket Standar (Rp 1.5 Jt)">Paket Standar (Rp 1,5 Jt)</option>
                                 <option value="Paket Paripurna (Rp 2 Jt)">Paket Paripurna + Santunan (Rp 2 Jt)</option>
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btnSimpanEditPendaftaran" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="sg-btn sg-btn--glass btn-sm py-2 px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnSimpanEditPendaftaran" class="sg-btn sg-btn--sig btn-sm py-2 px-4">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
                         </button>
                     </div>
                 </form>
@@ -456,15 +458,15 @@
     <!-- Modal Arsip Video Dokumentasi -->
     <div class="modal fade" id="modalArsipVideo" tabindex="-1" aria-labelledby="modalArsipVideoLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-success text-white border-0 rounded-top-4">
+            <div class="modal-content">
+                <div class="modal-header">
                     <div>
-                        <h5 class="modal-title fw-bold" id="modalArsipVideoLabel"><i class="fa-solid fa-video me-2"></i>Arsip Video Dokumentasi</h5>
-                        <div class="small text-white-50" id="videoArsipNama"></div>
+                        <h5 class="modal-title fw-bold" id="modalArsipVideoLabel"><i class="fa-solid fa-video me-2 sg-text-sig"></i>Arsip Video Dokumentasi</h5>
+                        <div class="small sg-text-muted" id="videoArsipNama"></div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body p-4 bg-light">
+                <div class="modal-body p-4">
                     <form id="formUnggahVideo" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="inputVideoDokumentasi" class="form-label fw-bold">Tambah video</label>
@@ -472,16 +474,16 @@
                             <div class="form-text">Pilih satu atau beberapa video. Format MP4, WEBM, atau MOV; maksimal 500 MB per video.</div>
                         </div>
                         <div class="d-flex justify-content-end">
-                            <button type="submit" id="btnUnggahVideo" class="btn btn-success rounded-pill px-4">
-                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Unggah ke Arsip
+                            <button type="submit" id="btnUnggahVideo" class="sg-btn sg-btn--sig btn-sm py-2 px-4">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Unggah ke Arsip
                             </button>
                         </div>
                     </form>
 
                     <hr class="my-4">
-                    <h6 class="fw-bold mb-3">Video yang Diarsipkan</h6>
+                    <h6 class="fw-bold mb-3 sg-text-ink">Video yang Diarsipkan</h6>
                     <div id="daftarVideoArsip" class="d-flex flex-column gap-2" aria-live="polite">
-                        <div class="text-muted small">Memuat daftar video...</div>
+                        <div class="sg-text-muted small">Memuat daftar video...</div>
                     </div>
                 </div>
             </div>
@@ -489,37 +491,37 @@
     </div>
 
     <!-- Modal Tambah Pendaftar Manual -->
-    <div class="modal fade" id="modalTambahPendaftar" tabindex="-1">
+    <div class="modal fade" id="modalTambahPendaftar" tabindex="-1" aria-labelledby="modalTambahPendaftarLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Input Pendaftaran Manual</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalTambahPendaftarLabel"><i class="fa-solid fa-user-plus me-2 sg-text-sig"></i> Input Pendaftaran Manual</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <form id="formTambahPendaftar" enctype="multipart/form-data">
-                    <div class="modal-body p-4 bg-light">
+                    <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold small">Nama Lengkap Pemesan</label>
-                            <input type="text" name="nama_pemesan" class="form-control rounded-3" required>
+                            <label for="tambahNamaPemesan" class="form-label fw-bold small">Nama Lengkap Pemesan</label>
+                            <input id="tambahNamaPemesan" type="text" name="nama_pemesan" class="form-control rounded-3" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold small">Nomor WhatsApp</label>
-                            <input type="number" name="no_wa_pemesan" class="form-control rounded-3" required>
+                            <label for="tambahNoWaPemesan" class="form-label fw-bold small">Nomor WhatsApp</label>
+                            <input id="tambahNoWaPemesan" type="number" name="no_wa_pemesan" class="form-control rounded-3" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold small">Nama Yang Di-umrahkan</label>
-                            <input type="text" name="nama_diumrahkan" class="form-control rounded-3" required>
+                            <label for="tambahNamaDiumrahkan" class="form-label fw-bold small">Nama Yang Di-umrahkan</label>
+                            <input id="tambahNamaDiumrahkan" type="text" name="nama_diumrahkan" class="form-control rounded-3" required>
                         </div>
                         <div class="mb-3">
-                            <label for="tambahFotoJamaah" class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
+                            <label for="tambahFotoJamaah" class="form-label fw-bold small">Foto untuk Sertifikat (Opsional)</label>
 
                             <!-- Preview Foto Terpilih -->
-                            <div id="tambahFotoPreviewWrapper" class="d-none mb-2 p-2 bg-white border rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-sm">
+                            <div id="tambahFotoPreviewWrapper" class="d-none mb-2 p-2 sg-subpanel d-flex align-items-center justify-content-between gap-3">
                                 <div class="d-flex align-items-center gap-3 overflow-hidden">
                                     <img id="tambahFotoPreview" src="" alt="Preview Foto Jamaah" class="rounded border shadow-sm flex-shrink-0" style="width: 50px; height: 65px; object-fit: cover;">
                                     <div class="small overflow-hidden">
-                                        <div class="fw-bold text-dark text-truncate" id="tambahFotoNama" style="max-width: 200px;">Nama File</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;" id="tambahFotoUkuran">0 KB</div>
+                                        <div class="fw-bold sg-text-ink text-truncate" id="tambahFotoNama" style="max-width: 200px;">Nama File</div>
+                                        <div class="sg-text-muted" style="font-size: 0.75rem;" id="tambahFotoUkuran">0 KB</div>
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2 py-1 flex-shrink-0" id="btnHapusPreviewTambahFoto" title="Hapus foto terpilih">
@@ -531,17 +533,17 @@
                             <div class="form-text">JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</div>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label text-muted fw-bold small">Pilihan Paket</label>
-                            <select name="paket_pilihan" class="form-select rounded-3" required>
+                            <label for="tambahPaketPilihan" class="form-label fw-bold small">Pilihan Paket</label>
+                            <select id="tambahPaketPilihan" name="paket_pilihan" class="form-select rounded-3" required>
                                 <option value="">-- Pilih Paket --</option>
                                 <option value="Paket Standar (Rp 1.5 Jt)">Paket Standar (Rp 1,5 Jt)</option>
                                 <option value="Paket Paripurna (Rp 2 Jt)">Paket Paripurna + Santunan (Rp 2 Jt)</option>
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fa-solid fa-save me-1"></i> Simpan Data</button>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="sg-btn sg-btn--glass btn-sm py-2 px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="sg-btn sg-btn--sig btn-sm py-2 px-4"><i class="fa-solid fa-save"></i> Simpan Data</button>
                     </div>
                 </form>
             </div>
@@ -549,24 +551,24 @@
     </div>
 
     <!-- Modal Form Eksekusi -->
-    <div class="modal fade" id="modalProses" tabindex="-1">
+    <div class="modal fade" id="modalProses" tabindex="-1" aria-labelledby="modalProsesLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-success text-white border-0 rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-signature me-2"></i> Generate Sertifikat</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalProsesLabel"><i class="fa-solid fa-file-signature me-2 sg-text-sig"></i> Generate Sertifikat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <form id="formProsesSertifikat">
-                    <div class="modal-body p-4 bg-light">
+                    <div class="modal-body p-4">
                         <input type="hidden" name="id_pendaftaran" id="id_pendaftaran">
 
-                        <div class="alert alert-success py-3 px-3 mb-4 rounded-3" style="border-left: 5px solid #0f3d23;">
-                            Eksekusi untuk: <br><strong id="lbl_nama_diumrahkan" class="fs-5"></strong>
+                        <div class="sg-subpanel mb-4" style="border-left: 4px solid var(--sig);">
+                            Eksekusi untuk: <br><strong id="lbl_nama_diumrahkan" class="fs-5 sg-text-ink"></strong>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">Mutawwif Pelaksana</label>
-                            <select name="pelaksana_data" class="form-select rounded-3" required>
+                            <label for="selectPelaksanaProses" class="form-label fw-bold">Mutawwif Pelaksana</label>
+                            <select id="selectPelaksanaProses" name="pelaksana_data" class="form-select rounded-3" required>
                                 <?php foreach ($list_mutawwif as $mutawwif): ?>
                                     <?php
                                     $parts = explode('|', $mutawwif);
@@ -580,12 +582,12 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="selectTempatMiqat" class="form-label text-muted fw-bold">
-                                <i class="fa-solid fa-location-dot text-success me-1"></i> Tempat Miqat
+                            <label for="selectTempatMiqat" class="form-label fw-bold">
+                                <i class="fa-solid fa-location-dot sg-text-sig me-1"></i> Tempat Miqat
                             </label>
                             <select name="tempat_miqat" id="selectTempatMiqat" class="form-select rounded-3" required>
                                 <option value="">Pilih atau ketik tempat miqat...</option>
-                                <?php 
+                                <?php
                                 $tempatMiqatOptions = ! empty($list_tempat_miqat) ? $list_tempat_miqat : [
                                     "Tan'im, Makkah Al-Mukarramah",
                                     "Bir Ali (Zulhulaifah)",
@@ -604,8 +606,8 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <div class="date-field-card">
-                                    <label for="tanggalMiqat" class="form-label fw-bold text-dark">
-                                        <i class="fa-solid fa-kaaba me-2 text-success"></i>Tanggal Miqat
+                                    <label for="tanggalMiqat" class="form-label fw-bold">
+                                        <i class="fa-solid fa-kaaba me-2 sg-text-sig"></i>Tanggal Miqat
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
@@ -616,8 +618,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="date-field-card">
-                                    <label for="tanggalCetak" class="form-label fw-bold text-dark">
-                                        <i class="fa-solid fa-file-circle-check me-2 text-success"></i>Tanggal Cetak Sertifikat
+                                    <label for="tanggalCetak" class="form-label fw-bold">
+                                        <i class="fa-solid fa-file-circle-check me-2 sg-text-sig"></i>Tanggal Cetak Sertifikat
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fa-regular fa-calendar-check"></i></span>
@@ -628,13 +630,13 @@
                             </div>
                         </div>
                         <div>
-                            <label class="form-label text-muted fw-bold">Koreksi Hijriah (Opsional)</label>
+                            <label for="inputKoreksiHijriah" class="form-label fw-bold">Koreksi Hijriah (Opsional)</label>
                             <input type="number" name="koreksi_hijriah" id="inputKoreksiHijriah" class="form-control rounded-3" step="1" value="<?= esc((string) $koreksi_hijriah); ?>">
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="fa-solid fa-print me-1"></i> Simpan & Generate</button>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="sg-btn sg-btn--glass btn-sm py-2 px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="sg-btn sg-btn--sig btn-sm py-2 px-4"><i class="fa-solid fa-print"></i> Simpan &amp; Generate</button>
                     </div>
                 </form>
             </div>
@@ -644,38 +646,38 @@
     <!-- Modal Preview PDF Sertifikat -->
     <div class="modal fade" id="modalPreviewPdf" tabindex="-1" aria-labelledby="modalPreviewPdfLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-danger text-white border-0 py-3">
+            <div class="modal-content">
+                <div class="modal-header py-3">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-file-pdf fs-4"></i>
+                        <i class="fa-solid fa-file-pdf fs-4 text-danger"></i>
                         <div>
                             <h5 class="modal-title fw-bold mb-0" id="modalPreviewPdfLabel">Preview Sertifikat PDF</h5>
-                            <div class="small text-white-50" id="previewPdfNamaJamaah"></div>
+                            <div class="small sg-text-muted" id="previewPdfNamaJamaah"></div>
                         </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body p-3 bg-light">
+                <div class="modal-body p-3">
                     <!-- Action Toolbar di atas preview -->
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-2 bg-white rounded-3 border shadow-sm">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-2 sg-subpanel">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill small">
-                                <i class="fa-solid fa-certificate me-1"></i> Sertifikat Resmi
+                            <span class="sg-pill sg-pill--bad">
+                                <i class="fa-solid fa-certificate"></i> Sertifikat Resmi
                             </span>
-                            <span class="small text-muted d-none d-md-inline font-monospace" id="previewPdfUuid"></span>
+                            <span class="small sg-text-muted d-none d-md-inline font-monospace" id="previewPdfUuid"></span>
 
                             <!-- Zoom Controls for PDF.js -->
                             <div class="btn-group btn-group-sm shadow-sm ms-md-2" role="group" aria-label="Kontrol Zoom PDF">
-                                <button type="button" id="btnPdfZoomOut" class="btn btn-outline-secondary" title="Perkecil">
+                                <button type="button" id="btnPdfZoomOut" class="btn btn-outline-secondary" title="Perkecil" aria-label="Perkecil PDF">
                                     <i class="fa-solid fa-magnifying-glass-minus"></i>
                                 </button>
                                 <button type="button" id="btnPdfZoomFit" class="btn btn-outline-secondary px-2" title="Sesuaikan Lebar Layar">
                                     <i class="fa-solid fa-arrows-left-right me-1"></i>Fit
                                 </button>
-                                <button type="button" id="btnPdfZoomIn" class="btn btn-outline-secondary" title="Perbesar">
+                                <button type="button" id="btnPdfZoomIn" class="btn btn-outline-secondary" title="Perbesar" aria-label="Perbesar PDF">
                                     <i class="fa-solid fa-magnifying-glass-plus"></i>
                                 </button>
-                                <span id="pdfZoomLabel" class="btn btn-outline-secondary disabled font-monospace text-dark bg-light px-2" style="opacity: 1;">100%</span>
+                                <span id="pdfZoomLabel" class="btn btn-outline-secondary disabled font-monospace px-2" style="opacity: 1;">100%</span>
                             </div>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
@@ -695,20 +697,20 @@
                     </div>
 
                     <!-- Container Mozilla PDF.js Canvas Preview -->
-                    <div id="pdfViewerWrapper" class="rounded-3 overflow-auto border bg-secondary bg-opacity-25 position-relative shadow-sm d-flex flex-column align-items-center p-2 p-md-3" style="height: 70vh; min-height: 420px; max-height: 85vh; -webkit-overflow-scrolling: touch;">
+                    <div id="pdfViewerWrapper" class="rounded-3 overflow-auto position-relative shadow-sm d-flex flex-column align-items-center p-2 p-md-3" style="height: 70vh; min-height: 420px; max-height: 85vh; -webkit-overflow-scrolling: touch; background: rgba(15, 17, 20, 0.55); border: 1px solid var(--glass-rim);">
                         <!-- Loading State -->
                         <div id="pdfLoadingSpinner" class="text-center my-auto py-5">
                             <div class="spinner-border text-danger mb-2" role="status">
                                 <span class="visually-hidden">Memuat PDF...</span>
                             </div>
-                            <div class="small text-muted fw-semibold">Memuat pratinjau sertifikat via Mozilla PDF.js...</div>
+                            <div class="small sg-text-muted fw-semibold">Memuat pratinjau sertifikat via Mozilla PDF.js...</div>
                         </div>
 
                         <!-- Error Fallback Notice -->
                         <div id="pdfErrorNotice" class="alert alert-danger d-none text-center my-auto p-4 m-3 rounded-3 shadow-sm" style="max-width: 500px;">
                             <i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-danger"></i>
                             <div class="fw-bold mb-1">Pratinjau PDF Tidak Dapat Ditampilkan</div>
-                            <div class="small mb-3 text-muted" id="pdfErrorMessage">Browser mengalami kendala saat merender berkas PDF langsung.</div>
+                            <div class="small mb-3" id="pdfErrorMessage">Browser mengalami kendala saat merender berkas PDF langsung.</div>
                             <div class="d-flex justify-content-center gap-2 flex-wrap">
                                 <a id="btnFallbackDownloadPdf" href="#" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" download>
                                     <i class="fa-solid fa-download me-1"></i> Unduh PDF
@@ -723,9 +725,9 @@
                         <div id="pdfPagesContainer" class="d-flex flex-column align-items-center w-100"></div>
                     </div>
 
-                    <div class="small text-muted mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <span><i class="fa-solid fa-shield-halved text-success me-1"></i> Pratinjau kompatibel untuk layar ponsel & desktop via Mozilla PDF.js.</span>
-                        <span class="text-secondary small">Badal Umrah Amanah & Terpercaya</span>
+                    <div class="small sg-text-muted mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="fa-solid fa-shield-halved text-success me-1"></i> Pratinjau kompatibel untuk layar ponsel &amp; desktop via Mozilla PDF.js.</span>
+                        <span class="small">Badal Umrah Amanah &amp; Terpercaya</span>
                     </div>
                 </div>
             </div>

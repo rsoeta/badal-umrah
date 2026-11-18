@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Pengaturan Master - Badal Umrah</title>
     <meta name="title" content="Pengaturan Master - Badal Umrah">
     <meta name="description" content="Pengaturan master sistem Badal Umrah, daftar mutawwif, dan konfigurasi kalender Hijriah.">
@@ -26,61 +26,24 @@
     <meta name="twitter:title" content="Pengaturan Master - Badal Umrah">
     <meta name="twitter:description" content="Pengaturan master sistem Badal Umrah, daftar mutawwif, dan konfigurasi kalender Hijriah.">
     <meta name="twitter:image" content="<?= base_url('img/logo-utama.png'); ?>">
+
+    <!-- Smoked Glass Design System & Pre-Paint Theme Loader -->
+    <?= $this->include('partials/smoked_glass_head'); ?>
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Quicksand -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Pengaturan Font Responsif Global (Mempengaruhi seluruh satuan REM Bootstrap) */
-        html {
-            font-size: 16px;
-        }
-
-        /* Ukuran Normal di Laptop */
-
         @media (max-width: 767.98px) {
             html {
-                font-size: 13.5px;
+                font-size: 14px;
             }
-
-            /* Mengecil serentak di HP */
         }
 
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Quicksand', sans-serif;
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .navbar-admin {
-            background-color: #0f3d23;
-        }
-
-        .settings-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            width: 100%;
-            max-width: 1140px;
-            margin: 0 auto;
-        }
-
-        .card-custom {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Custom SweetAlert Mobile-friendly */
         .swal-mobile-custom {
             font-size: 0.8rem !important;
             width: 85% !important;
@@ -91,7 +54,6 @@
 
         .swal-title-custom {
             font-size: 1rem !important;
-            font-family: 'Quicksand', sans-serif !important;
             font-weight: 700 !important;
         }
 
@@ -100,142 +62,155 @@
             font-size: 0.8rem !important;
             border-radius: 6px !important;
         }
-
-        @media (max-width: 767.98px) {
-            body {
-                font-size: 0.85rem;
-            }
-        }
     </style>
 </head>
 
-<body>
+<body class="sg-body">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark navbar-admin shadow-sm mb-4">
-        <div class="container-fluid px-md-4">
-            <a class="navbar-brand mb-0 h1 fs-5 text-white text-decoration-none" href="<?= base_url('admin'); ?>">
-                <i class="fa-solid fa-kaaba me-2 text-warning"></i> Admin Panel
+    <?= $this->include('partials/smoked_glass_bg'); ?>
+
+    <div class="sg-frame">
+        <!-- Sticky Top Bar -->
+        <header class="sg-topbar">
+            <a class="sg-brand" href="<?= base_url('admin'); ?>">
+                <img src="<?= base_url('img/logo-utama.png'); ?>" alt="Logo Admin Panel" class="sg-brand__logo">
+                <div class="sg-brand__meta">
+                    <span class="sg-brand__name">Admin Panel</span>
+                    <span class="sg-brand__sub">Pengaturan Master Sistem</span>
+                </div>
             </a>
-            <div class="d-flex gap-2 align-items-center">
-                <a href="<?= base_url('admin'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm">
-                    <i class="fa-solid fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Kembali</span>
+
+            <?= view('partials/admin_nav', [
+                'activeMenu'    => 'pengaturan',
+                'jumlah_sampah' => $jumlah_sampah ?? 0,
+            ]); ?>
+
+            <div class="sg-actions">
+                <?= $this->include('partials/smoked_glass_customizer'); ?>
+                <a href="<?= base_url('admin'); ?>" class="sg-icon-btn" aria-label="Kembali ke Dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span class="sg-btn-label d-none d-sm-inline">Kembali</span>
                 </a>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="container-fluid px-md-4 pb-5 settings-content">
-        <div class="d-flex justify-content-center align-items-center mb-3">
-            <h5 class="mb-0 fw-bold">Pengaturan Data Master</h5>
-        </div>
+        <main id="main-content" class="sg-pane sg-main">
+            <header class="sg-phead pb-3 mb-4 border-bottom">
+                <div>
+                    <div class="sg-phead__kicker">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Konfigurasi Operasional</span>
+                    </div>
+                    <h1 class="sg-h1">Pengaturan Data Master</h1>
+                    <p class="sg-phead__sub">Kelola daftar mutawwif, koreksi kalender Hijriah, autentikasi admin, dan master tempat miqat.</p>
+                </div>
+            </header>
 
-        <div class="row justify-content-center g-4">
-            <div class="col-lg-6">
-                <div class="card card-custom mb-4 border-top border-warning border-4 h-100">
-                    <div class="card-body p-4">
+            <div class="row justify-content-center g-4">
+                <div class="col-lg-6">
+                    <section class="sg-card sg-card--highlight h-100">
                         <form id="formPengaturan">
 
                             <!-- Setting: List Mutawwif -->
                             <div class="mb-4">
-                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-users me-2 text-success"></i> Daftar Mutawwif & File TTD</label>
-                                <p class="text-muted mb-2" style="font-size: 0.75rem;">
+                                <label for="inputListMutawwif" class="form-label fw-bold sg-text-ink"><i class="fa-solid fa-users me-2 text-success"></i> Daftar Mutawwif &amp; File TTD</label>
+                                <p class="sg-text-muted mb-2" style="font-size: 0.75rem;">
                                     Format pengisian: <b>Nama Ustadz|namafile.png</b> <br>
                                     Pisahkan mutawwif baru dengan <b>Baris Baru (Enter)</b>. Pastikan file TTD sudah di-upload ke folder <code>public/signatures/</code>.
                                 </p>
-                                <textarea name="list_mutawwif" class="form-control rounded-3" rows="5" required><?= esc($list_mutawwif); ?></textarea>
+                                <textarea id="inputListMutawwif" name="list_mutawwif" class="form-control rounded-3" rows="5" required><?= esc($list_mutawwif); ?></textarea>
                             </div>
 
-                            <div class="mb-4 pt-3 border-top border-light border-2">
-                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i> Koreksi Hijriah</label>
-                                <p class="text-muted mb-2" style="font-size: 0.75rem;">
+                            <div class="mb-4 pt-3 border-top">
+                                <label for="inputKoreksiHijriahSetting" class="form-label fw-bold sg-text-ink"><i class="fa-solid fa-calendar-days me-2 text-primary"></i> Koreksi Hijriah</label>
+                                <p class="sg-text-muted mb-2" style="font-size: 0.75rem;">
                                     Nilai ini akan otomatis dikirim ke formulir proses sertifikat. Isi <b>1</b> atau <b>-1</b> jika tanggal Hijriah perlu dikoreksi, atau <b>0</b> jika tidak ada koreksi.
                                 </p>
-                                <input type="number" name="koreksi_hijriah" class="form-control rounded-3" step="1" value="<?= esc((string) $koreksi_hijriah); ?>">
+                                <input id="inputKoreksiHijriahSetting" type="number" name="koreksi_hijriah" class="form-control rounded-3" step="1" value="<?= esc((string) $koreksi_hijriah); ?>">
                             </div>
 
                             <!-- Setting: Kredensial Akun -->
-                            <div class="mb-4 pt-3 border-top border-light border-2">
-                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-lock me-2 text-danger"></i> Kredensial Login Admin (Sistem)</label>
-                                <p class="text-muted mb-3" style="font-size: 0.75rem;">Ubah username dan password untuk masuk ke halaman admin. Kosongkan kolom password jika tidak ingin mengubahnya.</p>
+                            <div class="mb-4 pt-3 border-top">
+                                <div class="form-label fw-bold sg-text-ink"><i class="fa-solid fa-lock me-2 text-danger"></i> Kredensial Login Admin (Sistem)</div>
+                                <p class="sg-text-muted mb-3" style="font-size: 0.75rem;">Ubah username dan password untuk masuk ke halaman admin. Kosongkan kolom password jika tidak ingin mengubahnya.</p>
 
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">Username Baru</label>
-                                        <input type="text" name="admin_username" class="form-control rounded-3" value="<?= esc($admin_username); ?>" required>
+                                        <label for="inputAdminUsername" class="form-label small fw-bold sg-text-muted">Username Baru</label>
+                                        <input id="inputAdminUsername" type="text" name="admin_username" class="form-control rounded-3" value="<?= esc($admin_username); ?>" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">Password Baru</label>
-                                        <input type="password" name="admin_password" class="form-control rounded-3" placeholder="Isi untuk mengganti password">
+                                        <label for="inputAdminPassword" class="form-label small fw-bold sg-text-muted">Password Baru</label>
+                                        <input id="inputAdminPassword" type="password" name="admin_password" class="form-control rounded-3" placeholder="Isi untuk mengganti password">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Setting: Integrasi Google OAuth -->
-                            <div class="mb-4 pt-3 border-top border-light border-2">
+                            <div class="mb-4 pt-3 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label class="form-label fw-bold text-dark mb-0">
+                                    <span class="form-label fw-bold sg-text-ink mb-0">
                                         <i class="fa-brands fa-google me-2 text-danger"></i> Integrasi Google OAuth
-                                    </label>
+                                    </span>
                                     <?php if ($google_is_configured): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
-                                            <i class="fa-solid fa-circle-check me-1"></i> Aktif
+                                        <span class="sg-pill sg-pill--good">
+                                            <i class="fa-solid fa-circle-check"></i> Aktif
                                         </span>
                                     <?php else: ?>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2">
-                                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Belum Lengkap
+                                        <span class="sg-pill sg-pill--warn">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Belum Lengkap
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                <p class="text-muted mb-3" style="font-size: 0.75rem;">
+                                <p class="sg-text-muted mb-3" style="font-size: 0.75rem;">
                                     Konfigurasi login Administrator menggunakan akun Google OAuth 2.0.
                                 </p>
 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Google Client ID</label>
-                                    <input type="text" name="google_client_id" class="form-control rounded-3" value="<?= esc($google_client_id); ?>" placeholder="Contoh: 123456789-abc.apps.googleusercontent.com">
+                                    <label for="inputGoogleClientId" class="form-label small fw-bold sg-text-muted">Google Client ID</label>
+                                    <input id="inputGoogleClientId" type="text" name="google_client_id" class="form-control rounded-3" value="<?= esc($google_client_id); ?>" placeholder="Contoh: 123456789-abc.apps.googleusercontent.com">
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">
+                                    <label for="inputGoogleClientSecret" class="form-label small fw-bold sg-text-muted">
                                         Google Client Secret
                                         <?php if ($google_client_secret_is_set): ?>
-                                            <span class="badge bg-light text-success ms-1 small fw-normal border"><i class="fa-solid fa-lock me-1"></i>Tersimpan</span>
+                                            <span class="sg-pill sg-pill--good ms-1 py-0 px-2"><i class="fa-solid fa-lock"></i> Tersimpan</span>
                                         <?php endif; ?>
                                     </label>
-                                    <input type="password" name="google_client_secret" class="form-control rounded-3" placeholder="<?= $google_client_secret_is_set ? 'Biarkan kosong jika tidak diubah' : 'Masukkan Google Client Secret'; ?>">
+                                    <input id="inputGoogleClientSecret" type="password" name="google_client_secret" class="form-control rounded-3" placeholder="<?= $google_client_secret_is_set ? 'Biarkan kosong jika tidak diubah' : 'Masukkan Google Client Secret'; ?>">
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Email Admin yang Diizinkan (Whitelist)</label>
-                                    <input type="text" name="google_admin_emails" class="form-control rounded-3" value="<?= esc($google_admin_emails); ?>" placeholder="admin@gmail.com, azis@gmail.com">
+                                    <label for="inputGoogleAdminEmails" class="form-label small fw-bold sg-text-muted">Email Admin yang Diizinkan (Whitelist)</label>
+                                    <input id="inputGoogleAdminEmails" type="text" name="google_admin_emails" class="form-control rounded-3" value="<?= esc($google_admin_emails); ?>" placeholder="admin@gmail.com, azis@gmail.com">
                                     <div class="form-text" style="font-size: 0.72rem;">Pisahkan dengan koma jika lebih dari satu email. Jika dikosongkan, email Google pertama yang login akan otomatis dijadikan admin.</div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Redirect URI Kustom (Opsional)</label>
-                                    <input type="text" name="google_redirect_uri" class="form-control rounded-3" value="<?= esc($google_redirect_uri_custom ?? ''); ?>" placeholder="Biarkan kosong untuk deteksi otomatis (<?= esc($google_redirect_uri); ?>)">
+                                    <label for="inputGoogleRedirectUri" class="form-label small fw-bold sg-text-muted">Redirect URI Kustom (Opsional)</label>
+                                    <input id="inputGoogleRedirectUri" type="text" name="google_redirect_uri" class="form-control rounded-3" value="<?= esc($google_redirect_uri_custom ?? ''); ?>" placeholder="Biarkan kosong untuk deteksi otomatis (<?= esc($google_redirect_uri); ?>)">
                                     <div class="form-text" style="font-size: 0.72rem;">Kosongkan untuk mendeteksi domain/port aktif secara otomatis.</div>
                                 </div>
 
                                 <!-- Box Panduan Authorized Redirect URIs untuk Google Cloud Console -->
-                                <div class="p-3 bg-light border border-warning rounded-3 small">
+                                <div class="sg-subpanel small">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <div class="fw-bold text-dark" style="font-size: 0.8rem;">
+                                        <div class="fw-bold sg-text-ink" style="font-size: 0.8rem;">
                                             <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Authorized Redirect URIs (Google Console)
                                         </div>
-                                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm rounded-pill px-2 py-0" style="font-size: 0.7rem;">
-                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Buka Console
+                                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="sg-btn sg-btn--glass btn-sm py-0 px-2" style="font-size: 0.7rem;">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Console
                                         </a>
                                     </div>
-                                    <p class="text-muted mb-2" style="font-size: 0.73rem;">
+                                    <p class="sg-text-muted mb-2" style="font-size: 0.73rem;">
                                         Agar tidak muncul <b>Error 400: redirect_uri_mismatch</b>, pastikan URL berikut sudah didaftarkan pada <b>Authorized redirect URIs</b> di Google Cloud Console:
                                     </p>
 
                                     <!-- URI Aktif Saat Ini -->
-                                    <label class="small text-muted fw-bold mb-1" style="font-size: 0.7rem;">URI Aktif Saat Ini:</label>
+                                    <label for="redirectUriInput" class="small sg-text-muted fw-bold mb-1" style="font-size: 0.7rem;">URI Aktif Saat Ini:</label>
                                     <div class="input-group input-group-sm mb-2">
-                                        <input type="text" class="form-control font-monospace" id="redirectUriInput" value="<?= esc($google_redirect_uri); ?>" readonly style="font-size: 0.75rem; background: #fff;">
+                                        <input type="text" class="form-control font-monospace" id="redirectUriInput" value="<?= esc($google_redirect_uri); ?>" readonly style="font-size: 0.75rem;">
                                         <button class="btn btn-primary" type="button" id="btnCopyRedirectUri" title="Salin URI Aktif">
                                             <i class="fa-regular fa-copy me-1"></i> Salin
                                         </button>
@@ -247,17 +222,17 @@
                                     $uriLocalhost = 'http://localhost:8080/login/google/callback';
                                     ?>
                                     <div class="mt-2 pt-2 border-top">
-                                        <div class="text-muted small fw-semibold mb-1" style="font-size: 0.7rem;">Daftarkan juga variasi berikut di Google Console:</div>
+                                        <div class="sg-text-muted small fw-semibold mb-1" style="font-size: 0.7rem;">Daftarkan juga variasi berikut di Google Console:</div>
                                         <div class="d-flex flex-column gap-1">
-                                            <div class="d-flex justify-content-between align-items-center bg-white p-1 px-2 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center p-1 px-2 border rounded" style="background: var(--input-bg);">
                                                 <code style="font-size: 0.72rem;"><?= $uriLocalhost; ?></code>
-                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper" data-copy="<?= $uriLocalhost; ?>" style="font-size: 0.72rem;">
+                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper sg-text-sig" data-copy="<?= $uriLocalhost; ?>" style="font-size: 0.72rem;">
                                                     <i class="fa-regular fa-copy"></i> Salin
                                                 </button>
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center bg-white p-1 px-2 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center p-1 px-2 border rounded" style="background: var(--input-bg);">
                                                 <code style="font-size: 0.72rem;"><?= $uri127; ?></code>
-                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper" data-copy="<?= $uri127; ?>" style="font-size: 0.72rem;">
+                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper sg-text-sig" data-copy="<?= $uri127; ?>" style="font-size: 0.72rem;">
                                                     <i class="fa-regular fa-copy"></i> Salin
                                                 </button>
                                             </div>
@@ -270,33 +245,33 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm w-100 fw-bold">
-                                <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Pengaturan
+                            <button type="submit" class="sg-btn sg-btn--sig w-100 py-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan
                             </button>
                         </form>
-                    </div>
+                    </section>
                 </div>
-            </div>
 
-            <!-- Card Master Tempat Miqat -->
-            <div class="col-lg-6">
-                <div class="card card-custom mb-4 border-top border-success border-4 h-100">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
+                <!-- Card Master Tempat Miqat -->
+                <div class="col-lg-6">
+                    <section class="sg-card h-100">
+                        <div class="sg-card__head align-items-start">
                             <div>
-                                <label class="form-label fw-bold text-dark mb-1"><i class="fa-solid fa-location-dot me-2 text-success"></i> Master Tempat Miqat</label>
-                                <p class="text-muted mb-0" style="font-size: 0.75rem;">
-                                    Daftar opsi tempat miqat untuk form sertifikat & dashboard.
+                                <h2 class="sg-card__title mb-1">
+                                    <i class="fa-solid fa-location-dot"></i> Master Tempat Miqat
+                                </h2>
+                                <p class="sg-text-muted mb-0" style="font-size: 0.75rem;">
+                                    Daftar opsi tempat miqat untuk form sertifikat &amp; dashboard.
                                 </p>
                             </div>
-                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahMiqat">
-                                <i class="fa-solid fa-plus me-1"></i> Tambah
+                            <button type="button" class="sg-btn sg-btn--sig btn-sm py-1 px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahMiqat">
+                                <i class="fa-solid fa-plus"></i> Tambah
                             </button>
                         </div>
 
                         <div class="table-responsive flex-grow-1">
                             <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                                <thead class="table-light">
+                                <thead>
                                     <tr>
                                         <th style="width: 40px;">No</th>
                                         <th>Nama Miqat</th>
@@ -307,26 +282,28 @@
                                 <tbody>
                                     <?php if (empty($list_tempat_miqat)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">Belum ada data tempat miqat.</td>
+                                            <td colspan="4" class="text-center sg-text-muted py-4">Belum ada data tempat miqat.</td>
                                         </tr>
                                     <?php else: ?>
                                         <?php $no = 1; foreach ($list_tempat_miqat as $miqat): ?>
                                             <tr>
-                                                <td class="text-muted small"><?= $no++; ?></td>
-                                                <td class="fw-bold text-dark"><?= esc($miqat['nama_miqat']); ?></td>
-                                                <td class="text-muted small"><?= esc($miqat['keterangan'] ?? '-'); ?></td>
+                                                <td class="sg-text-muted small"><?= $no++; ?></td>
+                                                <td class="fw-bold sg-text-ink"><?= esc($miqat['nama_miqat']); ?></td>
+                                                <td class="sg-text-muted small"><?= esc($miqat['keterangan'] ?? '-'); ?></td>
                                                 <td class="text-end text-nowrap">
                                                     <button type="button" class="btn btn-outline-primary btn-sm rounded-pill btn-edit-miqat me-1"
                                                         data-id="<?= $miqat['id']; ?>"
                                                         data-nama="<?= esc($miqat['nama_miqat'], 'attr'); ?>"
                                                         data-keterangan="<?= esc($miqat['keterangan'] ?? '', 'attr'); ?>"
-                                                        title="Edit">
+                                                        title="Edit"
+                                                        aria-label="Edit <?= esc($miqat['nama_miqat'], 'attr'); ?>">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-outline-danger btn-sm rounded-pill btn-hapus-miqat"
                                                         data-id="<?= $miqat['id']; ?>"
                                                         data-nama="<?= esc($miqat['nama_miqat'], 'attr'); ?>"
-                                                        title="Hapus">
+                                                        title="Hapus"
+                                                        aria-label="Hapus <?= esc($miqat['nama_miqat'], 'attr'); ?>">
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </button>
                                                 </td>
@@ -336,37 +313,37 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Modal Tambah Tempat Miqat -->
     <div class="modal fade" id="modalTambahMiqat" tabindex="-1" aria-labelledby="modalTambahMiqatLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-success text-white border-0 rounded-top-4">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h6 class="modal-title fw-bold" id="modalTambahMiqatLabel">
-                        <i class="fa-solid fa-location-dot me-2"></i>Tambah Tempat Miqat
+                        <i class="fa-solid fa-location-dot me-2 sg-text-sig"></i>Tambah Tempat Miqat
                     </h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <form id="formTambahMiqat">
-                    <div class="modal-body p-4 bg-light">
+                    <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label for="inputNamaMiqat" class="form-label text-muted fw-bold small">Nama Tempat Miqat <span class="text-danger">*</span></label>
+                            <label for="inputNamaMiqat" class="form-label fw-bold small">Nama Tempat Miqat <span class="text-danger">*</span></label>
                             <input type="text" name="nama_miqat" id="inputNamaMiqat" class="form-control rounded-3" placeholder="Contoh: Tan'im, Makkah Al-Mukarramah" maxlength="150" required>
                         </div>
                         <div>
-                            <label for="inputKeteranganMiqat" class="form-label text-muted fw-bold small">Keterangan (Opsional)</label>
+                            <label for="inputKeteranganMiqat" class="form-label fw-bold small">Keterangan (Opsional)</label>
                             <input type="text" name="keterangan" id="inputKeteranganMiqat" class="form-control rounded-3" placeholder="Contoh: Miqat penduduk Makkah / Umrah sunnah" maxlength="255">
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btnSimpanTambahMiqat" class="btn btn-success rounded-pill px-4 shadow-sm">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="sg-btn sg-btn--glass btn-sm py-2 px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnSimpanTambahMiqat" class="sg-btn sg-btn--sig btn-sm py-2 px-4">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan
                         </button>
                     </div>
                 </form>
@@ -377,29 +354,29 @@
     <!-- Modal Edit Tempat Miqat -->
     <div class="modal fade" id="modalEditMiqat" tabindex="-1" aria-labelledby="modalEditMiqatLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h6 class="modal-title fw-bold" id="modalEditMiqatLabel">
-                        <i class="fa-solid fa-pen-to-square me-2"></i>Edit Tempat Miqat
+                        <i class="fa-solid fa-pen-to-square me-2 sg-text-sig"></i>Edit Tempat Miqat
                     </h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <form id="formEditMiqat">
                     <input type="hidden" name="id" id="editIdMiqat">
-                    <div class="modal-body p-4 bg-light">
+                    <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label for="editNamaMiqat" class="form-label text-muted fw-bold small">Nama Tempat Miqat <span class="text-danger">*</span></label>
+                            <label for="editNamaMiqat" class="form-label fw-bold small">Nama Tempat Miqat <span class="text-danger">*</span></label>
                             <input type="text" name="nama_miqat" id="editNamaMiqat" class="form-control rounded-3" maxlength="150" required>
                         </div>
                         <div>
-                            <label for="editKeteranganMiqat" class="form-label text-muted fw-bold small">Keterangan (Opsional)</label>
+                            <label for="editKeteranganMiqat" class="form-label fw-bold small">Keterangan (Opsional)</label>
                             <input type="text" name="keterangan" id="editKeteranganMiqat" class="form-control rounded-3" maxlength="255">
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-4 pt-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light text-muted rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btnSimpanEditMiqat" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="sg-btn sg-btn--glass btn-sm py-2 px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnSimpanEditMiqat" class="sg-btn sg-btn--sig btn-sm py-2 px-4">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
                         </button>
                     </div>
                 </form>
