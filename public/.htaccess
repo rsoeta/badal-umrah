@@ -53,6 +53,13 @@ Options -Indexes
 ServerSignature Off
 # Disable server signature end
 
+# Ensure Service Worker script updates immediately without stale browser HTTP cache
+<IfModule mod_headers.c>
+	<Files "sw.js">
+		Header set Cache-Control "no-cache, no-store, must-revalidate"
+	</Files>
+</IfModule>
+
 # ----------------------------------------------------------------------
 # PHP upload & execution configuration (for Apache mod_php)
 # ----------------------------------------------------------------------

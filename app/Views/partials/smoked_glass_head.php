@@ -8,6 +8,16 @@
  */
 ?>
 <meta name="theme-color" content="#2a2c2f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Badal Umrah">
+<meta name="sg-sw-url" content="<?= base_url('sw.js'); ?>">
+<meta name="sg-sw-scope" content="<?= rtrim(base_url(), '/') . '/'; ?>">
+<link rel="manifest" href="<?= base_url('manifest.json'); ?>">
+<link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('icons/icon-192x192.png'); ?>">
+<link rel="icon" type="image/png" sizes="512x512" href="<?= base_url('icons/icon-512x512.png'); ?>">
+<link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('icons/apple-touch-icon-180x180.png'); ?>">
 <script>
 (function () {
     try {
@@ -32,6 +42,8 @@
         r.style.setProperty('--sig', sig);
         r.style.setProperty('--sig-ink', isLight ? p.inkLight : p.inkDark);
         r.style.setProperty('--sig-text', isLight ? p.textLight : p.textDark);
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', isLight ? '#c9cbce' : '#2a2c2f');
     } catch (e) {}
 })();
 </script>

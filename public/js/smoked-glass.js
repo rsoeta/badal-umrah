@@ -55,6 +55,11 @@
         root.style.setProperty('--frost', String(frost));
         applyAccent(accent, theme);
 
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) {
+            metaTheme.setAttribute('content', theme === 'light' ? '#c9cbce' : '#2a2c2f');
+        }
+
         // Update theme toggle button icon/label if present
         document.querySelectorAll('[data-sg-theme-toggle]').forEach(btn => {
             const icon = btn.querySelector('i');
@@ -222,4 +227,20 @@
             }
         });
     });
+
+    // Register Progressive Web App Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const swMeta = document.querySelector('meta[name="sg-sw-url"]');
+            const scopeMeta = document.querySelector('meta[name="sg-sw-scope"]');
+            const swUrl = swMeta ? swMeta.getAttribute('content') : '/sw.js';
+            const swScope = scopeMeta ? scopeMeta.getAttribute('content') : '/';
+
+            navigator.serviceWorker
+                .register(swUrl, { scope: swScope })
+                .catch((err) => {
+                    console.warn('Service Worker registration failed:', err);
+                });
+        });
+    }
 })();
