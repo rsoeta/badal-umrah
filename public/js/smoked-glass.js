@@ -237,7 +237,7 @@
             const swScope = scopeMeta ? scopeMeta.getAttribute('content') : '/';
 
             navigator.serviceWorker
-                .register(swUrl, { scope: swScope })
+                .register(swUrl, { scope: swScope, updateViaCache: 'none' })
                 .catch((err) => {
                     console.warn('Service Worker registration failed:', err);
                 });

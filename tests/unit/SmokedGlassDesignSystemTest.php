@@ -132,5 +132,6 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
 
         $js = file_get_contents(FCPATH . 'js/smoked-glass.js');
         $this->assertStringContainsString('navigator.serviceWorker', $js);
+        $this->assertStringContainsString("updateViaCache: 'none'", $js);
     }
 }
