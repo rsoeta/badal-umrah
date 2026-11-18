@@ -5,13 +5,20 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 use App\Libraries\SertifikatGenerator;
 use App\Models\PendaftaranModel;
+use App\Models\TempatMiqatModel;
 use App\Models\VideoDokumentasiModel;
 
 class SertifikatController extends Controller
 {
     public function index()
     {
-        return view('sertifikat_form');
+        $miqatModel = new TempatMiqatModel();
+        $listMiqat = $miqatModel->orderBy('nama_miqat', 'ASC')->findAll();
+
+        return view('sertifikat_form', [
+            'list_miqat'    => $listMiqat,
+            'default_miqat' => ! empty($listMiqat) ? $listMiqat[0]['nama_miqat'] : "Tan'im, Makkah Al-Mukarramah",
+        ]);
     }
 
     public function generate()
@@ -43,6 +50,16 @@ class SertifikatController extends Controller
         $tempat_miqat_input = trim((string) $this->request->getPost('tempat_miqat'));
         if ($tempat_miqat_input === '') {
             $tempat_miqat_input = "Tan'im, Makkah Al-Mukarramah";
+        }
+
+        // Simpan tempat miqat ke master jika belum ada
+        $tempatMiqatModel = new TempatMiqatModel();
+        $miqatMasterCheck = $tempatMiqatModel->where('LOWER(nama_miqat)', strtolower($tempat_miqat_input))->first();
+        if (! $miqatMasterCheck) {
+            $tempatMiqatModel->insert([
+                'nama_miqat' => $tempat_miqat_input,
+                'keterangan' => 'Ditambahkan dari formulir sertifikat',
+            ]);
         }
         $tgl_miqat_input = $this->request->getPost('tanggal_miqat');
         $tgl_cetak_input = $this->request->getPost('tanggal_cetak');

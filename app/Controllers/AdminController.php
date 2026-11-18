@@ -5,6 +5,7 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 use App\Models\PendaftaranModel;
 use App\Models\PengaturanModel;
+use App\Models\TempatMiqatModel;
 use App\Models\VideoDokumentasiModel;
 use App\Libraries\SertifikatGenerator;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
@@ -41,7 +42,10 @@ class AdminController extends Controller
         $data['list_mutawwif'] = array_filter(explode("\n", str_replace("\r", "", $list_mutawwif_raw)));
         $data['koreksi_hijriah'] = (int) ($pengaturanModel->getSetting('koreksi_hijriah') ?? 0);
 
-        // Ambil opsi tempat miqat dari database dengan group by agar tidak ada duplikasi
+        // Ambil opsi tempat miqat dari database master tempat_miqat dan pendaftaran
+        $miqatMaster = (new TempatMiqatModel())->orderBy('nama_miqat', 'ASC')->findAll();
+        $miqatMasterNames = ! empty($miqatMaster) ? array_column($miqatMaster, 'nama_miqat') : [];
+
         $list_tempat_miqat_db = (new PendaftaranModel())
             ->select('tempat_miqat')
             ->where('tempat_miqat IS NOT NULL', null, false)
@@ -59,7 +63,7 @@ class AdminController extends Controller
             "Qarnul Manazil",
         ];
 
-        $data['list_tempat_miqat'] = array_values(array_unique(array_filter(array_merge($default_miqat, $list_tempat_miqat_db))));
+        $data['list_tempat_miqat'] = array_values(array_unique(array_filter(array_merge($default_miqat, $miqatMasterNames, $list_tempat_miqat_db))));
 
         return view('admin_dashboard', $data);
     }
@@ -806,6 +810,16 @@ class AdminController extends Controller
             $tempat_miqat_input = "Tan'im, Makkah Al-Mukarramah";
         }
 
+        // Simpan tempat miqat ke master jika belum ada
+        $tempatMiqatModel = new TempatMiqatModel();
+        $miqatMasterCheck = $tempatMiqatModel->where('LOWER(nama_miqat)', strtolower($tempat_miqat_input))->first();
+        if (! $miqatMasterCheck) {
+            $tempatMiqatModel->insert([
+                'nama_miqat' => $tempat_miqat_input,
+                'keterangan' => 'Ditambahkan otomatis dari proses sertifikat',
+            ]);
+        }
+
         $tgl_miqat_input = $this->request->getPost('tanggal_miqat');
         $tgl_cetak_input = $this->request->getPost('tanggal_cetak');
         $koreksi_hijriah = (int) $this->request->getPost('koreksi_hijriah');
@@ -900,6 +914,9 @@ class AdminController extends Controller
         // Ambil data username untuk ditampilkan di form (password jangan pernah dikirim ke view)
         $data['admin_username'] = $pengaturanModel->getSetting('admin_username') ?? 'admin-badal';
 
+        // Master Tempat Miqat
+        $data['list_tempat_miqat'] = (new TempatMiqatModel())->orderBy('nama_miqat', 'ASC')->findAll();
+
         return view('admin_pengaturan', $data);
     }
 
@@ -938,5 +955,143 @@ class AdminController extends Controller
         }
 
         return $this->response->setJSON(['status' => 'success', 'message' => 'Pengaturan & Kredensial berhasil diperbarui!']);
+    }
+
+    public function tambahMiqat()
+    {
+        $namaMiqat = trim((string) $this->request->getPost('nama_miqat'));
+        $keterangan = trim((string) $this->request->getPost('keterangan'));
+
+        if ($namaMiqat === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Nama tempat miqat wajib diisi.',
+            ]);
+        }
+
+        if (mb_strlen($namaMiqat) > 150) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Nama tempat miqat maksimal 150 karakter.',
+            ]);
+        }
+
+        if (mb_strlen($keterangan) > 255) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Keterangan maksimal 255 karakter.',
+            ]);
+        }
+
+        $miqatModel = new TempatMiqatModel();
+        $existing = $miqatModel->where('LOWER(nama_miqat)', strtolower($namaMiqat))->first();
+        if ($existing) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Tempat miqat dengan nama tersebut sudah ada.',
+            ]);
+        }
+
+        $id = $miqatModel->insert([
+            'nama_miqat' => $namaMiqat,
+            'keterangan' => $keterangan !== '' ? $keterangan : null,
+        ]);
+
+        if (! $id) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal menyimpan tempat miqat.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Tempat miqat berhasil ditambahkan.',
+            'data'    => [
+                'id'         => $id,
+                'nama_miqat' => $namaMiqat,
+                'keterangan' => $keterangan,
+            ],
+        ]);
+    }
+
+    public function editMiqat(int $id)
+    {
+        $miqatModel = new TempatMiqatModel();
+        $item = $miqatModel->find($id);
+        if (! $item) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data tempat miqat tidak ditemukan.',
+            ]);
+        }
+
+        $namaMiqat = trim((string) $this->request->getPost('nama_miqat'));
+        $keterangan = trim((string) $this->request->getPost('keterangan'));
+
+        if ($namaMiqat === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Nama tempat miqat wajib diisi.',
+            ]);
+        }
+
+        if (mb_strlen($namaMiqat) > 150) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Nama tempat miqat maksimal 150 karakter.',
+            ]);
+        }
+
+        if (mb_strlen($keterangan) > 255) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Keterangan maksimal 255 karakter.',
+            ]);
+        }
+
+        $existing = $miqatModel->where('LOWER(nama_miqat)', strtolower($namaMiqat))
+            ->where('id !=', $id)
+            ->first();
+        if ($existing) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Tempat miqat dengan nama tersebut sudah ada.',
+            ]);
+        }
+
+        $miqatModel->update($id, [
+            'nama_miqat' => $namaMiqat,
+            'keterangan' => $keterangan !== '' ? $keterangan : null,
+        ]);
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Tempat miqat berhasil diperbarui.',
+            'data'    => [
+                'id'         => $id,
+                'nama_miqat' => $namaMiqat,
+                'keterangan' => $keterangan,
+            ],
+        ]);
+    }
+
+    public function hapusMiqat(int $id)
+    {
+        $miqatModel = new TempatMiqatModel();
+        $item = $miqatModel->find($id);
+        if (! $item) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data tempat miqat tidak ditemukan.',
+            ]);
+        }
+
+        $miqatModel->delete($id);
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Tempat miqat berhasil dihapus.',
+        ]);
     }
 }

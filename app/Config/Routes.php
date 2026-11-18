@@ -32,6 +32,9 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     $routes->get('pengaturan', 'AdminController::pengaturan');
     $routes->post('pengaturan/simpan', 'AdminController::simpanPengaturan');
+    $routes->post('pengaturan/miqat/tambah', 'AdminController::tambahMiqat');
+    $routes->post('pengaturan/miqat/(:num)/edit', 'AdminController::editMiqat/$1');
+    $routes->post('pengaturan/miqat/(:num)/hapus', 'AdminController::hapusMiqat/$1');
 });
 
 $routes->get('sertifikat', 'SertifikatController::index');

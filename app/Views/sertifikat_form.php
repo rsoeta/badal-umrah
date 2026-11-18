@@ -131,14 +131,22 @@
             </div>
             <div class="form-group">
                 <label>Tempat Miqat</label>
-                <input type="text" name="tempat_miqat" list="listMiqatForm" placeholder="Pilih atau ketik tempat miqat..." value="Tan'im, Makkah Al-Mukarramah" required>
+                <?php
+                $defaultValue = ! empty($default_miqat) ? $default_miqat : "Tan'im, Makkah Al-Mukarramah";
+                $options = ! empty($list_miqat) ? $list_miqat : [
+                    ['nama_miqat' => "Tan'im, Makkah Al-Mukarramah"],
+                    ['nama_miqat' => 'Bir Ali (Zulhulaifah)'],
+                    ['nama_miqat' => "Ji'ranah"],
+                    ['nama_miqat' => 'Hudaibiyah'],
+                    ['nama_miqat' => 'Yalamlam'],
+                    ['nama_miqat' => 'Qarnul Manazil'],
+                ];
+                ?>
+                <input type="text" name="tempat_miqat" list="listMiqatForm" placeholder="Pilih atau ketik tempat miqat..." value="<?= esc($defaultValue, 'attr'); ?>" required>
                 <datalist id="listMiqatForm">
-                    <option value="Tan'im, Makkah Al-Mukarramah">
-                    <option value="Bir Ali (Zulhulaifah)">
-                    <option value="Ji'ranah">
-                    <option value="Hudaibiyah">
-                    <option value="Yalamlam">
-                    <option value="Qarnul Manazil">
+                    <?php foreach ($options as $opt): ?>
+                        <option value="<?= esc(is_array($opt) ? ($opt['nama_miqat'] ?? '') : (string) $opt, 'attr'); ?>">
+                    <?php endforeach; ?>
                 </datalist>
             </div>
             <div class="form-group">
