@@ -10,6 +10,8 @@ $routes->get('video/(:segment)/download', 'PendaftaranController::downloadShared
 
 // Rute Login
 $routes->get('login', 'AuthController::index');
+$routes->get('login/google', 'AuthController::googleLogin');
+$routes->get('login/google/callback', 'AuthController::googleCallback');
 $routes->post('login/proses', 'AuthController::proses');
 $routes->get('logout', 'AuthController::logout');
 

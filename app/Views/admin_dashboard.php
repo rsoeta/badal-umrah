@@ -244,6 +244,14 @@
                     <?php endif; ?>
                 </a>
 
+                <?php if (session()->get('admin_picture')): ?>
+                    <img src="<?= esc(session()->get('admin_picture'), 'attr'); ?>" alt="Profil Google" class="rounded-circle border border-2 border-warning shadow-sm" style="width: 32px; height: 32px; object-fit: cover;" title="<?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>">
+                <?php elseif (session()->get('admin_email')): ?>
+                    <span class="badge bg-light text-dark d-none d-lg-inline-flex align-items-center text-truncate shadow-sm" style="max-width: 170px;" title="<?= esc(session()->get('admin_email')); ?>">
+                        <i class="fa-brands fa-google text-danger me-1"></i><?= esc(session()->get('admin_name') ?? session()->get('admin_email')); ?>
+                    </span>
+                <?php endif; ?>
+
                 <a href="#" id="btn-logout" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm" aria-label="Logout">
                     <i class="fa-solid fa-right-from-bracket me-1"></i> <span class="d-none d-sm-inline">Logout</span>
                 </a>
@@ -503,8 +511,23 @@
                             <input type="text" name="nama_diumrahkan" class="form-control rounded-3" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
-                            <input type="file" name="foto_jamaah" class="form-control rounded-3" accept="image/jpeg,image/png,image/webp">
+                            <label for="tambahFotoJamaah" class="form-label text-muted fw-bold small">Foto untuk Sertifikat (Opsional)</label>
+
+                            <!-- Preview Foto Terpilih -->
+                            <div id="tambahFotoPreviewWrapper" class="d-none mb-2 p-2 bg-white border rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-sm">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <img id="tambahFotoPreview" src="" alt="Preview Foto Jamaah" class="rounded border shadow-sm flex-shrink-0" style="width: 50px; height: 65px; object-fit: cover;">
+                                    <div class="small overflow-hidden">
+                                        <div class="fw-bold text-dark text-truncate" id="tambahFotoNama" style="max-width: 200px;">Nama File</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;" id="tambahFotoUkuran">0 KB</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2 py-1 flex-shrink-0" id="btnHapusPreviewTambahFoto" title="Hapus foto terpilih">
+                                    <i class="fa-solid fa-xmark me-1"></i> Batal
+                                </button>
+                            </div>
+
+                            <input type="file" name="foto_jamaah" id="tambahFotoJamaah" class="form-control rounded-3" accept="image/jpeg,image/png,image/webp">
                             <div class="form-text">JPG, PNG, atau WEBP, maksimal 5 MB. Foto akan dipotong ke rasio 3:4.</div>
                         </div>
                         <div class="mb-2">
@@ -1657,6 +1680,90 @@
                 });
         });
 
+        // Preview Foto pada Modal Input Pendaftaran Manual
+        const tambahFotoJamaah = document.getElementById('tambahFotoJamaah');
+        const tambahFotoPreviewWrapper = document.getElementById('tambahFotoPreviewWrapper');
+        const tambahFotoPreview = document.getElementById('tambahFotoPreview');
+        const tambahFotoNama = document.getElementById('tambahFotoNama');
+        const tambahFotoUkuran = document.getElementById('tambahFotoUkuran');
+        const btnHapusPreviewTambahFoto = document.getElementById('btnHapusPreviewTambahFoto');
+        const modalTambahPendaftarEl = document.getElementById('modalTambahPendaftar');
+
+        function formatBytesFoto(bytes, decimals = 1) {
+            if (!bytes || bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function resetTambahFotoPreview() {
+            if (tambahFotoJamaah) tambahFotoJamaah.value = '';
+            if (tambahFotoPreview) tambahFotoPreview.src = '';
+            if (tambahFotoNama) tambahFotoNama.textContent = '';
+            if (tambahFotoUkuran) tambahFotoUkuran.textContent = '';
+            if (tambahFotoPreviewWrapper) tambahFotoPreviewWrapper.classList.add('d-none');
+        }
+
+        if (tambahFotoJamaah) {
+            tambahFotoJamaah.addEventListener('change', function() {
+                const file = this.files && this.files[0];
+                if (!file) {
+                    resetTambahFotoPreview();
+                    return;
+                }
+
+                // Validasi format file
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Format Gambar Tidak Sesuai',
+                        text: 'Pilih file gambar dengan format JPG, PNG, atau WEBP.',
+                        customClass: { popup: 'swal-mobile-custom' }
+                    });
+                    resetTambahFotoPreview();
+                    return;
+                }
+
+                // Validasi ukuran file (maksimal 5 MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Ukuran Terlalu Besar',
+                        text: 'Ukuran file gambar maksimal adalah 5 MB.',
+                        customClass: { popup: 'swal-mobile-custom' }
+                    });
+                    resetTambahFotoPreview();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (tambahFotoPreview) tambahFotoPreview.src = e.target.result;
+                    if (tambahFotoNama) tambahFotoNama.textContent = file.name;
+                    if (tambahFotoUkuran) tambahFotoUkuran.textContent = formatBytesFoto(file.size);
+                    if (tambahFotoPreviewWrapper) tambahFotoPreviewWrapper.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        if (btnHapusPreviewTambahFoto) {
+            btnHapusPreviewTambahFoto.addEventListener('click', function() {
+                resetTambahFotoPreview();
+            });
+        }
+
+        if (modalTambahPendaftarEl) {
+            modalTambahPendaftarEl.addEventListener('hidden.bs.modal', function() {
+                document.getElementById('formTambahPendaftar').reset();
+                resetTambahFotoPreview();
+            });
+        }
+
         // Submit Form Tambah Pendaftar Manual
         document.getElementById('formTambahPendaftar').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1684,6 +1791,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
+                        resetTambahFotoPreview();
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',

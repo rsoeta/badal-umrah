@@ -917,6 +917,15 @@ class AdminController extends Controller
         // Master Tempat Miqat
         $data['list_tempat_miqat'] = (new TempatMiqatModel())->orderBy('nama_miqat', 'ASC')->findAll();
 
+        // Integrasi Google OAuth
+        $googleOAuth = new \App\Libraries\GoogleOAuth();
+        $data['google_client_id'] = $pengaturanModel->getSetting('google_client_id') ?? (env('google.clientId') ?? env('GOOGLE_CLIENT_ID') ?? '');
+        $data['google_client_secret_is_set'] = ! empty($pengaturanModel->getSetting('google_client_secret') ?: (env('google.clientSecret') ?: env('GOOGLE_CLIENT_SECRET')));
+        $data['google_admin_emails'] = $pengaturanModel->getSetting('google_admin_emails') ?? (env('google.allowedEmails') ?? env('GOOGLE_ALLOWED_EMAILS') ?? '');
+        $data['google_redirect_uri_custom'] = $pengaturanModel->getSetting('google_redirect_uri') ?? '';
+        $data['google_redirect_uri'] = $googleOAuth->getRedirectUri();
+        $data['google_is_configured'] = $googleOAuth->isConfigured();
+
         return view('admin_pengaturan', $data);
     }
 
@@ -934,10 +943,19 @@ class AdminController extends Controller
         }
 
         $settings = [
-            'list_mutawwif'  => $this->request->getPost('list_mutawwif'),
-            'admin_username' => $this->request->getPost('admin_username'),
-            'koreksi_hijriah' => (string) ((int) ($this->request->getPost('koreksi_hijriah') ?? 0)),
+            'list_mutawwif'        => $this->request->getPost('list_mutawwif'),
+            'admin_username'       => $this->request->getPost('admin_username'),
+            'koreksi_hijriah'      => (string) ((int) ($this->request->getPost('koreksi_hijriah') ?? 0)),
+            'google_client_id'     => trim((string) $this->request->getPost('google_client_id')),
+            'google_admin_emails'  => trim((string) $this->request->getPost('google_admin_emails')),
+            'google_redirect_uri'  => trim((string) $this->request->getPost('google_redirect_uri')),
         ];
+
+        // Khusus untuk Google Client Secret, JIKA diisi baru kita simpan
+        $new_google_secret = trim((string) $this->request->getPost('google_client_secret'));
+        if ($new_google_secret !== '') {
+            $settings['google_client_secret'] = $new_google_secret;
+        }
 
         // Khusus untuk password, JIKA diisi baru kita update & enkripsi
         $new_password = $this->request->getPost('admin_password');

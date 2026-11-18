@@ -156,7 +156,7 @@
 
                             <!-- Setting: Kredensial Akun -->
                             <div class="mb-4 pt-3 border-top border-light border-2">
-                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-lock me-2 text-danger"></i> Kredensial Login Admin</label>
+                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-lock me-2 text-danger"></i> Kredensial Login Admin (Sistem)</label>
                                 <p class="text-muted mb-3" style="font-size: 0.75rem;">Ubah username dan password untuk masuk ke halaman admin. Kosongkan kolom password jika tidak ingin mengubahnya.</p>
 
                                 <div class="row g-3">
@@ -167,6 +167,105 @@
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Password Baru</label>
                                         <input type="password" name="admin_password" class="form-control rounded-3" placeholder="Isi untuk mengganti password">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Setting: Integrasi Google OAuth -->
+                            <div class="mb-4 pt-3 border-top border-light border-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-bold text-dark mb-0">
+                                        <i class="fa-brands fa-google me-2 text-danger"></i> Integrasi Google OAuth
+                                    </label>
+                                    <?php if ($google_is_configured): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Aktif
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Belum Lengkap
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="text-muted mb-3" style="font-size: 0.75rem;">
+                                    Konfigurasi login Administrator menggunakan akun Google OAuth 2.0.
+                                </p>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Google Client ID</label>
+                                    <input type="text" name="google_client_id" class="form-control rounded-3" value="<?= esc($google_client_id); ?>" placeholder="Contoh: 123456789-abc.apps.googleusercontent.com">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">
+                                        Google Client Secret
+                                        <?php if ($google_client_secret_is_set): ?>
+                                            <span class="badge bg-light text-success ms-1 small fw-normal border"><i class="fa-solid fa-lock me-1"></i>Tersimpan</span>
+                                        <?php endif; ?>
+                                    </label>
+                                    <input type="password" name="google_client_secret" class="form-control rounded-3" placeholder="<?= $google_client_secret_is_set ? 'Biarkan kosong jika tidak diubah' : 'Masukkan Google Client Secret'; ?>">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Email Admin yang Diizinkan (Whitelist)</label>
+                                    <input type="text" name="google_admin_emails" class="form-control rounded-3" value="<?= esc($google_admin_emails); ?>" placeholder="admin@gmail.com, azis@gmail.com">
+                                    <div class="form-text" style="font-size: 0.72rem;">Pisahkan dengan koma jika lebih dari satu email. Jika dikosongkan, email Google pertama yang login akan otomatis dijadikan admin.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Redirect URI Kustom (Opsional)</label>
+                                    <input type="text" name="google_redirect_uri" class="form-control rounded-3" value="<?= esc($google_redirect_uri_custom ?? ''); ?>" placeholder="Biarkan kosong untuk deteksi otomatis (<?= esc($google_redirect_uri); ?>)">
+                                    <div class="form-text" style="font-size: 0.72rem;">Kosongkan untuk mendeteksi domain/port aktif secara otomatis.</div>
+                                </div>
+
+                                <!-- Box Panduan Authorized Redirect URIs untuk Google Cloud Console -->
+                                <div class="p-3 bg-light border border-warning rounded-3 small">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="fw-bold text-dark" style="font-size: 0.8rem;">
+                                            <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Authorized Redirect URIs (Google Console)
+                                        </div>
+                                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm rounded-pill px-2 py-0" style="font-size: 0.7rem;">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Buka Console
+                                        </a>
+                                    </div>
+                                    <p class="text-muted mb-2" style="font-size: 0.73rem;">
+                                        Agar tidak muncul <b>Error 400: redirect_uri_mismatch</b>, pastikan URL berikut sudah didaftarkan pada <b>Authorized redirect URIs</b> di Google Cloud Console:
+                                    </p>
+
+                                    <!-- URI Aktif Saat Ini -->
+                                    <label class="small text-muted fw-bold mb-1" style="font-size: 0.7rem;">URI Aktif Saat Ini:</label>
+                                    <div class="input-group input-group-sm mb-2">
+                                        <input type="text" class="form-control font-monospace" id="redirectUriInput" value="<?= esc($google_redirect_uri); ?>" readonly style="font-size: 0.75rem; background: #fff;">
+                                        <button class="btn btn-primary" type="button" id="btnCopyRedirectUri" title="Salin URI Aktif">
+                                            <i class="fa-regular fa-copy me-1"></i> Salin
+                                        </button>
+                                    </div>
+
+                                    <!-- URI Tambahan untuk Localhost -->
+                                    <?php
+                                    $uri127 = 'http://127.0.0.1:8080/login/google/callback';
+                                    $uriLocalhost = 'http://localhost:8080/login/google/callback';
+                                    ?>
+                                    <div class="mt-2 pt-2 border-top">
+                                        <div class="text-muted small fw-semibold mb-1" style="font-size: 0.7rem;">Daftarkan juga variasi berikut di Google Console:</div>
+                                        <div class="d-flex flex-column gap-1">
+                                            <div class="d-flex justify-content-between align-items-center bg-white p-1 px-2 border rounded">
+                                                <code style="font-size: 0.72rem;"><?= $uriLocalhost; ?></code>
+                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper" data-copy="<?= $uriLocalhost; ?>" style="font-size: 0.72rem;">
+                                                    <i class="fa-regular fa-copy"></i> Salin
+                                                </button>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center bg-white p-1 px-2 border rounded">
+                                                <code style="font-size: 0.72rem;"><?= $uri127; ?></code>
+                                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none copy-helper" data-copy="<?= $uri127; ?>" style="font-size: 0.72rem;">
+                                                    <i class="fa-regular fa-copy"></i> Salin
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 text-danger" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i> <b>Catatan:</b> Jangan tambahkan tanda miring (<code>/</code>) di akhir URL. Setelah menambahkannya di Google Console, klik <b>SAVE</b> dan tunggu 1-2 menit agar Google menyinkronkan.
                                     </div>
                                 </div>
                             </div>
@@ -519,6 +618,46 @@
                             console.error(err);
                         });
                     }
+                });
+            });
+        });
+
+        // Salin Redirect URI Google OAuth
+        const btnCopyRedirectUri = document.getElementById('btnCopyRedirectUri');
+        if (btnCopyRedirectUri) {
+            btnCopyRedirectUri.addEventListener('click', function() {
+                const input = document.getElementById('redirectUriInput');
+                if (!input) return;
+                input.select();
+                navigator.clipboard.writeText(input.value).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tersalin!',
+                        text: 'Authorized Redirect URI berhasil disalin.',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        customClass: { popup: 'swal-mobile-custom', title: 'swal-title-custom' }
+                    });
+                }).catch(() => {
+                    input.select();
+                    document.execCommand('copy');
+                });
+            });
+        }
+
+        document.querySelectorAll('.copy-helper').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const text = this.getAttribute('data-copy');
+                if (!text) return;
+                navigator.clipboard.writeText(text).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tersalin!',
+                        text: text + ' telah disalin ke clipboard.',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        customClass: { popup: 'swal-mobile-custom', title: 'swal-title-custom' }
+                    });
                 });
             });
         });
