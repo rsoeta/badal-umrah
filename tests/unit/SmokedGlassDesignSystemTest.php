@@ -33,9 +33,11 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
         $this->assertStringContainsString('prefers-reduced-transparency', $css);
         $this->assertStringContainsString('.sg-topbar::before', $css);
         $this->assertStringContainsString('.sg-nav .tabbar__pill', $css);
+        $this->assertStringContainsString('.sg-nav.sg-nav--desktop-only', $css);
 
         $js = file_get_contents($jsPath);
         $this->assertStringContainsString('syncTabbarPills', $js);
+        $this->assertStringContainsString('.sg-nav:not(.sg-nav--desktop-only)', $js);
         $this->assertStringContainsString('instanceof Element', $js);
     }
 
@@ -63,12 +65,13 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
     public function testNavigationIncludesMobileTabbarPill(): void
     {
         $homeHtml = view('home');
-        $this->assertStringContainsString('class="sg-nav"', $homeHtml);
-        $this->assertStringContainsString('class="tabbar__pill"', $homeHtml);
+        $this->assertStringContainsString('sg-nav sg-nav--desktop-only', $homeHtml);
+        $this->assertStringNotContainsString('class="tabbar__pill"', $homeHtml);
 
         $trashHtml = view('admin_trash', ['pendaftar' => []]);
         $this->assertStringContainsString('aria-label="Menu Admin"', $trashHtml);
         $this->assertStringContainsString('class="tabbar__pill"', $trashHtml);
+        $this->assertStringNotContainsString('sg-nav--desktop-only', $trashHtml);
 
         $dashHtml = view('admin_dashboard', [
             'pendaftar'         => [],
@@ -80,6 +83,7 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
         $this->assertStringContainsString('aria-label="Menu Admin"', $dashHtml);
         $this->assertStringContainsString('class="tabbar__pill"', $dashHtml);
         $this->assertStringContainsString('class="sg-nav__count"', $dashHtml);
+        $this->assertStringNotContainsString('sg-nav--desktop-only', $dashHtml);
     }
 
     public function testPwaManifestIconsServiceWorkerAndHeadTags(): void

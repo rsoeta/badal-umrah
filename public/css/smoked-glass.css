@@ -1325,7 +1325,7 @@ body.sg-body .swal2-html-container {
     }
 
     body.sg-has-tabbar .sg-frame,
-    .sg-frame:has(.sg-nav) {
+    .sg-frame:has(.sg-nav:not(.sg-nav--desktop-only)) {
         padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
 
@@ -1376,6 +1376,10 @@ body.sg-body .swal2-html-container {
         align-items: stretch;
         gap: 4px;
         z-index: 1035;
+    }
+
+    .sg-nav.sg-nav--desktop-only {
+        display: none !important;
     }
 
     .sg-nav .tabbar__pill {

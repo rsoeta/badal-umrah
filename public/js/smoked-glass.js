@@ -94,8 +94,11 @@
     };
 
     const syncTabbarPills = () => {
-        const navs = document.querySelectorAll('.sg-nav');
-        if (navs.length === 0) return;
+        const navs = document.querySelectorAll('.sg-nav:not(.sg-nav--desktop-only)');
+        if (navs.length === 0) {
+            document.body.classList.remove('sg-has-tabbar');
+            return;
+        }
 
         document.body.classList.add('sg-has-tabbar');
         const isMobile = window.matchMedia('(max-width: 767.98px)').matches;

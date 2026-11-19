@@ -217,8 +217,7 @@
                 </div>
             </a>
 
-            <nav class="sg-nav" aria-label="Navigasi Halaman">
-                <span class="tabbar__pill" aria-hidden="true"></span>
+            <nav class="sg-nav sg-nav--desktop-only" aria-label="Navigasi Halaman">
                 <a href="#main-content" class="sg-nav__item is-active" aria-current="page">
                     <i class="fa-solid fa-kaaba"></i>
                     <span>Beranda</span>

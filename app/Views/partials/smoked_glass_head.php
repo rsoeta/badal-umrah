@@ -51,5 +51,5 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?= base_url('css/smoked-glass.css?v=1'); ?>">
-<script src="<?= base_url('js/smoked-glass.js?v=1'); ?>" defer></script>
+<link rel="stylesheet" href="<?= base_url('css/smoked-glass.css?v=2'); ?>">
+<script src="<?= base_url('js/smoked-glass.js?v=2'); ?>" defer></script>
