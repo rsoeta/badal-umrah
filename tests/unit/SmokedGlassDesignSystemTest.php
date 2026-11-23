@@ -34,11 +34,15 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
         $this->assertStringContainsString('.sg-topbar::before', $css);
         $this->assertStringContainsString('.sg-nav .tabbar__pill', $css);
         $this->assertStringContainsString('.sg-nav.sg-nav--desktop-only', $css);
+        $this->assertStringContainsString('.sg-segmented--3', $css);
 
         $js = file_get_contents($jsPath);
         $this->assertStringContainsString('syncTabbarPills', $js);
         $this->assertStringContainsString('.sg-nav:not(.sg-nav--desktop-only)', $js);
         $this->assertStringContainsString('instanceof Element', $js);
+        $this->assertStringContainsString('getTimeBasedTheme', $js);
+        $this->assertStringContainsString('getHours()', $js);
+        $this->assertStringContainsString('visibilitychange', $js);
     }
 
     public function testViewsRenderWithSmokedGlassShell(): void
@@ -67,6 +71,9 @@ final class SmokedGlassDesignSystemTest extends CIUnitTestCase
         $homeHtml = view('home');
         $this->assertStringContainsString('sg-nav sg-nav--desktop-only', $homeHtml);
         $this->assertStringNotContainsString('class="tabbar__pill"', $homeHtml);
+        $this->assertStringContainsString('hour >= 6 && hour < 18', $homeHtml);
+        $this->assertStringContainsString('data-sg-theme-option="auto"', $homeHtml);
+        $this->assertStringContainsString('data-sg-theme-hint', $homeHtml);
 
         $trashHtml = view('admin_trash', ['pendaftar' => []]);
         $this->assertStringContainsString('aria-label="Menu Admin"', $trashHtml);

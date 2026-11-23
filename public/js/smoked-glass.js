@@ -41,15 +41,22 @@
         root.style.setProperty('--sig-border', hexToRgba(sig, 0.42));
     };
 
+    const getTimeBasedTheme = (date = new Date()) => {
+        const hour = date.getHours();
+        return (hour >= 6 && hour < 18) ? 'light' : 'dark';
+    };
+
     const getState = () => {
-        const theme = localStorage.getItem(STORAGE_KEYS.theme) === 'light' ? 'light' : 'dark';
+        const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+        const themeMode = (savedTheme === 'light' || savedTheme === 'dark') ? savedTheme : 'auto';
+        const theme = themeMode === 'auto' ? getTimeBasedTheme() : themeMode;
         const rawFrost = parseFloat(localStorage.getItem(STORAGE_KEYS.frost));
         const frost = Number.isFinite(rawFrost) ? Math.min(1, Math.max(0, rawFrost)) : 0.5;
         const accent = localStorage.getItem(STORAGE_KEYS.sigName) || 'gold';
-        return { theme, frost, accent };
+        return { theme, themeMode, frost, accent };
     };
 
-    const applyState = ({ theme, frost, accent }) => {
+    const applyState = ({ theme, themeMode, frost, accent }) => {
         const root = document.documentElement;
         root.setAttribute('data-theme', theme);
         root.style.setProperty('--frost', String(frost));
@@ -77,7 +84,15 @@
 
         // Sync controls inside popover if mounted
         document.querySelectorAll('[data-sg-theme-option]').forEach(el => {
-            el.classList.toggle('is-active', el.dataset.sgThemeOption === theme);
+            el.classList.toggle('is-active', el.dataset.sgThemeOption === themeMode);
+        });
+
+        document.querySelectorAll('[data-sg-theme-hint]').forEach(hint => {
+            if (themeMode === 'auto') {
+                hint.textContent = theme === 'light' ? 'Siang · Frost' : 'Malam · Smoke';
+            } else {
+                hint.textContent = theme === 'light' ? 'Manual · Frost' : 'Manual · Smoke';
+            }
         });
 
         document.querySelectorAll('[data-sg-frost-slider]').forEach(slider => {
@@ -137,6 +152,19 @@
         syncTabbarPills();
         window.addEventListener('resize', syncTabbarPills, { passive: true });
 
+        const syncAutoTheme = () => {
+            const state = getState();
+            if (state.themeMode === 'auto' && document.documentElement.getAttribute('data-theme') !== state.theme) {
+                applyState(state);
+            }
+        };
+        window.setInterval(syncAutoTheme, 60000);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                syncAutoTheme();
+            }
+        });
+
         // Quick Theme Toggle Buttons & Tabbar Interactions
         document.addEventListener('click', (e) => {
             if (!(e.target instanceof Element)) return;
@@ -161,18 +189,21 @@
             const toggleBtn = e.target.closest('[data-sg-theme-toggle]');
             if (toggleBtn) {
                 const state = getState();
-                state.theme = state.theme === 'dark' ? 'light' : 'dark';
-                localStorage.setItem(STORAGE_KEYS.theme, state.theme);
-                applyState(state);
+                const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem(STORAGE_KEYS.theme, nextTheme);
+                applyState(getState());
                 return;
             }
 
             const themeOpt = e.target.closest('[data-sg-theme-option]');
             if (themeOpt) {
-                const state = getState();
-                state.theme = themeOpt.dataset.sgThemeOption === 'light' ? 'light' : 'dark';
-                localStorage.setItem(STORAGE_KEYS.theme, state.theme);
-                applyState(state);
+                const opt = themeOpt.dataset.sgThemeOption;
+                if (opt === 'auto') {
+                    localStorage.removeItem(STORAGE_KEYS.theme);
+                } else {
+                    localStorage.setItem(STORAGE_KEYS.theme, opt === 'light' ? 'light' : 'dark');
+                }
+                applyState(getState());
                 return;
             }
 

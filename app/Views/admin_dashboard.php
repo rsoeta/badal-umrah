@@ -589,12 +589,9 @@
                                 <option value="">Pilih atau ketik tempat miqat...</option>
                                 <?php
                                 $tempatMiqatOptions = ! empty($list_tempat_miqat) ? $list_tempat_miqat : [
-                                    "Tan'im, Makkah Al-Mukarramah",
-                                    "Bir Ali (Zulhulaifah)",
                                     "Ji'ranah",
                                     "Hudaibiyah",
-                                    "Yalamlam",
-                                    "Qarnul Manazil"
+                                    "Yalamlam"
                                 ];
                                 ?>
                                 <?php foreach ($tempatMiqatOptions as $miqatOpt): ?>
@@ -842,7 +839,10 @@
 
                 const miqatVal = this.getAttribute('data-tempat-miqat') || "Tan'im, Makkah Al-Mukarramah";
                 if (tomSelectMiqat) {
-                    tomSelectMiqat.addOption({value: miqatVal, text: miqatVal});
+                    tomSelectMiqat.addOption({
+                        value: miqatVal,
+                        text: miqatVal
+                    });
                     tomSelectMiqat.setValue(miqatVal, true);
                 } else if (elSelectMiqat) {
                     elSelectMiqat.value = miqatVal;
@@ -967,10 +967,18 @@
                 if (data.url_pdf) {
                     window.open(data.url_pdf, '_blank');
                 }
-                await Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message
+                });
                 location.reload();
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Data pendaftar gagal diperbarui.' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message || 'Data pendaftar gagal diperbarui.'
+                });
             } finally {
                 btnSimpanEditPendaftaran.disabled = false;
                 btnSimpanEditPendaftaran.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan';
@@ -1094,9 +1102,12 @@
                 filename.textContent = video.original_name;
                 const metadata = document.createElement('div');
                 metadata.className = 'text-muted small';
-                const uploadedAt = video.created_at
-                    ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(video.created_at.replace(' ', 'T')))
-                    : '';
+                const uploadedAt = video.created_at ?
+                    new Intl.DateTimeFormat('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                    }).format(new Date(video.created_at.replace(' ', 'T'))) :
+                    '';
                 metadata.textContent = `${formatUkuranVideo(video.file_size)}${uploadedAt ? ` · Diunggah ${uploadedAt}` : ''}`;
                 details.append(filename, metadata);
 
@@ -1117,9 +1128,9 @@
                 shareButton.dataset.videoName = video.original_name || '';
                 shareButton.setAttribute('aria-label', video.share_url ? `Salin tautan video ${video.original_name}` : `Buat tautan video ${video.original_name}`);
                 shareButton.title = video.share_url ? 'Salin tautan berbagi' : 'Buat tautan berbagi';
-                shareButton.innerHTML = video.share_url
-                    ? '<i class="fa-solid fa-link"></i>'
-                    : '<i class="fa-solid fa-share-nodes"></i>';
+                shareButton.innerHTML = video.share_url ?
+                    '<i class="fa-solid fa-link"></i>' :
+                    '<i class="fa-solid fa-share-nodes"></i>';
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
                 deleteButton.className = 'btn btn-sm btn-outline-danger rounded-pill btn-hapus-video';
@@ -1181,12 +1192,20 @@
                     body: new FormData(this)
                 });
                 this.reset();
-                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message
+                });
                 loadVideoArchive().catch(error => {
                     daftarVideoArsip.textContent = error.message;
                 });
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Unggah Gagal', text: error.message || 'Video gagal diarsipkan.' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Unggah Gagal',
+                    text: error.message || 'Video gagal diarsipkan.'
+                });
             } finally {
                 btnUnggahVideo.disabled = false;
                 btnUnggahVideo.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-1"></i> Unggah ke Arsip';
@@ -1207,9 +1226,9 @@
                     }
 
                     const namaJamaah = (videoArsipNama.textContent || '').trim();
-                    const shareTitle = namaJamaah
-                        ? `Video Dokumentasi Badal Umrah - ${namaJamaah}`
-                        : 'Video Dokumentasi Badal Umrah';
+                    const shareTitle = namaJamaah ?
+                        `Video Dokumentasi Badal Umrah - ${namaJamaah}` :
+                        'Video Dokumentasi Badal Umrah';
                     const shareText = `${shareTitle}\n\n${shareUrl}`;
 
                     await copyShareText(shareText, shareUrl);
@@ -1221,7 +1240,11 @@
                         confirmButtonColor: '#198754'
                     });
                 } catch (error) {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Tautan video gagal disiapkan atau disalin.' });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Tautan video gagal disiapkan atau disalin.'
+                    });
                 }
                 return;
             }
@@ -1244,9 +1267,17 @@
                         method: 'POST'
                     });
                     await loadVideoArchive();
-                    Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
                 } catch (error) {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Tautan gagal dicabut.' });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Tautan gagal dicabut.'
+                    });
                 }
                 return;
             }
@@ -1269,12 +1300,20 @@
                 const data = await requestVideoJson(`${videoBaseUrl}/${activePendaftaranVideoId}/videos/${button.dataset.id}/hapus`, {
                     method: 'POST'
                 });
-                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message
+                });
                 loadVideoArchive().catch(error => {
                     daftarVideoArsip.textContent = error.message;
                 });
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Video gagal dihapus.' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message || 'Video gagal dihapus.'
+                });
             }
         });
 
@@ -1322,7 +1361,9 @@
 
         const cancelAllRenderTasks = () => {
             currentRenderTasks.forEach(task => {
-                try { task.cancel(); } catch (e) {}
+                try {
+                    task.cancel();
+                } catch (e) {}
             });
             currentRenderTasks = [];
         };
@@ -1337,13 +1378,15 @@
 
             try {
                 const numPages = currentPdfDoc.numPages;
-                const wrapperWidth = pdfViewerWrapper.clientWidth > 0
-                    ? pdfViewerWrapper.clientWidth
-                    : (window.innerWidth < 768 ? window.innerWidth - 32 : 720);
+                const wrapperWidth = pdfViewerWrapper.clientWidth > 0 ?
+                    pdfViewerWrapper.clientWidth :
+                    (window.innerWidth < 768 ? window.innerWidth - 32 : 720);
                 const availableWidth = Math.max(260, wrapperWidth - 28);
 
                 const firstPage = await currentPdfDoc.getPage(1);
-                const unscaledViewport = firstPage.getViewport({ scale: 1.0 });
+                const unscaledViewport = firstPage.getViewport({
+                    scale: 1.0
+                });
                 const baseFitScale = availableWidth / unscaledViewport.width;
                 const effectiveScale = isZoomFit ? baseFitScale : (baseFitScale * currentZoomScale);
                 updateZoomLabel();
@@ -1352,7 +1395,9 @@
 
                 for (let pageNum = 1; pageNum <= numPages; pageNum++) {
                     const page = (pageNum === 1) ? firstPage : await currentPdfDoc.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: effectiveScale });
+                    const viewport = page.getViewport({
+                        scale: effectiveScale
+                    });
 
                     const pageWrapper = document.createElement('div');
                     pageWrapper.className = 'pdf-page-wrapper my-2 position-relative text-center w-100 d-flex justify-content-center';
@@ -1411,11 +1456,15 @@
 
             cancelAllRenderTasks();
             if (currentPdfLoadingTask) {
-                try { currentPdfLoadingTask.destroy(); } catch (e) {}
+                try {
+                    currentPdfLoadingTask.destroy();
+                } catch (e) {}
                 currentPdfLoadingTask = null;
             }
             if (currentPdfDoc) {
-                try { currentPdfDoc.destroy(); } catch (e) {}
+                try {
+                    currentPdfDoc.destroy();
+                } catch (e) {}
                 currentPdfDoc = null;
             }
 
@@ -1502,7 +1551,7 @@
             '>': '&gt;',
             '"': '&quot;',
             "'": '&#039;'
-        }[match]));
+        } [match]));
 
         document.addEventListener('click', function(event) {
             const button = event.target.closest('.btn-preview-pdf');
@@ -1563,11 +1612,15 @@
             modalPreviewPdf.addEventListener('hidden.bs.modal', function() {
                 cancelAllRenderTasks();
                 if (currentPdfLoadingTask) {
-                    try { currentPdfLoadingTask.destroy(); } catch (e) {}
+                    try {
+                        currentPdfLoadingTask.destroy();
+                    } catch (e) {}
                     currentPdfLoadingTask = null;
                 }
                 if (currentPdfDoc) {
-                    try { currentPdfDoc.destroy(); } catch (e) {}
+                    try {
+                        currentPdfDoc.destroy();
+                    } catch (e) {}
                     currentPdfDoc = null;
                 }
                 if (pdfPagesContainer) pdfPagesContainer.innerHTML = '';
@@ -1723,7 +1776,9 @@
                         icon: 'warning',
                         title: 'Format Gambar Tidak Sesuai',
                         text: 'Pilih file gambar dengan format JPG, PNG, atau WEBP.',
-                        customClass: { popup: 'swal-mobile-custom' }
+                        customClass: {
+                            popup: 'swal-mobile-custom'
+                        }
                     });
                     resetTambahFotoPreview();
                     return;
@@ -1736,7 +1791,9 @@
                         icon: 'warning',
                         title: 'Ukuran Terlalu Besar',
                         text: 'Ukuran file gambar maksimal adalah 5 MB.',
-                        customClass: { popup: 'swal-mobile-custom' }
+                        customClass: {
+                            popup: 'swal-mobile-custom'
+                        }
                     });
                     resetTambahFotoPreview();
                     return;

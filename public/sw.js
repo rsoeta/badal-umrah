@@ -5,7 +5,7 @@
    - Network First with offline cache & offline.html fallback for public HTML pages
    ========================================================================== */
 
-const CACHE_VERSION = 'badal-umrah-v2';
+const CACHE_VERSION = 'badal-umrah-v3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 const OFFLINE_FALLBACK = './offline.html';
@@ -14,8 +14,8 @@ const PRECACHE_ASSETS = [
   './offline.html',
   './manifest.json',
   './favicon.ico',
-  './css/smoked-glass.css?v=2',
-  './js/smoked-glass.js?v=2',
+  './css/smoked-glass.css?v=3',
+  './js/smoked-glass.js?v=3',
   './img/bg-haram-blur.jpg',
   './img/bg-haram.jpg',
   './img/logo-utama.png',

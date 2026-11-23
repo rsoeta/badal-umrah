@@ -534,6 +534,10 @@ body.sg-body {
     margin-bottom: 14px;
 }
 
+.sg-segmented--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .sg-segmented button {
     border: 0;
     background: transparent;
@@ -545,6 +549,11 @@ body.sg-body {
     border-radius: var(--r-pill);
     cursor: pointer;
     transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.sg-segmented--3 button {
+    padding: 6px 6px;
+    white-space: nowrap;
 }
 
 .sg-segmented button.is-active {

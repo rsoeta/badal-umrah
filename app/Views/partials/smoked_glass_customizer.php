@@ -30,8 +30,12 @@
         <span><i class="fa-solid fa-wand-magic-sparkles me-2 sg-text-sig"></i>Tampilan Smoked Glass</span>
     </div>
 
-    <div class="sg-popover__label"><span>Tema Permukaan</span></div>
-    <div class="sg-segmented" role="group" aria-label="Pilih tema permukaan">
+    <div class="sg-popover__label">
+        <span>Tema Permukaan</span>
+        <span data-sg-theme-hint>Otomatis</span>
+    </div>
+    <div class="sg-segmented sg-segmented--3" role="group" aria-label="Pilih tema permukaan">
+        <button type="button" data-sg-theme-option="auto"><i class="fa-solid fa-clock me-1"></i> Auto</button>
         <button type="button" data-sg-theme-option="dark"><i class="fa-solid fa-moon me-1"></i> Smoke</button>
         <button type="button" data-sg-theme-option="light"><i class="fa-solid fa-sun me-1"></i> Frost</button>
     </div>
